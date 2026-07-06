@@ -1,0 +1,61 @@
+# System Architecture - Fuenzer Sports
+
+This MVP architecture is optimized for data computation performance and seamless AI integration, utilizing local storage (*client-side*) for initial interactions to maximize "Time-to-Value".
+
+## Tech Stack
+- **Frontend:** React (Vite), TypeScript, Tailwind CSS, Zustand (with Persist Middleware for LocalStorage).
+- **Backend:** Python (FastAPI, Pydantic, NumPy) - Serves as the Monte Carlo simulation engine & AI Gateway.
+- **External APIs:** Football-Data.org API (for real-time fixtures, teams, and live scores) with a backend caching layer (in-memory/file-based) to bypass the 10/min rate limit.
+- **Database & Auth:** Firebase (Firestore & Google Auth) - Active during profile/login synchronization.
+- **AI Infrastructure:** AMD ROCm (Local/Fast) & Fireworks AI API (Pro).
+- **Deployment:** Cloudflare Pages (Frontend) & AMD Developer Cloud (Backend Docker).
+
+## Storage Flow Diagram
+```
+[ User Action (Send Prompt) ]
+        │
+        ▼
+[ FastAPI Backend processes Simulation & AI ]
+        │
+        ▼ (Returns JSON)
+[ React Frontend receives Results ]
+        │
+        ├── If Status = GUEST ──> [ Save to LocalStorage ]
+        │
+        └── If Status = LOGIN ──> [ Save to LocalStorage & Sync to Firestore ]
+```
+
+## Project Structure (Monorepo)
+```
+fuenzer-sports/
+├── backend/                    # PYTHON FASTAPI (API & Simulation Engine)
+│   ├── app/               
+│   │   ├── api/                # API Endpoints (routes)
+│   │   │   └── simulate.py     # Router for POST /simulate
+│   │   ├── core/               # System config (CORS, Load ENV, API Keys)
+│   │   ├── integrations/       # External API Clients
+│   │   │   └── football_data.py# Client for football-data.org API
+│   │   ├── models/             # Pydantic schemas (JSON payload validation)
+│   │   ├── services/           # Business logic (NumPy Monte Carlo, AI Routing)
+│   │   └── main.py             # FastAPI Entry point
+│   ├── requirements.txt        # Library list (fastapi, uvicorn, numpy, requests, etc)
+│   └── Dockerfile              # Python Dockerfile
+│
+├── frontend/                   # REACT FRONTEND (UI & Visualization)
+│   ├── src/
+│   │   ├── components/         # Reusable UI components
+│   │   │   ├── layout/         # Navbar, Footer, Split-pane layout
+│   │   │   ├── search/         # Hero Chat Box (Stitch style)
+│   │   │   └── playground/     # Standings Table, Probability Cards
+│   │   ├── pages/              # Main view pages
+│   │   │   ├── LandingPage.tsx # The Input Phase
+│   │   │   └── Playground.tsx  # The Workspace (AI Chat + Visuals)
+│   │   ├── store/              # Zustand state management
+│   │   ├── App.tsx             # Root component
+│   │   └── main.tsx            # React DOM render entry
+│   ├── Dockerfile              # Frontend Dockerfile (Nginx Alpine)
+│   └── package.json            # Node dependencies
+│
+├── docker-compose.yml          # ORCHESTRATION for Hackathon Judges
+└── README.md                   # Project overview and setup instructions
+```
