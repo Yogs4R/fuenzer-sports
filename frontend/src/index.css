@@ -9,6 +9,10 @@
 }
 
 @layer base {
+  html, body {
+    width: 100%;
+    overflow-x: hidden;
+  }
   body {
     background-color: var(--color-bg-0);
     color: #dae2fd;

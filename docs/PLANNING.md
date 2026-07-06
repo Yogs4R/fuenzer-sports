@@ -15,3 +15,11 @@ This document outlines the step-by-step execution plan for the development phase
 | [ ] | **4. Polish** | **9. Final Review & Demo** | • Record Video Demo / GIF of the platform.<br>• Update `README.md` if setup steps changed.<br>• Final repository check for Hackathon submission. |
 
 *Note: Mark the `Status` column with `[x]` as each step is completed.*
+
+### Verification Note:
+To verify the frontend build and check for any TypeScript compilation errors or warnings, run:
+```bash
+cd frontend
+npx tsc -b
+```
+
