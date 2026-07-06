@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type Page = '/' | '/standings' | '/history' | '/signin' | '/signup';
+type Page = '/' | '/standings' | '/history' | '/signin' | '/signup' | '/privacy' | '/terms';
 type Language = 'en' | 'id';
 
 interface AppState {

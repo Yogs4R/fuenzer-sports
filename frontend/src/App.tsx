@@ -7,6 +7,8 @@ import StandingsPage from './pages/StandingsPage';
 import HistoryPage from './pages/HistoryPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
 
 function App() {
   const { currentPage, setCurrentPage } = useAppStore();
@@ -31,6 +33,10 @@ function App() {
         return <SignInPage />;
       case '/signup':
         return <SignUpPage />;
+      case '/privacy':
+        return <PrivacyPage />;
+      case '/terms':
+        return <TermsPage />;
       default:
         return <LandingPage />;
     }
