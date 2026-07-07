@@ -24,6 +24,7 @@ const HeroSearchBox: React.FC = () => {
 
   const [images, setImages] = useState<File[]>([]);
   const [isRecording, setIsRecording] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,6 +72,8 @@ const HeroSearchBox: React.FC = () => {
         }
         return combined;
       });
+      // Clear input value to allow uploading the same file again
+      e.target.value = '';
     }
   };
 
@@ -134,17 +137,25 @@ const HeroSearchBox: React.FC = () => {
         {/* Image Previews */}
         {images.length > 0 && (
           <div className="flex flex-wrap gap-2 p-4 pb-0">
-            {images.map((file, index) => (
-              <div key={index} className="relative group rounded-xl overflow-hidden border border-white/10 w-16 h-16">
-                <img src={URL.createObjectURL(file)} alt="upload preview" className="w-full h-full object-cover" />
-                <button 
-                  onClick={() => removeImage(index)}
-                  className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            {images.map((file, index) => {
+              const url = URL.createObjectURL(file);
+              return (
+                <div 
+                  key={index} 
+                  onClick={() => setPreviewImage(url)}
+                  className="relative group rounded-xl overflow-hidden border border-white/10 w-16 h-16 cursor-zoom-in"
                 >
-                  <X size={16} className="text-white" />
-                </button>
-              </div>
-            ))}
+                  <img src={url} alt="upload preview" className="w-full h-full object-cover" />
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); removeImage(index); }}
+                    className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10"
+                    title="Remove image"
+                  >
+                    <X size={10} />
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
 
@@ -305,6 +316,35 @@ const HeroSearchBox: React.FC = () => {
         onChipLeave={handleChipLeave}
         onChipClick={handleChipClick}
       />
+
+      {/* Image Preview Modal */}
+      <AnimatePresence>
+        {previewImage && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setPreviewImage(null)}
+            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 cursor-zoom-out"
+          >
+            <motion.div 
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl bg-bg-1 border border-white/10 p-1"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img src={previewImage} alt="Full preview" className="max-w-full max-h-[80vh] object-contain rounded-xl" />
+              <button 
+                onClick={() => setPreviewImage(null)} 
+                className="absolute top-4 right-4 bg-black/70 hover:bg-black text-white rounded-full p-2 border border-white/10 transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

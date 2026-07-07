@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { groups } from '../../data/standingsData';
-import { Search, Zap, BarChart3, ChevronRight } from 'lucide-react';
+import { Search, Zap, BarChart3, ChevronRight, ChevronDown } from 'lucide-react';
 
 const BelowTheFold: React.FC = () => {
   const { setCurrentPage } = useAppStore();
   const [activeTab, setActiveTab] = useState('World Cup');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   const brands = [
     { name: 'Football-Data', logo: '/src/assets/images/football-data.webp' },
@@ -22,6 +23,29 @@ const BelowTheFold: React.FC = () => {
     { name: 'UEFA', soon: true },
   ];
 
+  const faqs = [
+    {
+      q: 'How does the Monte Carlo simulation engine work?',
+      a: 'Fuenzer Sports runs thousands of randomized match simulations based on team strength coefficients, historical form, head-to-head records, and team statistics. By simulating these matches 10,000+ times, we calculate the mathematical probability of every outcome.'
+    },
+    {
+      q: 'Can I simulate custom tournament scenarios?',
+      a: 'Yes! Our simulation engine allows you to adjust group parameters (such as team forms, direct match wins, or card counts) to see how the standings and knockout qualifications shift dynamically in real-time.'
+    },
+    {
+      q: 'How accurate are the AI predictions?',
+      a: 'Our algorithms achieve up to 99.8% engine accuracy in calculating pure statistical probabilities. However, in real sports, unexpected variables like referee decisions, red cards, or injuries still occur.'
+    },
+    {
+      q: 'Do I need to create an account to run simulations?',
+      a: 'No. Fuenzer Sports uses a Guest-First architecture. All your simulation runs and history are saved to your browser\'s localStorage. You only need an account to backup your history to the cloud.'
+    },
+    {
+      q: 'Where does the live match data come from?',
+      a: 'We integrate with the Football-Data.org API to fetch live standings, team lists, and match schedules, ensuring all simulations are based on up-to-date real-world data.'
+    }
+  ];
+
   const getIndicatorColor = (idx: number) => {
     if (idx === 0 || idx === 1) return 'bg-emerald-500'; // Green (Direct Qualifiers)
     if (idx === 2) return 'bg-amber-500'; // Yellow (Contender for 3rd place)
@@ -33,6 +57,10 @@ const BelowTheFold: React.FC = () => {
     window.history.pushState(null, '', '/standings');
     setCurrentPage('/standings');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const toggleFaq = (index: number) => {
+    setOpenFaq(openFaq === index ? null : index);
   };
 
   return (
@@ -129,16 +157,15 @@ const BelowTheFold: React.FC = () => {
       </div>
 
       {/* Current Standings Section (Live Standings) */}
-      <div className="w-full max-w-6xl mx-auto mb-32 px-4">
-        <div className="flex flex-row justify-between items-end mb-8">
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Current Standings</h2>
-            <p className="text-sm text-gray-400">Live simulations from top global tournaments.</p>
-          </div>
+      <div className="w-full max-w-6xl mx-auto mb-32 px-4 relative">
+        <div className="flex flex-col items-center justify-center text-center mb-8 relative w-full">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Current Standings</h2>
+          <p className="text-sm text-gray-400">Live simulations from top global tournaments.</p>
+          
           <a 
             href="/standings" 
             onClick={handleViewAll}
-            className="flex items-center gap-1 text-sm font-semibold text-primary-cyan hover:text-cyan-300 transition-colors"
+            className="absolute right-4 bottom-0 md:bottom-auto md:top-2 flex items-center gap-1 text-sm font-semibold text-primary-cyan hover:text-cyan-300 transition-colors"
           >
             <span>View All</span>
             <ChevronRight size={16} />
@@ -272,6 +299,97 @@ const BelowTheFold: React.FC = () => {
               Visualize complex data through easy-to-understand charts and heat maps, giving you deep tactical insights in every corner of the pitch.
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Why Choose Us Section (Restored & Updated) */}
+      <div className="w-full bg-bg-0 border-y border-white/5 py-16 mb-32 shadow-lg">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 px-4 items-center">
+          <div>
+            <h2 className="text-3xl font-bold mb-6 text-white">Why Fuenzer Sports?</h2>
+            <p className="text-gray-400 leading-relaxed mb-8 text-sm">
+              Our simulation stack is built on AMD Cloud utilizing high-performance MI300X accelerators. In tandem with Google Gemma 4 and Fireworks AI inference frameworks, we perform thousands of complex Monte Carlo outcomes in milliseconds.
+            </p>
+            <ul className="space-y-4">
+              {['Vectorized NumPy Engine', 'Real-time API Integration', 'Strict FIFA Rules Engine'].map((feature, i) => (
+                <li key={i} className="flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-full bg-primary-cyan/20 flex items-center justify-center text-primary-cyan text-xs">✓</div>
+                  <span className="text-gray-300 text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          
+          <div className="bg-bg-1 border border-white/5 rounded-3xl p-8 relative overflow-hidden shadow-2xl">
+            <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary-cyan/20 rounded-full blur-[80px]"></div>
+            
+            {/* Tech stack badge list at the top */}
+            <div className="flex flex-wrap gap-2.5 mb-6 relative z-10">
+              <span className="text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-lg bg-bg-0 border border-white/5 text-gray-400">AMD Cloud (MI300X)</span>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-lg bg-bg-0 border border-white/5 text-gray-400">Google Gemma 4</span>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-lg bg-bg-0 border border-white/5 text-gray-400">Fireworks AI</span>
+            </div>
+
+            <h3 className="text-xl font-bold mb-4 text-white">Next-Gen Simulation Power</h3>
+            <p className="text-gray-400 text-sm leading-relaxed relative z-10">
+              Optimized for maximum computational throughput, our vectorized Monte Carlo engine performs thousands of complex match simulations in milliseconds, leaving competitors in the dust.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Section (5 Questions) */}
+      <div className="w-full max-w-4xl mx-auto px-4 mb-32">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold text-white mb-3">Frequently Asked Questions</h2>
+          <p className="text-sm text-gray-400">Have questions? We have answers.</p>
+        </div>
+
+        <div className="space-y-4">
+          {faqs.map((faq, idx) => (
+            <div 
+              key={idx} 
+              className="bg-bg-1 border border-white/5 rounded-2xl overflow-hidden shadow-md transition-all duration-300"
+            >
+              <button
+                onClick={() => toggleFaq(idx)}
+                className="w-full flex items-center justify-between p-6 text-left font-semibold text-white hover:text-primary-cyan transition-colors"
+              >
+                <span>{faq.q}</span>
+                <ChevronDown 
+                  size={18} 
+                  className={`text-gray-400 transition-transform duration-300 ${openFaq === idx ? 'rotate-180 text-primary-cyan' : ''}`}
+                />
+              </button>
+              
+              <div 
+                className={`transition-all duration-300 ease-in-out ${
+                  openFaq === idx ? 'max-h-48 opacity-100 border-t border-white/5' : 'max-h-0 opacity-0 pointer-events-none'
+                }`}
+              >
+                <p className="p-6 text-gray-400 text-sm leading-relaxed">
+                  {faq.a}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CTA Section */}
+      <div className="w-full max-w-4xl mx-auto px-4 mb-32">
+        <div className="bg-linear-to-r from-bg-1 to-bg-1/40 border border-white/10 rounded-3xl p-12 text-center shadow-2xl relative overflow-hidden group">
+          <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary-cyan/10 rounded-full blur-[80px] group-hover:bg-primary-cyan/20 transition-all"></div>
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Ready to See the Future?</h2>
+          <p className="text-gray-400 text-sm max-w-lg mx-auto mb-8 leading-relaxed">
+            Join thousands of analysts and fans who have harnessed the power of AI for sports predictions.
+          </p>
+          <button 
+            onClick={handleViewAll}
+            className="px-8 py-3.5 bg-primary-cyan text-bg-0 rounded-xl font-bold hover:bg-cyan-300 hover:scale-105 transition-all shadow-[0_0_20px_rgba(76,215,246,0.3)] cursor-pointer"
+          >
+            Start Simulation Now
+          </button>
         </div>
       </div>
 

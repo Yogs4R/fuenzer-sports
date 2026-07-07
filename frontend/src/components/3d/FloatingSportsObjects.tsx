@@ -60,7 +60,7 @@ const AnalyticsChart: React.FC = () => {
 
 const FloatingSportsObjects: React.FC = () => {
   return (
-    <div className="absolute inset-0 z-0 pointer-events-none opacity-30 mix-blend-screen">
+    <div className="absolute top-0 left-0 w-full h-screen z-0 pointer-events-none opacity-30 mix-blend-screen overflow-hidden">
       {/* Fade out mask at bottom to blend into the rest of the page */}
       <div className="absolute inset-0 bg-linear-to-b from-transparent to-[#050814] z-10" />
       <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
