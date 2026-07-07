@@ -8,8 +8,9 @@ const Football: React.FC = () => {
 
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
+      const time = state.clock.getElapsedTime();
+      meshRef.current.rotation.x = time * 0.2;
+      meshRef.current.rotation.y = time * 0.3;
     }
   });
 
@@ -34,7 +35,8 @@ const AnalyticsChart: React.FC = () => {
 
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * -0.15;
+      const time = state.clock.getElapsedTime();
+      groupRef.current.rotation.y = time * -0.15;
     }
   });
 

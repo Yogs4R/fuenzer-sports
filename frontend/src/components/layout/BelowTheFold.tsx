@@ -97,8 +97,8 @@ const BelowTheFold: React.FC = () => {
           {/* Set 1 */}
           <div className="animate-marquee flex items-center shrink-0 justify-around min-w-full py-2 gap-12 px-6">
             {brands.map((brand, i) => (
-              <div key={i} className="flex items-center justify-center h-8 px-6 opacity-40 hover:opacity-80 transition-opacity">
-                <img src={brand.logo} alt={brand.name} className="h-full w-auto object-contain max-w-[120px]" onError={(e) => {
+              <div key={i} className="flex items-center justify-center w-32 h-10 px-4 opacity-40 hover:opacity-80 transition-opacity">
+                <img src={brand.logo} alt={brand.name} className="max-h-full max-w-full object-contain brightness-0 invert" onError={(e) => {
                   (e.target as HTMLElement).style.display = 'none';
                   const parent = (e.target as HTMLElement).parentNode;
                   if (parent && !parent.querySelector('.fallback-text')) {
@@ -114,8 +114,8 @@ const BelowTheFold: React.FC = () => {
           {/* Set 2 (Duplicate for Seamless Loop) */}
           <div className="animate-marquee flex items-center shrink-0 justify-around min-w-full py-2 gap-12 px-6" aria-hidden="true">
             {brands.map((brand, i) => (
-              <div key={`dup-${i}`} className="flex items-center justify-center h-8 px-6 opacity-40 hover:opacity-80 transition-opacity">
-                <img src={brand.logo} alt={brand.name} className="h-full w-auto object-contain max-w-[120px]" onError={(e) => {
+              <div key={`dup-${i}`} className="flex items-center justify-center w-32 h-10 px-4 opacity-40 hover:opacity-80 transition-opacity">
+                <img src={brand.logo} alt={brand.name} className="max-h-full max-w-full object-contain brightness-0 invert" onError={(e) => {
                   (e.target as HTMLElement).style.display = 'none';
                   const parent = (e.target as HTMLElement).parentNode;
                   if (parent && !parent.querySelector('.fallback-text')) {
@@ -336,9 +336,15 @@ const BelowTheFold: React.FC = () => {
             
             {/* Tech stack logo images at the top */}
             <div className="flex flex-wrap items-center gap-6 mb-6 relative z-10 bg-bg-0/40 px-5 py-3 rounded-2xl border border-white/5 w-fit">
-              <img src="/src/assets/images/amd.webp" alt="AMD" className="h-5 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-              <img src="/src/assets/images/google-gemma.webp" alt="Google Gemma" className="h-5 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
-              <img src="/src/assets/images/fireworks-ai.webp" alt="Fireworks AI" className="h-5 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+              <div className="w-20 h-6 flex items-center justify-center">
+                <img src="/src/assets/images/amd.webp" alt="AMD" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
+              </div>
+              <div className="w-20 h-6 flex items-center justify-center">
+                <img src="/src/assets/images/google-gemma.webp" alt="Google Gemma" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
+              </div>
+              <div className="w-20 h-6 flex items-center justify-center">
+                <img src="/src/assets/images/fireworks-ai.webp" alt="Fireworks AI" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
+              </div>
             </div>
 
             <h3 className="text-xl font-bold mb-4 text-white">Next-Gen Simulation Power</h3>
