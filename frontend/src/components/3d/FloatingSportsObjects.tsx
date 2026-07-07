@@ -28,33 +28,6 @@ const Football: React.FC = () => {
   );
 };
 
-const Stadium: React.FC = () => {
-  const groupRef = useRef<THREE.Group>(null);
-
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.x = 0.3;
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.15;
-    }
-  });
-
-  return (
-    <Float speed={1.5} rotationIntensity={0.3} floatIntensity={1} position={[2.2, 1, -4]}>
-      <group ref={groupRef}>
-        {/* Stadium Outer Bowl */}
-        <mesh>
-          <cylinderGeometry args={[0.7, 0.5, 0.3, 16, 1, true]} />
-          <meshStandardMaterial color="#0b1326" wireframe={true} emissive="#4cd7f6" emissiveIntensity={0.5} />
-        </mesh>
-        {/* Stadium Field */}
-        <mesh position={[0, -0.05, 0]}>
-          <cylinderGeometry args={[0.48, 0.48, 0.02, 16]} />
-          <meshStandardMaterial color="#0b1326" wireframe={true} emissive="#4cd7f6" emissiveIntensity={0.2} />
-        </mesh>
-      </group>
-    </Float>
-  );
-};
 
 const AnalyticsChart: React.FC = () => {
   const groupRef = useRef<THREE.Group>(null);
@@ -94,7 +67,6 @@ const FloatingSportsObjects: React.FC = () => {
         <ambientLight intensity={0.5} />
         <directionalLight position={[10, 10, 5]} intensity={1} color="#4cd7f6" />
         <Football />
-        <Stadium />
         <AnalyticsChart />
       </Canvas>
     </div>

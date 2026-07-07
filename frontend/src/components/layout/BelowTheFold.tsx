@@ -4,24 +4,8 @@ const BelowTheFold: React.FC = () => {
   return (
     <div className="w-full mt-32 relative z-10 flex flex-col items-center">
       
-      {/* Statistics Bar */}
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center bg-bg-0 border border-white/5 rounded-3xl py-12 mb-32 px-4 shadow-xl">
-        <div>
-          <h3 className="text-5xl font-bold font-mono text-white mb-2">10,000+</h3>
-          <p className="text-gray-400">Monte Carlo Iterations</p>
-        </div>
-        <div>
-          <h3 className="text-5xl font-bold font-mono text-white mb-2">48</h3>
-          <p className="text-gray-400">Teams Simulated</p>
-        </div>
-        <div>
-          <h3 className="text-5xl font-bold font-mono text-white mb-2">&lt;2s</h3>
-          <p className="text-gray-400">Average Prediction Time</p>
-        </div>
-      </div>
-
       {/* Video/GIF Demo Placeholder */}
-      <div className="w-full max-w-5xl mx-auto mb-32 px-4">
+      <div className="w-full max-w-5xl mx-auto mb-20 px-4">
         <div className="aspect-video w-full rounded-2xl bg-bg-1 border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 bg-linear-to-tr from-bg-0/80 to-transparent z-10"></div>
           <div className="text-center z-20">
@@ -29,6 +13,24 @@ const BelowTheFold: React.FC = () => {
               <div className="w-0 h-0 border-t-8 border-t-transparent border-l-12 border-l-primary-cyan border-b-8 border-b-transparent ml-1"></div>
             </div>
             <span className="text-gray-300 font-medium tracking-wide">Watch Platform Demo</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Statistics Bar (Full-Width Background) */}
+      <div className="w-full bg-bg-0 border-y border-white/5 py-12 mb-32 shadow-lg">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center px-4">
+          <div>
+            <h3 className="text-5xl font-bold font-mono text-white mb-2">10,000+</h3>
+            <p className="text-gray-400">Monte Carlo Iterations</p>
+          </div>
+          <div>
+            <h3 className="text-5xl font-bold font-mono text-white mb-2">48</h3>
+            <p className="text-gray-400">Teams Simulated</p>
+          </div>
+          <div>
+            <h3 className="text-5xl font-bold font-mono text-white mb-2">&lt;2s</h3>
+            <p className="text-gray-400">Average Prediction Time</p>
           </div>
         </div>
       </div>
