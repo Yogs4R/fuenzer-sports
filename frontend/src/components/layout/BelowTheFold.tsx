@@ -80,18 +80,22 @@ const BelowTheFold: React.FC = () => {
 
       {/* Statistics Bar (Full-Width Background) */}
       <div className="w-full bg-bg-0 border-y border-white/5 py-12 mb-32 shadow-lg">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center px-4">
+        <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center px-4">
           <div>
-            <h3 className="text-5xl font-bold font-mono text-white mb-2">10,000+</h3>
-            <p className="text-gray-400">Monte Carlo Iterations</p>
+            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">10,000+</h3>
+            <p className="text-xs md:text-sm text-gray-400">Monte Carlo Iterations</p>
           </div>
           <div>
-            <h3 className="text-5xl font-bold font-mono text-white mb-2">48</h3>
-            <p className="text-gray-400">Teams Simulated</p>
+            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">48</h3>
+            <p className="text-xs md:text-sm text-gray-400">Teams Simulated</p>
           </div>
           <div>
-            <h3 className="text-5xl font-bold font-mono text-white mb-2">&lt;2s</h3>
-            <p className="text-gray-400">Average Prediction Time</p>
+            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">&lt;2s</h3>
+            <p className="text-xs md:text-sm text-gray-400">Average Prediction Time</p>
+          </div>
+          <div>
+            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">99.8%</h3>
+            <p className="text-xs md:text-sm text-gray-400">Engine Accuracy</p>
           </div>
         </div>
       </div>
