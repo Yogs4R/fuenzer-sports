@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { id } from '../locales/id';
 import { en } from '../locales/en';
+import { groups, bestThirdPlaceTeams } from '../data/standingsData';
 
 const StandingsPage = () => {
   const { language } = useAppStore();
@@ -14,74 +15,6 @@ const StandingsPage = () => {
     { name: 'AFCON', soon: true },
     { name: 'UEFA', soon: true },
   ];
-
-  // 48 Countries with ISO codes for flags (using flagcdn.com)
-  const countries = [
-    { name: 'Argentina', code: 'ar' }, { name: 'France', code: 'fr' }, { name: 'Japan', code: 'jp' }, { name: 'Morocco', code: 'ma' },
-    { name: 'Brazil', code: 'br' }, { name: 'Germany', code: 'de' }, { name: 'Spain', code: 'es' }, { name: 'England', code: 'gb' },
-    { name: 'Netherlands', code: 'nl' }, { name: 'Portugal', code: 'pt' }, { name: 'Croatia', code: 'hr' }, { name: 'Belgium', code: 'be' },
-    { name: 'Uruguay', code: 'uy' }, { name: 'Senegal', code: 'sn' }, { name: 'USA', code: 'us' }, { name: 'Mexico', code: 'mx' },
-    { name: 'South Korea', code: 'kr' }, { name: 'Switzerland', code: 'ch' }, { name: 'Cameroon', code: 'cm' }, { name: 'Ghana', code: 'gh' },
-    { name: 'Canada', code: 'ca' }, { name: 'Ecuador', code: 'ec' }, { name: 'Poland', code: 'pl' }, { name: 'Australia', code: 'au' },
-    { name: 'Denmark', code: 'dk' }, { name: 'Tunisia', code: 'tn' }, { name: 'Costa Rica', code: 'cr' }, { name: 'Saudi Arabia', code: 'sa' },
-    { name: 'Qatar', code: 'qa' }, { name: 'Iran', code: 'ir' }, { name: 'Serbia', code: 'rs' }, { name: 'Wales', code: 'gb-wls' },
-    { name: 'Italy', code: 'it' }, { name: 'Colombia', code: 'co' }, { name: 'Sweden', code: 'se' }, { name: 'Ukraine', code: 'ua' },
-    { name: 'Peru', code: 'pe' }, { name: 'Chile', code: 'cl' }, { name: 'Nigeria', code: 'ng' }, { name: 'Egypt', code: 'eg' },
-    { name: 'Algeria', code: 'dz' }, { name: 'Turkey', code: 'tr' }, { name: 'Austria', code: 'at' }, { name: 'Hungary', code: 'hu' },
-    { name: 'Czech Republic', code: 'cz' }, { name: 'Romania', code: 'ro' }, { name: 'Greece', code: 'gr' }, { name: 'New Zealand', code: 'nz' }
-  ];
-
-  // Distribute 48 teams into 12 groups (A to L), 4 teams each
-  const groups = Array.from({ length: 12 }, (_, i) => {
-    const groupLetter = String.fromCharCode(65 + i); // A to L
-    const groupTeams = countries.slice(i * 4, i * 4 + 4).map((c, tIdx) => {
-      // Simulate dummy points to sort nicely
-      // Pos 1: 7pts, Pos 2: 4pts, Pos 3: 3pts, Pos 4: 1pt
-      const pts = tIdx === 0 ? 7 : tIdx === 1 ? 4 : tIdx === 2 ? 3 : 1;
-      const w = tIdx === 0 ? 2 : tIdx === 1 ? 1 : tIdx === 2 ? 1 : 0;
-      const d = tIdx === 0 ? 1 : tIdx === 1 ? 1 : tIdx === 2 ? 0 : 1;
-      const l = tIdx === 0 ? 0 : tIdx === 1 ? 1 : tIdx === 2 ? 2 : 2;
-      return {
-        ...c,
-        pld: 3,
-        w,
-        d,
-        l,
-        pts
-      };
-    });
-
-    return {
-      name: `Group ${groupLetter}`,
-      teams: groupTeams
-    };
-  });
-
-  // 3rd place standings: get index 2 (3rd place) from all 12 groups
-  const bestThirdPlaceTeams = groups.map((g, i) => {
-    const team = g.teams[2];
-    // Give them simulated variance in points/goals to demonstrate ranking order
-    // We vary points from 5 down to 1 so they sort nicely
-    let pts = 1;
-    let w = 0, d = 1, l = 2;
-    if (i < 3) {
-      pts = 5; w = 1; d = 2; l = 0;
-    } else if (i < 7) {
-      pts = 4; w = 1; d = 1; l = 1;
-    } else if (i < 10) {
-      pts = 3; w = 1; d = 0; l = 2;
-    }
-    return {
-      name: team.name,
-      code: team.code,
-      group: g.name.replace('Group ', ''),
-      pld: 3,
-      w,
-      d,
-      l,
-      pts
-    };
-  }).sort((a, b) => b.pts - a.pts); // Sort by points
 
   const getIndicatorColor = (idx: number) => {
     if (idx === 0 || idx === 1) return 'bg-emerald-500'; // Green (Direct Qualifiers)
@@ -112,7 +45,7 @@ const StandingsPage = () => {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex justify-center gap-2 mb-12 border-b border-white/5 pb-4 overflow-x-auto w-full scrollbar-hide">
+        <div className="flex justify-start md:justify-center gap-2 mb-12 border-b border-white/5 pb-4 overflow-x-auto w-full scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
           {tabs.map((tab) => (
             <button
               key={tab.name}

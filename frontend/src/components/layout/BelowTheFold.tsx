@@ -1,4 +1,12 @@
+import React, { useState } from 'react';
+import { useAppStore } from '../../store/useAppStore';
+import { groups } from '../../data/standingsData';
+import { Search, Zap, BarChart3, ChevronRight } from 'lucide-react';
+
 const BelowTheFold: React.FC = () => {
+  const { setCurrentPage } = useAppStore();
+  const [activeTab, setActiveTab] = useState('World Cup');
+
   const brands = [
     { name: 'Football-Data', logo: '/src/assets/images/football-data.webp' },
     { name: 'AMD', logo: '/src/assets/images/amd.webp' },
@@ -6,6 +14,26 @@ const BelowTheFold: React.FC = () => {
     { name: 'Google Gemma', logo: '/src/assets/images/google-gemma.webp' },
     { name: 'Fireworks AI', logo: '/src/assets/images/fireworks-ai.webp' },
   ];
+
+  const tabs = [
+    { name: 'World Cup', soon: false },
+    { name: 'AFC', soon: true },
+    { name: 'AFCON', soon: true },
+    { name: 'UEFA', soon: true },
+  ];
+
+  const getIndicatorColor = (idx: number) => {
+    if (idx === 0 || idx === 1) return 'bg-emerald-500'; // Green (Direct Qualifiers)
+    if (idx === 2) return 'bg-amber-500'; // Yellow (Contender for 3rd place)
+    return 'bg-rose-500'; // Red (Eliminated)
+  };
+
+  const handleViewAll = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.history.pushState(null, '', '/standings');
+    setCurrentPage('/standings');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <div className="w-full mt-32 relative z-10 flex flex-col items-center">
@@ -100,28 +128,150 @@ const BelowTheFold: React.FC = () => {
         </div>
       </div>
 
-      {/* Features & Benefits */}
-      <div className="max-w-6xl w-full mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 mb-32 px-8">
-        <div>
-          <h2 className="text-3xl font-bold mb-6 text-white">Why Fuenzer Sports?</h2>
-          <p className="text-gray-400 leading-relaxed mb-8">
-            Our platform leverages advanced statistical modeling and machine learning to provide you with the most accurate sports tournament predictions available on the market.
-          </p>
-          <ul className="space-y-4">
-            {['Vectorized NumPy Engine', 'Real-time API Integration', 'Strict FIFA Rules Engine'].map((feature, i) => (
-              <li key={i} className="flex items-center gap-3">
-                <div className="w-6 h-6 rounded-full bg-primary-cyan/20 flex items-center justify-center text-primary-cyan text-xs">✓</div>
-                <span className="text-gray-300">{feature}</span>
-              </li>
-            ))}
-          </ul>
+      {/* Current Standings Section (Live Standings) */}
+      <div className="w-full max-w-6xl mx-auto mb-32 px-4">
+        <div className="flex flex-row justify-between items-end mb-8">
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Current Standings</h2>
+            <p className="text-sm text-gray-400">Live simulations from top global tournaments.</p>
+          </div>
+          <a 
+            href="/standings" 
+            onClick={handleViewAll}
+            className="flex items-center gap-1 text-sm font-semibold text-primary-cyan hover:text-cyan-300 transition-colors"
+          >
+            <span>View All</span>
+            <ChevronRight size={16} />
+          </a>
         </div>
-        <div className="bg-bg-1 border border-white/5 rounded-3xl p-8 relative overflow-hidden">
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary-cyan/20 rounded-full blur-[80px]"></div>
-          <h3 className="text-xl font-semibold mb-4 text-white">AMD Hackathon Power</h3>
-          <p className="text-gray-400 mb-6 relative z-10">
-            Optimized for maximum computational throughput, our Monte Carlo engine performs thousands of complex match simulations in milliseconds, leaving competitors in the dust.
+
+        {/* Mini Navigation Tabs */}
+        <div className="flex justify-start md:justify-center gap-2 mb-8 border-b border-white/5 pb-4 overflow-x-auto w-full scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+          {tabs.map((tab) => (
+            <button
+              key={tab.name}
+              disabled={tab.soon}
+              onClick={() => setActiveTab(tab.name)}
+              className={`flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
+                activeTab === tab.name
+                  ? 'bg-primary-cyan text-bg-0 shadow-[0_0_15px_rgba(76,215,246,0.3)]'
+                  : tab.soon
+                  ? 'text-gray-600 cursor-not-allowed'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <span>{tab.name}</span>
+              {tab.soon && (
+                <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-white/5 text-gray-500">
+                  soon
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* First 3 Groups Rendered side-by-side */}
+        {activeTab === 'World Cup' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {groups.slice(0, 3).map((group, index) => (
+              <div key={index} className="bg-bg-1 border border-white/5 rounded-3xl p-6 shadow-2xl">
+                <h3 className="text-sm font-bold text-white mb-4 border-b border-white/5 pb-2 uppercase tracking-wider">
+                  {group.name}
+                </h3>
+                
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full border-collapse text-left text-xs">
+                    <thead>
+                      <tr className="text-gray-500 border-b border-white/5 uppercase tracking-wider font-bold">
+                        <th className="pb-3 w-8">Pos</th>
+                        <th className="pb-3">Team</th>
+                        <th className="pb-3 text-center w-8">Pld</th>
+                        <th className="pb-3 text-center w-8">W</th>
+                        <th className="pb-3 text-center w-8">D</th>
+                        <th className="pb-3 text-center w-8">L</th>
+                        <th className="pb-3 text-center w-10 font-mono text-primary-cyan">Pts</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.teams.map((team, tIdx) => (
+                        <tr key={tIdx} className="border-b border-white/5 last:border-0 text-gray-300 hover:bg-white/5 transition-colors">
+                          <td className="py-3 font-bold flex items-center gap-1.5">
+                            <span className={`w-1.5 h-3 rounded-full ${getIndicatorColor(tIdx)}`}></span>
+                            <span className="text-white">{tIdx + 1}</span>
+                          </td>
+                          <td className="py-3 font-semibold text-white truncate max-w-[120px]">
+                            <div className="flex items-center gap-2">
+                              <img 
+                                src={`https://flagcdn.com/16x12/${team.code}.png`} 
+                                alt={`${team.name} Flag`} 
+                                className="w-4 h-3 object-cover rounded-[1px] border border-white/10"
+                              />
+                              <span>{team.name.split(' - ')[1] || team.name}</span>
+                            </div>
+                          </td>
+                          <td className="py-3 text-center">{team.pld}</td>
+                          <td className="py-3 text-center">{team.w}</td>
+                          <td className="py-3 text-center">{team.d}</td>
+                          <td className="py-3 text-center">{team.l}</td>
+                          <td className="py-3 text-center font-mono font-bold text-white">{team.pts}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Features Section (Limitless Capabilities - Redesigned) */}
+      <div className="w-full max-w-6xl mx-auto px-4 mb-32 flex flex-col items-center">
+        <div className="text-center mb-16 max-w-2xl">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Limitless Capabilities
+          </h2>
+          <p className="text-sm text-gray-400 leading-relaxed">
+            Explore advanced features that give you the power to predict, analyze, and simulate the sports world with high accuracy.
           </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+          {/* Card 1: AI-Powered Analytics */}
+          <div className="bg-bg-1 border border-white/5 hover:border-primary-cyan/30 rounded-3xl p-8 transition-all shadow-2xl relative overflow-hidden group">
+            <div className="absolute -top-20 -right-20 w-48 h-48 bg-primary-cyan/5 rounded-full blur-[60px] group-hover:bg-primary-cyan/10 transition-colors"></div>
+            <div className="w-12 h-12 rounded-2xl bg-primary-cyan/10 flex items-center justify-center text-primary-cyan mb-6">
+              <Search size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">AI-Powered Analytics</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Our AI models process millions of historical and real-time data points to uncover hidden patterns that determine match outcomes.
+            </p>
+          </div>
+
+          {/* Card 2: Live Simulation */}
+          <div className="bg-bg-1 border border-white/5 hover:border-primary-cyan/30 rounded-3xl p-8 transition-all shadow-2xl relative overflow-hidden group">
+            <div className="absolute -top-20 -right-20 w-48 h-48 bg-primary-cyan/5 rounded-full blur-[60px] group-hover:bg-primary-cyan/10 transition-colors"></div>
+            <div className="w-12 h-12 rounded-2xl bg-primary-cyan/10 flex items-center justify-center text-primary-cyan mb-6">
+              <Zap size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">Live Simulation</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Run &quot;What-if&quot; scenario simulations in seconds. Change formations, injure players, or alter weather, and see the impact instantly.
+            </p>
+          </div>
+
+          {/* Card 3: Interactive Charts */}
+          <div className="bg-bg-1 border border-white/5 hover:border-primary-cyan/30 rounded-3xl p-8 transition-all shadow-2xl relative overflow-hidden group">
+            <div className="absolute -top-20 -right-20 w-48 h-48 bg-primary-cyan/5 rounded-full blur-[60px] group-hover:bg-primary-cyan/10 transition-colors"></div>
+            <div className="w-12 h-12 rounded-2xl bg-primary-cyan/10 flex items-center justify-center text-primary-cyan mb-6">
+              <BarChart3 size={24} />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">Interactive Charts</h3>
+            <p className="text-gray-400 text-sm leading-relaxed">
+              Visualize complex data through easy-to-understand charts and heat maps, giving you deep tactical insights in every corner of the pitch.
+            </p>
+          </div>
         </div>
       </div>
 
