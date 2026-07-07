@@ -15,11 +15,11 @@ const HistoryPage = () => {
           {t.navbar.history}
         </h1>
         <p className="text-gray-400 mb-8 text-sm">
-          This is a template page for simulation history. Your past tournament runs and simulation queries will be shown here.
+          {t.pages.history.subtitle}
         </p>
 
         <div className="text-center py-16 border border-dashed border-white/10 rounded-2xl bg-bg-0 text-gray-500 text-sm">
-          No simulation history available yet. Try running a tournament simulation!
+          {t.pages.history.empty}
         </div>
       </div>
     </div>

@@ -40,7 +40,7 @@ const StandingsPage = () => {
             {t.navbar.standings}
           </h1>
           <p className="text-gray-400 text-sm">
-            Explore tournament group stages and standings simulated by Monte Carlo AI.
+            {t.pages.standings.subtitle}
           </p>
         </div>
 
@@ -62,7 +62,7 @@ const StandingsPage = () => {
               <span>{tab.name}</span>
               {tab.soon && (
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-white/5 text-gray-500">
-                  soon
+                  {t.pages.standings.soon}
                 </span>
               )}
             </button>
@@ -129,10 +129,10 @@ const StandingsPage = () => {
             <div className="bg-bg-1 border border-white/5 rounded-3xl p-8 shadow-2xl max-w-4xl mx-auto">
               <div className="mb-6">
                 <h3 className="text-xl font-bold text-white mb-2">
-                  Best 3rd Place Standings
+                  {t.pages.standings.best3rdTitle}
                 </h3>
                 <p className="text-gray-400 text-xs">
-                  The top 8 third-place teams qualify for the knockout stage (marked in green).
+                  {t.pages.standings.best3rdDesc}
                 </p>
               </div>
 

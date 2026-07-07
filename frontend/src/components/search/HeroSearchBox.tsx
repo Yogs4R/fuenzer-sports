@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowUp, Sparkles, ChevronDown, Image as ImageIcon, Mic, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuickActionChips from './QuickActionChips';
+import { useAppStore } from '../../store/useAppStore';
+import { id } from '../../locales/id';
+import { en } from '../../locales/en';
 
 // Add type for SpeechRecognition
 declare global {
@@ -14,6 +17,8 @@ declare global {
 type DropdownType = 'model' | 'mode' | 'style' | null;
 
 const HeroSearchBox: React.FC = () => {
+  const { language } = useAppStore();
+  const t = language === 'id' ? id : en;
   const [query, setQuery] = useState('');
   const [tempQuery, setTempQuery] = useState('');
   
@@ -136,10 +141,10 @@ const HeroSearchBox: React.FC = () => {
       {/* Title */}
       <div className="text-center mb-8 px-4">
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4 text-transparent bg-clip-text bg-linear-to-r from-white via-cyan-100 to-primary-cyan/70 pb-2 leading-normal">
-          Ask Anything. Simulate Everything.
+          {t.components.hero.title}
         </h1>
         <p className="text-lg text-gray-400">
-          Powered by advanced Monte Carlo algorithms for the ultimate sports predictions.
+          {t.components.hero.subtitle}
         </p>
       </div>
 
@@ -178,7 +183,7 @@ const HeroSearchBox: React.FC = () => {
           <textarea
             value={displayQuery}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g. Simulate World Cup 2026 Group A matches..."
+            placeholder={t.components.hero.placeholder}
             className="w-full h-40 md:h-32 bg-transparent text-white placeholder-gray-500 p-6 pb-6 rounded-2xl resize-none focus:outline-none text-lg"
           />
         </div>
@@ -212,7 +217,7 @@ const HeroSearchBox: React.FC = () => {
                 className={`flex items-center gap-2 border transition-all rounded-full px-4 py-2 text-sm ${activeDropdown === 'model' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-300'}`}
               >
                 <Sparkles size={14} className={activeDropdown === 'model' ? 'text-primary-cyan' : 'text-gray-400'} />
-                <span className="hidden sm:inline">Model: {selectedModel}</span>
+                <span className="hidden sm:inline">{t.components.hero.model}: {selectedModel}</span>
                 <span className="sm:hidden">{selectedModel}</span>
                 <ChevronDown size={14} className={`transition-transform ${activeDropdown === 'model' ? 'rotate-180' : ''}`} />
               </button>
@@ -245,7 +250,7 @@ const HeroSearchBox: React.FC = () => {
                 onClick={() => setActiveDropdown(activeDropdown === 'mode' ? null : 'mode')}
                 className={`flex items-center gap-2 border transition-all rounded-full px-4 py-2 text-sm ${activeDropdown === 'mode' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-300'}`}
               >
-                <span className="hidden sm:inline">Mode: {selectedMode}</span>
+                <span className="hidden sm:inline">{t.components.hero.mode}: {selectedMode}</span>
                 <span className="sm:hidden">{selectedMode}</span>
                 <ChevronDown size={14} className={`transition-transform ${activeDropdown === 'mode' ? 'rotate-180' : ''}`} />
               </button>
@@ -278,7 +283,7 @@ const HeroSearchBox: React.FC = () => {
                 onClick={() => setActiveDropdown(activeDropdown === 'style' ? null : 'style')}
                 className={`flex items-center gap-2 border transition-all rounded-full px-4 py-2 text-sm ${activeDropdown === 'style' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-300'}`}
               >
-                <span className="hidden sm:inline">Style: {selectedStyle}</span>
+                <span className="hidden sm:inline">{t.components.hero.style}: {selectedStyle}</span>
                 <span className="sm:hidden">{selectedStyle}</span>
                 <ChevronDown size={14} className={`transition-transform ${activeDropdown === 'style' ? 'rotate-180' : ''}`} />
               </button>
