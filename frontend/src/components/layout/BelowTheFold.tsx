@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { groups } from '../../data/standingsData';
 import { Search, Zap, BarChart3, ChevronRight, ChevronDown } from 'lucide-react';
-import FloatingSportsObjects from '../3d/FloatingSportsObjects';
 
 const BelowTheFold: React.FC = () => {
   const { setCurrentPage } = useAppStore();
@@ -133,7 +132,6 @@ const BelowTheFold: React.FC = () => {
 
       {/* Video/GIF Demo Placeholder */}
       <div className="w-full max-w-5xl mx-auto mb-20 px-4 relative">
-        <FloatingSportsObjects />
         <div className="aspect-video w-full rounded-2xl bg-bg-1 border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden z-10">
           <div className="absolute inset-0 bg-linear-to-tr from-bg-0/80 to-transparent z-10"></div>
           <div className="text-center z-20">
