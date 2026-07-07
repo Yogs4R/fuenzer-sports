@@ -5,7 +5,7 @@ import FloatingSportsObjects from '../components/3d/FloatingSportsObjects';
 const LandingPage: React.FC = () => {
   return (
     <div 
-      className="min-h-[calc(100vh-80px)] relative w-full pt-8 pb-10 flex flex-col justify-center items-center bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-[#0a1128] via-[#050814] to-[#050814]"
+      className="min-h-screen overflow-hidden relative w-full pt-28 pb-20 flex flex-col items-center bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-[#0a1128] via-[#050814] to-[#050814]"
     >
       {/* Dot Grid Pattern */}
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, #4cd7f6 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>

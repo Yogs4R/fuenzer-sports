@@ -23,7 +23,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="w-full border-t border-white/5 bg-bg-0 pt-16 pb-8 mt-24">
+    <footer className="w-full border-t border-white/5 bg-bg-0 pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 pb-16 border-b border-white/5">
         
         {/* Left Col: Logo & Description */}

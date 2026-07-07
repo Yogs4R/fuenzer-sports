@@ -12,9 +12,9 @@ Fuenzer Sports is an AI-driven sports analytics simulation platform. It function
 - **Navbar:** Located at a *fixed-top* position. Left: "Fuenzer Sports" logo. Center (optional): Standings, History. Right: Language Toggle (EN/ID), notification bell icon, and "Sign In / Sign Up" button.
 - **Hero Section:** Prominent main slogan ("Ask Anything. Simulate Everything."). Below it is a giant *Prompt/Chat Box* styled like *Google Stitch*.
 - **Chat Box Detail (Stitch Style):** 
-  - Large text input with an inviting *placeholder*.
-  - In the bottom left corner of the input box, there are *chips/dropdowns* for **AI Model (Auto/Fast/Pro)** and **Mode (Live/Custom)**.
-  - In the bottom right corner is the execution button (*Submit Arrow*).
+  - Large text input with an inviting *placeholder* and an image thumbnail preview area at the top.
+  - In the bottom left corner, there are buttons for **Add Images** (max 5 photos, 5MB each) and dropdowns for **AI Model (Auto/Fast/Pro)**, **Mode (Live/Custom)**, and **Style (Komentator, Coach, Football Analyst)**.
+  - In the bottom right corner is the **Voice Chat (Mic)** button and the execution button (*Submit Arrow*).
   - Just outside/below the box, there are **Quick Action Chips** containing instant prompt recommendations (e.g., "Simulate Group A").
 - **Below the Fold Content:**
   1. **Statistics Bar:** 4 metric numbers (e.g., *10k+ Simulations, 99.8% Accuracy*).

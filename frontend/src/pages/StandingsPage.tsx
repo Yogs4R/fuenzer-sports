@@ -7,7 +7,7 @@ const StandingsPage = () => {
   const t = language === 'id' ? id : en;
 
   return (
-    <div className="min-h-screen relative w-full pt-12 pb-10 flex flex-col items-center px-4">
+    <div className="min-h-screen relative w-full pt-32 pb-20 flex flex-col items-center px-4">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary-cyan/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
       
       <div className="w-full max-w-4xl bg-bg-1 border border-white/5 rounded-3xl p-8 relative z-10 shadow-2xl">

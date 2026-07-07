@@ -45,7 +45,7 @@ function App() {
   return (
     <div className="w-full flex flex-col items-center min-h-screen bg-bg-0 text-white font-sans">
       <Navbar />
-      <main className="w-full grow pt-20">
+      <main className="w-full grow">
         {renderPage()}
       </main>
       <Footer />
