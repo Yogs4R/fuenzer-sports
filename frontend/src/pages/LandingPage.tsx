@@ -1,6 +1,5 @@
 import HeroSearchBox from '../components/search/HeroSearchBox';
 import BelowTheFold from '../components/layout/BelowTheFold';
-import FloatingSportsObjects from '../components/3d/FloatingSportsObjects';
 
 const LandingPage: React.FC = () => {
   return (
@@ -10,9 +9,8 @@ const LandingPage: React.FC = () => {
       {/* Dot Grid Pattern */}
       <div className="absolute inset-0 z-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at center, #4cd7f6 1px, transparent 1px)', backgroundSize: '24px 24px' }}></div>
       
-      {/* Background glow effects & 3D Objects */}
+      {/* Background glow effects */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary-cyan/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
-      <FloatingSportsObjects />
       
       <HeroSearchBox />
       

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { groups } from '../../data/standingsData';
 import { Search, Zap, BarChart3, ChevronRight, ChevronDown } from 'lucide-react';
+import FloatingSportsObjects from '../3d/FloatingSportsObjects';
 
 const BelowTheFold: React.FC = () => {
   const { setCurrentPage } = useAppStore();
@@ -57,6 +58,15 @@ const BelowTheFold: React.FC = () => {
     window.history.pushState(null, '', '/standings');
     setCurrentPage('/standings');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleScrollToHero = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+      setTimeout(() => (textarea as HTMLTextAreaElement).focus(), 300);
+    }
   };
 
   const toggleFaq = (index: number) => {
@@ -122,8 +132,9 @@ const BelowTheFold: React.FC = () => {
       </div>
 
       {/* Video/GIF Demo Placeholder */}
-      <div className="w-full max-w-5xl mx-auto mb-20 px-4">
-        <div className="aspect-video w-full rounded-2xl bg-bg-1 border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-5xl mx-auto mb-20 px-4 relative">
+        <FloatingSportsObjects />
+        <div className="aspect-video w-full rounded-2xl bg-bg-1 border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden z-10">
           <div className="absolute inset-0 bg-linear-to-tr from-bg-0/80 to-transparent z-10"></div>
           <div className="text-center z-20">
             <div className="w-16 h-16 rounded-full bg-primary-cyan/20 flex items-center justify-center mx-auto mb-4 border border-primary-cyan/30 backdrop-blur-sm cursor-pointer hover:bg-primary-cyan/30 transition-all">
@@ -158,14 +169,14 @@ const BelowTheFold: React.FC = () => {
 
       {/* Current Standings Section (Live Standings) */}
       <div className="w-full max-w-6xl mx-auto mb-32 px-4 relative">
-        <div className="flex flex-col items-center justify-center text-center mb-8 relative w-full">
+        <div className="flex flex-col items-center justify-center text-center mb-8 relative w-full px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Current Standings</h2>
-          <p className="text-sm text-gray-400">Live simulations from top global tournaments.</p>
+          <p className="text-sm text-gray-400 mb-4 md:mb-0">Live simulations from top global tournaments.</p>
           
           <a 
             href="/standings" 
             onClick={handleViewAll}
-            className="absolute right-4 bottom-0 md:bottom-auto md:top-2 flex items-center gap-1 text-sm font-semibold text-primary-cyan hover:text-cyan-300 transition-colors"
+            className="md:absolute md:right-4 md:top-2 flex items-center gap-1 text-sm font-semibold text-primary-cyan hover:text-cyan-300 transition-colors"
           >
             <span>View All</span>
             <ChevronRight size={16} />
@@ -323,11 +334,11 @@ const BelowTheFold: React.FC = () => {
           <div className="bg-bg-1 border border-white/5 rounded-3xl p-8 relative overflow-hidden shadow-2xl">
             <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary-cyan/20 rounded-full blur-[80px]"></div>
             
-            {/* Tech stack badge list at the top */}
-            <div className="flex flex-wrap gap-2.5 mb-6 relative z-10">
-              <span className="text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-lg bg-bg-0 border border-white/5 text-gray-400">AMD Cloud (MI300X)</span>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-lg bg-bg-0 border border-white/5 text-gray-400">Google Gemma 4</span>
-              <span className="text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-lg bg-bg-0 border border-white/5 text-gray-400">Fireworks AI</span>
+            {/* Tech stack logo images at the top */}
+            <div className="flex flex-wrap items-center gap-6 mb-6 relative z-10 bg-bg-0/40 px-5 py-3 rounded-2xl border border-white/5 w-fit">
+              <img src="/src/assets/images/amd.webp" alt="AMD" className="h-5 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+              <img src="/src/assets/images/google-gemma.webp" alt="Google Gemma" className="h-5 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
+              <img src="/src/assets/images/fireworks-ai.webp" alt="Fireworks AI" className="h-5 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity" />
             </div>
 
             <h3 className="text-xl font-bold mb-4 text-white">Next-Gen Simulation Power</h3>
@@ -385,7 +396,7 @@ const BelowTheFold: React.FC = () => {
             Join thousands of analysts and fans who have harnessed the power of AI for sports predictions.
           </p>
           <button 
-            onClick={handleViewAll}
+            onClick={handleScrollToHero}
             className="px-8 py-3.5 bg-primary-cyan text-bg-0 rounded-xl font-bold hover:bg-cyan-300 hover:scale-105 transition-all shadow-[0_0_20px_rgba(76,215,246,0.3)] cursor-pointer"
           >
             Start Simulation Now
