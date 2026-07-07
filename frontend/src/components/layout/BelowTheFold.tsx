@@ -334,13 +334,13 @@ const BelowTheFold: React.FC = () => {
             
             {/* Tech stack logo images at the top */}
             <div className="flex flex-wrap items-center gap-6 mb-6 relative z-10 bg-bg-0/40 px-5 py-3 rounded-2xl border border-white/5 w-fit">
-              <div className="w-20 h-6 flex items-center justify-center">
+              <div className="w-28 h-8 flex items-center justify-center">
                 <img src="/src/assets/images/amd.webp" alt="AMD" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
               </div>
-              <div className="w-20 h-6 flex items-center justify-center">
+              <div className="w-28 h-8 flex items-center justify-center">
                 <img src="/src/assets/images/google-gemma.webp" alt="Google Gemma" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
               </div>
-              <div className="w-20 h-6 flex items-center justify-center">
+              <div className="w-28 h-8 flex items-center justify-center">
                 <img src="/src/assets/images/fireworks-ai.webp" alt="Fireworks AI" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
               </div>
             </div>

@@ -22,7 +22,11 @@ const HeroSearchBox: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState('Live Standings');
   const [selectedStyle, setSelectedStyle] = useState('Komentator Style');
 
-  const [images, setImages] = useState<File[]>([]);
+  interface UploadedImage {
+    file: File;
+    url: string;
+  }
+  const [images, setImages] = useState<UploadedImage[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   
@@ -64,10 +68,16 @@ const HeroSearchBox: React.FC = () => {
         return true;
       });
 
+      const newUploads = validFiles.map(file => ({
+        file,
+        url: URL.createObjectURL(file)
+      }));
+
       setImages(prev => {
-        const combined = [...prev, ...validFiles];
+        const combined = [...prev, ...newUploads];
         if (combined.length > 5) {
           alert('You can only upload up to 5 images.');
+          combined.slice(5).forEach(img => URL.revokeObjectURL(img.url));
           return combined.slice(0, 5);
         }
         return combined;
@@ -78,7 +88,12 @@ const HeroSearchBox: React.FC = () => {
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+    setImages(prev => {
+      if (prev[index]) {
+        URL.revokeObjectURL(prev[index].url);
+      }
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
   const toggleRecording = () => {
@@ -137,15 +152,15 @@ const HeroSearchBox: React.FC = () => {
         {/* Image Previews */}
         {images.length > 0 && (
           <div className="flex flex-wrap gap-2 p-4 pb-0">
-            {images.map((file, index) => {
-              const url = URL.createObjectURL(file);
+            {images.map((imgItem, index) => {
+              const safeUrl = imgItem.url.startsWith('blob:') ? imgItem.url : '';
               return (
                 <div 
                   key={index} 
-                  onClick={() => setPreviewImage(url)}
+                  onClick={() => setPreviewImage(safeUrl)}
                   className="relative group rounded-xl overflow-hidden border border-white/10 w-16 h-16 cursor-zoom-in"
                 >
-                  <img src={url} alt="upload preview" className="w-full h-full object-cover" />
+                  <img src={safeUrl} alt="upload preview" className="w-full h-full object-cover" />
                   <button 
                     onClick={(e) => { e.stopPropagation(); removeImage(index); }}
                     className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10"
@@ -334,7 +349,7 @@ const HeroSearchBox: React.FC = () => {
               className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl bg-bg-1 border border-white/10 p-1"
               onClick={(e) => e.stopPropagation()}
             >
-              <img src={previewImage} alt="Full preview" className="max-w-full max-h-[80vh] object-contain rounded-xl" />
+              <img src={previewImage && previewImage.startsWith('blob:') ? previewImage : ''} alt="Full preview" className="max-w-full max-h-[80vh] object-contain rounded-xl" />
               <button 
                 onClick={() => setPreviewImage(null)} 
                 className="absolute top-4 right-4 bg-black/70 hover:bg-black text-white rounded-full p-2 border border-white/10 transition-colors cursor-pointer"
