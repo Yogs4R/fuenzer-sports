@@ -5,7 +5,7 @@ const BelowTheFold: React.FC = () => {
     <div className="w-full mt-32 relative z-10 flex flex-col items-center">
       
       {/* Statistics Bar */}
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center border-y border-white/5 py-12 mb-32 px-4">
+      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center bg-bg-0 border border-white/5 rounded-3xl py-12 mb-32 px-4 shadow-xl">
         <div>
           <h3 className="text-5xl font-bold font-mono text-white mb-2">10,000+</h3>
           <p className="text-gray-400">Monte Carlo Iterations</p>
