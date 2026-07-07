@@ -1,9 +1,70 @@
-
-
 const BelowTheFold: React.FC = () => {
+  const brands = [
+    { name: 'Football-Data', logo: '/src/assets/images/football-data.webp' },
+    { name: 'AMD', logo: '/src/assets/images/amd.webp' },
+    { name: 'lablab.ai', logo: '/src/assets/images/lablab-ai.webp' },
+    { name: 'Google Gemma', logo: '/src/assets/images/google-gemma.webp' },
+    { name: 'Fireworks AI', logo: '/src/assets/images/fireworks-ai.webp' },
+  ];
+
   return (
     <div className="w-full mt-32 relative z-10 flex flex-col items-center">
       
+      {/* Brand Carousel */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+          animation: marquee 25s linear infinite;
+        }
+        .animate-marquee-container:hover .animate-marquee {
+          animation-play-state: paused;
+        }
+      `}} />
+      <div className="w-full bg-bg-0 border-y border-white/5 py-8 mb-20 shadow-lg overflow-hidden relative animate-marquee-container">
+        <div className="max-w-6xl mx-auto px-4 mb-8 text-center text-xs font-semibold text-gray-500 uppercase tracking-widest">
+          Supported & Powered by
+        </div>
+        <div className="flex overflow-hidden w-full select-none">
+          {/* Set 1 */}
+          <div className="animate-marquee flex items-center shrink-0 justify-around min-w-full py-2 gap-12 px-6">
+            {brands.map((brand, i) => (
+              <div key={i} className="flex items-center justify-center h-8 px-6 opacity-40 hover:opacity-80 transition-opacity">
+                <img src={brand.logo} alt={brand.name} className="h-full w-auto object-contain max-w-[120px]" onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                  const parent = (e.target as HTMLElement).parentNode;
+                  if (parent && !parent.querySelector('.fallback-text')) {
+                    const textNode = document.createElement('span');
+                    textNode.className = 'fallback-text text-gray-400 font-bold tracking-wider text-sm';
+                    textNode.innerText = brand.name;
+                    parent.appendChild(textNode);
+                  }
+                }} />
+              </div>
+            ))}
+          </div>
+          {/* Set 2 (Duplicate for Seamless Loop) */}
+          <div className="animate-marquee flex items-center shrink-0 justify-around min-w-full py-2 gap-12 px-6" aria-hidden="true">
+            {brands.map((brand, i) => (
+              <div key={`dup-${i}`} className="flex items-center justify-center h-8 px-6 opacity-40 hover:opacity-80 transition-opacity">
+                <img src={brand.logo} alt={brand.name} className="h-full w-auto object-contain max-w-[120px]" onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                  const parent = (e.target as HTMLElement).parentNode;
+                  if (parent && !parent.querySelector('.fallback-text')) {
+                    const textNode = document.createElement('span');
+                    textNode.className = 'fallback-text text-gray-400 font-bold tracking-wider text-sm';
+                    textNode.innerText = brand.name;
+                    parent.appendChild(textNode);
+                  }
+                }} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Video/GIF Demo Placeholder */}
       <div className="w-full max-w-5xl mx-auto mb-20 px-4">
         <div className="aspect-video w-full rounded-2xl bg-bg-1 border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden">
