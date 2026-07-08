@@ -135,14 +135,46 @@ const HeroSearchBox: React.FC = () => {
           {/* Left: Action & Selectors */}
           <div className="flex flex-wrap items-center gap-2">
             
+            {/* Model Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setActiveDropdown(activeDropdown === 'model' ? null : 'model')}
+                className={`flex items-center gap-2 border transition-all rounded-full px-4 py-2 text-sm ${activeDropdown === 'model' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-300'}`}
+              >
+                <Sparkles size={14} className={activeDropdown === 'model' ? 'text-primary-cyan' : 'text-gray-400'} />
+                <span>{selectedModel}</span>
+                <ChevronDown size={14} className={`transition-transform ${activeDropdown === 'model' ? 'rotate-180' : ''}`} />
+              </button>
+              
+              <AnimatePresence>
+                {activeDropdown === 'model' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute bottom-full left-0 mb-2 w-48 bg-bg-0 border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
+                  >
+                    {['Auto', 'Fast', 'Pro'].map((opt) => (
+                      <button 
+                        key={opt}
+                        onClick={() => { setSelectedModel(opt); setActiveDropdown(null); }}
+                        className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${selectedModel === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300'}`}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Competition Dropdown */}
             <div className="relative">
               <button 
                 onClick={() => setActiveDropdown(activeDropdown === 'competition' ? null : 'competition')}
                 className={`flex items-center gap-2 border transition-all rounded-full px-4 py-2 text-sm ${activeDropdown === 'competition' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-300'}`}
               >
-                <span className="hidden sm:inline">Tournament: {selectedCompetition}</span>
-                <span className="sm:hidden">{selectedCompetition}</span>
+                <span>{selectedCompetition}</span>
                 <ChevronDown size={14} className={`transition-transform ${activeDropdown === 'competition' ? 'rotate-180' : ''}`} />
               </button>
               
@@ -177,31 +209,29 @@ const HeroSearchBox: React.FC = () => {
               </AnimatePresence>
             </div>
 
-            {/* Model Dropdown */}
+            {/* Style Dropdown */}
             <div className="relative">
               <button 
-                onClick={() => setActiveDropdown(activeDropdown === 'model' ? null : 'model')}
-                className={`flex items-center gap-2 border transition-all rounded-full px-4 py-2 text-sm ${activeDropdown === 'model' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-300'}`}
+                onClick={() => setActiveDropdown(activeDropdown === 'style' ? null : 'style')}
+                className={`flex items-center gap-2 border transition-all rounded-full px-4 py-2 text-sm ${activeDropdown === 'style' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-300'}`}
               >
-                <Sparkles size={14} className={activeDropdown === 'model' ? 'text-primary-cyan' : 'text-gray-400'} />
-                <span className="hidden sm:inline">{t.components.hero.model}: {selectedModel}</span>
-                <span className="sm:hidden">{selectedModel}</span>
-                <ChevronDown size={14} className={`transition-transform ${activeDropdown === 'model' ? 'rotate-180' : ''}`} />
+                <span>{selectedStyle}</span>
+                <ChevronDown size={14} className={`transition-transform ${activeDropdown === 'style' ? 'rotate-180' : ''}`} />
               </button>
-              
+
               <AnimatePresence>
-                {activeDropdown === 'model' && (
+                {activeDropdown === 'style' && (
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="absolute bottom-full left-0 mb-2 w-48 bg-bg-0 border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
+                    className="absolute bottom-full left-0 mb-2 w-56 bg-bg-0 border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
                   >
-                    {['Auto', 'Fast', 'Pro'].map((opt) => (
+                    {['Commentator Style', 'Coach Style', 'Football Analyst Style'].map((opt) => (
                       <button 
                         key={opt}
-                        onClick={() => { setSelectedModel(opt); setActiveDropdown(null); }}
-                        className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${selectedModel === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300'}`}
+                        onClick={() => { setSelectedStyle(opt); setActiveDropdown(null); }}
+                        className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${selectedStyle === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300'}`}
                       >
                         {opt}
                       </button>
@@ -217,8 +247,7 @@ const HeroSearchBox: React.FC = () => {
                 onClick={() => setActiveDropdown(activeDropdown === 'mode' ? null : 'mode')}
                 className={`flex items-center gap-2 border transition-all rounded-full px-4 py-2 text-sm ${activeDropdown === 'mode' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-300'}`}
               >
-                <span className="hidden sm:inline">{t.components.hero.mode}: {selectedMode}</span>
-                <span className="sm:hidden">{selectedMode}</span>
+                <span>{t.components.hero.mode}: {selectedMode}</span>
                 <ChevronDown size={14} className={`transition-transform ${activeDropdown === 'mode' ? 'rotate-180' : ''}`} />
               </button>
 
@@ -230,44 +259,11 @@ const HeroSearchBox: React.FC = () => {
                     exit={{ opacity: 0, y: 10 }}
                     className="absolute bottom-full left-0 mb-2 w-48 bg-bg-0 border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
                   >
-                    {['Live Standings', 'Custom Standings'].map((opt) => (
+                    {['Live Standings', 'Random Standings'].map((opt) => (
                       <button 
                         key={opt}
                         onClick={() => { setSelectedMode(opt); setActiveDropdown(null); }}
                         className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${selectedMode === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300'}`}
-                      >
-                        {opt}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
-            {/* Style Dropdown */}
-            <div className="relative">
-              <button 
-                onClick={() => setActiveDropdown(activeDropdown === 'style' ? null : 'style')}
-                className={`flex items-center gap-2 border transition-all rounded-full px-4 py-2 text-sm ${activeDropdown === 'style' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-300'}`}
-              >
-                <span className="hidden sm:inline">{t.components.hero.style}: {selectedStyle}</span>
-                <span className="sm:hidden">{selectedStyle}</span>
-                <ChevronDown size={14} className={`transition-transform ${activeDropdown === 'style' ? 'rotate-180' : ''}`} />
-              </button>
-
-              <AnimatePresence>
-                {activeDropdown === 'style' && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute bottom-full left-0 mb-2 w-56 bg-bg-0 border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
-                  >
-                    {['Comentator Style', 'Coach Style', 'Football Analyst Style'].map((opt) => (
-                      <button 
-                        key={opt}
-                        onClick={() => { setSelectedStyle(opt); setActiveDropdown(null); }}
-                        className={`w-full text-left px-4 py-3 text-sm hover:bg-white/5 transition-colors ${selectedStyle === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300'}`}
                       >
                         {opt}
                       </button>

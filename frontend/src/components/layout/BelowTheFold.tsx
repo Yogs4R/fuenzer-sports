@@ -3,12 +3,20 @@ import { useAppStore } from '../../store/useAppStore';
 import { id } from '../../locales/id';
 import { en } from '../../locales/en';
 import { Search, Zap, BarChart3, ChevronRight, ChevronDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const BelowTheFold: React.FC = () => {
   const { setCurrentPage, language, simulationData, liveStandings, isLiveLoading, hasFetchedLive, fetchLiveStandings } = useAppStore();
   const t = language === 'id' ? id : en;
   const [activeTab, setActiveTab] = useState('World Cup');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const scrollRevealProps = {
+    initial: { opacity: 0, y: 40 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: "-100px" },
+    transition: { duration: 0.6 }
+  };
 
   useEffect(() => {
     if (!simulationData && !hasFetchedLive && !isLiveLoading) {
@@ -141,7 +149,7 @@ const BelowTheFold: React.FC = () => {
       </div>
 
       {/* Video/GIF Demo Placeholder */}
-      <div className="w-full max-w-5xl mx-auto mb-20 px-4 relative">
+      <motion.div {...scrollRevealProps} className="w-full max-w-5xl mx-auto mb-20 px-4 relative">
         <div className="aspect-video w-full rounded-2xl bg-bg-1 border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden z-10">
           <div className="absolute inset-0 bg-linear-to-tr from-bg-0/80 to-transparent z-10"></div>
           <div className="text-center z-20">
@@ -151,9 +159,10 @@ const BelowTheFold: React.FC = () => {
             <span className="text-gray-300 font-medium tracking-wide">{t.components.belowTheFold.watchDemo}</span>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="w-full bg-bg-0 border-y border-white/5 py-12 mb-32 shadow-lg">
+      {/* Stats Section */}
+      <motion.div {...scrollRevealProps} className="w-full bg-bg-0 border-y border-white/5 py-12 mb-32 shadow-lg">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center px-4">
           <div>
             <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">10,000+</h3>
@@ -172,9 +181,10 @@ const BelowTheFold: React.FC = () => {
             <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.accuracy}</p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="w-full max-w-6xl mx-auto mb-32 px-4 relative">
+      {/* Standings Section */}
+      <motion.div {...scrollRevealProps} className="w-full max-w-6xl mx-auto mb-32 px-4 relative">
         <div className="flex flex-col items-center justify-center text-center mb-8 relative w-full px-4">
           <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">{t.components.belowTheFold.currentStandings.title}</h2>
           <p className="text-sm text-gray-400 mb-4 md:mb-0">{t.components.belowTheFold.currentStandings.subtitle}</p>
@@ -214,10 +224,10 @@ const BelowTheFold: React.FC = () => {
           ))}
         </div>
 
-        {/* First 3 Groups Rendered side-by-side */}
+        {/* First 2 Groups Rendered side-by-side */}
         {activeTab === 'World Cup' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {groups.slice(0, 3).map((group, index) => (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {groups.slice(0, 2).map((group, index) => (
               <div key={index} className="bg-bg-1 border border-white/5 rounded-3xl p-6 shadow-2xl">
                 <h3 className="text-sm font-bold text-white mb-4 border-b border-white/5 pb-2 uppercase tracking-wider">
                   {group.group_name}
@@ -273,9 +283,10 @@ const BelowTheFold: React.FC = () => {
             ))}
           </div>
         )}
-      </div>
+      </motion.div>
 
-      <div className="w-full max-w-6xl mx-auto px-4 mb-32 flex flex-col items-center">
+      {/* Features Section */}
+      <motion.div {...scrollRevealProps} className="w-full max-w-6xl mx-auto px-4 mb-32 flex flex-col items-center">
         <div className="text-center mb-16 max-w-2xl">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             {t.components.belowTheFold.features.title}
@@ -322,9 +333,10 @@ const BelowTheFold: React.FC = () => {
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="w-full bg-bg-0 border-y border-white/5 py-16 mb-32 shadow-lg">
+      {/* Why Choose Us Section */}
+      <motion.div {...scrollRevealProps} className="w-full bg-bg-0 border-y border-white/5 py-16 mb-32 shadow-lg">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 px-4 items-center">
           <div>
             <h2 className="text-3xl font-bold mb-6 text-white">{t.components.belowTheFold.whyChooseUs.title}</h2>
@@ -363,9 +375,10 @@ const BelowTheFold: React.FC = () => {
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="w-full max-w-4xl mx-auto px-4 mb-32">
+      {/* FAQ Section */}
+      <motion.div {...scrollRevealProps} className="w-full max-w-4xl mx-auto px-4 mb-32">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-white mb-3">{t.components.belowTheFold.faq.title}</h2>
           <p className="text-sm text-gray-400">{t.components.belowTheFold.faq.subtitle}</p>
@@ -400,9 +413,10 @@ const BelowTheFold: React.FC = () => {
             </div>
           ))}
         </div>
-      </div>
+      </motion.div>
 
-      <div className="w-full max-w-4xl mx-auto px-4 mb-32">
+      {/* CTA Section */}
+      <motion.div {...scrollRevealProps} className="w-full max-w-4xl mx-auto px-4 mb-32">
         <div className="bg-linear-to-r from-bg-1 to-bg-1/40 border border-white/10 rounded-3xl p-12 text-center shadow-2xl relative overflow-hidden group">
           <div className="absolute -top-24 -right-24 w-72 h-72 bg-primary-cyan/10 rounded-full blur-[80px] group-hover:bg-primary-cyan/20 transition-all"></div>
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{t.components.belowTheFold.cta.title}</h2>
@@ -416,7 +430,7 @@ const BelowTheFold: React.FC = () => {
             {t.components.belowTheFold.cta.button}
           </button>
         </div>
-      </div>
+      </motion.div>
 
     </div>
   );

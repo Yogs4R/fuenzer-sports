@@ -1,5 +1,6 @@
 import HeroSearchBox from '../components/search/HeroSearchBox';
 import BelowTheFold from '../components/layout/BelowTheFold';
+import { motion } from 'framer-motion';
 
 const LandingPage: React.FC = () => {
   return (
@@ -12,7 +13,14 @@ const LandingPage: React.FC = () => {
       {/* Background glow effects */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-primary-cyan/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
       
-      <HeroSearchBox />
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="w-full z-10 flex flex-col items-center"
+      >
+        <HeroSearchBox />
+      </motion.div>
       
       <div className="mt-auto w-full pt-10">
         <BelowTheFold />
