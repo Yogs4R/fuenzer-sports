@@ -1,5 +1,21 @@
 from typing import Dict, Any
+import json
+import os
 
+def get_elo_ratings() -> dict:
+    """Reads the Elo ratings JSON and returns a dictionary mapping team names to ratings."""
+    points_map = {}
+    json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "eloratings.json")
+    
+    if os.path.exists(json_path):
+        with open(json_path, mode='r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+                for item in data:
+                    points_map[item["Team"]] = float(item["Rating"])
+            except (json.JSONDecodeError, KeyError):
+                pass
+    return points_map
 def get_mock_wc_teams() -> Dict[str, Any]:
     """Returns mock data for World Cup teams (48 teams)."""
     countries = [
@@ -22,23 +38,21 @@ def get_mock_wc_teams() -> Dict[str, Any]:
         "Group G", "Group H", "Group I", "Group J", "Group K", "Group L"
     ]
     
+    # Load real Elo points
+    elo_ratings = get_elo_ratings()
+    
     teams = []
     for idx, c in enumerate(countries):
-        # Assign static power ratings based on historical tiers for realistic simulations
-        tier1 = ["ARG", "FRA", "BRA", "ENG", "ESP", "GER", "POR", "NED", "BEL", "ITA", "CRO", "URU"]
-        tier2 = ["SEN", "USA", "MEX", "KOR", "SUI", "DEN", "MAR", "COL", "JPN", "SRB", "SWE", "UKR"]
-        tier3 = ["CMR", "GHA", "CAN", "ECU", "POL", "AUS", "TUN", "CRC", "PER", "CHI", "NGA", "EGY"]
-        # Others will be tier 4
+        name = c["name"]
         
-        if c["code"] in tier1:
-            power = 85 + (idx % 10)  # 85-94
-        elif c["code"] in tier2:
-            power = 75 + (idx % 10)  # 75-84
-        elif c["code"] in tier3:
-            power = 65 + (idx % 10)  # 65-74
-        else:
-            power = 55 + (idx % 10)  # 55-64
-            
+        # Get raw Elo points (default to 1500 if not found)
+        raw_points = elo_ratings.get(name, 1500.0)
+        
+        # Scale to a 0-100ish power rating for our Poisson calculation
+        # Elo ratings usually span from 1000 to 2200
+        # e.g., 2100 points -> 110 power, 1500 points -> 50 power
+        power = max(10, (raw_points - 1000) / 10)
+        
         group_idx = idx // 4
         teams.append({
             "id": idx + 1,
