@@ -3,8 +3,9 @@ from app.services.simulation import MonteCarloEngine
 from app.integrations.mock_data import get_mock_wc_teams
 
 def test_monte_carlo_engine_execution():
-    teams_data = get_mock_wc_teams()["teams"]
-    engine = MonteCarloEngine(teams_data=teams_data, n_iterations=1000)
+    data = get_mock_wc_teams()
+    teams = data.get("teams", [])
+    engine = MonteCarloEngine(teams_data=teams, n_iterations=1000)
     
     response = engine.run()
     

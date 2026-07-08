@@ -32,3 +32,7 @@ class SimulationResponse(BaseModel):
     execution_time_ms: float
     probabilities: Dict[str, Dict[str, float]]
     sample_standings: List[GroupStandings]
+
+class SimulationRequest(BaseModel):
+    iterations: int = 10000
+    custom_weights: Dict[str, float] = None

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.api import simulate
 
 app = FastAPI(title="Fuenzer Sports API", version="0.1.0")
 
@@ -15,3 +16,5 @@ app.add_middleware(
 @app.get("/")
 def read_root():
     return {"message": "Fuenzer Sports API is running"}
+
+app.include_router(simulate.router, prefix="/api")

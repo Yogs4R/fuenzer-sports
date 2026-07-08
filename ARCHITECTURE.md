@@ -33,7 +33,9 @@ fuenzer-sports/
 │   │   ├── api/                # API Endpoints (routes)
 │   │   │   └── simulate.py     # Router for POST /simulate
 │   │   ├── core/               # System config (CORS, Load ENV, API Keys)
-│   │   ├── integrations/       # External API Clients
+│   ├── data/               # Parsed JSON datasets (Elo Ratings, Market Values) for simulation
+│   ├── data_pipeline/      # Raw data sources (.md, .csv) and parsing scripts
+│   ├── integrations/       # External API Clients
 │   │   │   └── football_data.py# Client for football-data.org API
 │   │   ├── models/             # Pydantic schemas (JSON payload validation)
 │   │   ├── services/           # Business logic (NumPy Monte Carlo, AI Routing)

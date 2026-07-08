@@ -16,6 +16,22 @@ def get_elo_ratings() -> dict:
             except (json.JSONDecodeError, KeyError):
                 pass
     return points_map
+
+def get_wc_stats() -> dict:
+    """Reads the World Cup stats JSON and returns a dictionary mapping team names to their stats."""
+    stats_map = {}
+    json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "fifa_world_cup_mens_2026.json")
+    
+    if os.path.exists(json_path):
+        with open(json_path, mode='r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+                for item in data:
+                    stats_map[item["team"]] = item
+            except (json.JSONDecodeError, KeyError):
+                pass
+    return stats_map
+
 def get_mock_wc_teams() -> Dict[str, Any]:
     """Returns mock data for World Cup teams (48 teams)."""
     countries = [
@@ -40,6 +56,8 @@ def get_mock_wc_teams() -> Dict[str, Any]:
     
     # Load real Elo points
     elo_ratings = get_elo_ratings()
+    # Load WC Stats (host, market value)
+    wc_stats = get_wc_stats()
     
     teams = []
     for idx, c in enumerate(countries):
@@ -53,16 +71,24 @@ def get_mock_wc_teams() -> Dict[str, Any]:
         # e.g., 2100 points -> 110 power, 1500 points -> 50 power
         power = max(10, (raw_points - 1000) / 10)
         
+        # Get WC Stats
+        stats = wc_stats.get(name, {})
+        is_host = stats.get("is_host", 0)
+        market_value = stats.get("squad_total_market_value_eur", 0)
+        if market_value is None:
+            market_value = 0
+            
         group_idx = idx // 4
         teams.append({
             "id": idx + 1,
             "name": c["name"],
             "shortName": c["code"],
             "tla": c["code"],
+            "crest": f"https://crests.football-data.org/{idx + 1}.svg",
             "group": groups[group_idx],
             "power_rating": power,
-            # Normally from API, but we'll mock it
-            "crest": f"https://crests.football-data.org/{idx+1}.png"
+            "is_host": is_host,
+            "market_value": market_value
         })
         
     return {

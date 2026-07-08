@@ -1,9 +1,10 @@
 import pytest
-from app.integrations.mock_data import generate_mock_teams
+from app.integrations.mock_data import get_mock_wc_teams
 
 def test_mock_data_generation():
     """Test that the mock data generates 48 teams for the World Cup format."""
-    teams = generate_mock_teams()
+    data = get_mock_wc_teams()
+    teams = data["teams"]
     assert len(teams) == 48
     
     # Check that required keys exist

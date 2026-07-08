@@ -14,6 +14,8 @@ class MonteCarloEngine:
         # Parse data
         self.tlas = [t["tla"] for t in self.teams_data]
         self.powers = np.array([t.get("power_rating", 60) for t in self.teams_data])
+        self.is_host = np.array([t.get("is_host", 0) for t in self.teams_data])
+        self.market_value = np.array([t.get("market_value", 0) for t in self.teams_data])
         
         self.setup_matches()
 
@@ -43,6 +45,13 @@ class MonteCarloEngine:
         home_power = self.powers[home_idx]
         away_power = self.powers[away_idx]
         
+        home_is_host = self.is_host[home_idx]
+        away_is_host = self.is_host[away_idx]
+        
+        # Add host advantage (+50 Elo = +5.0 power rating)
+        home_power = home_power + (home_is_host * 5.0)
+        away_power = away_power + (away_is_host * 5.0)
+        
         # Calculate expected goals (lambda for Poisson)
         # Baseline home advantage + power difference
         lam_home = np.maximum(0.1, 1.2 + (home_power - away_power) * 0.03)
@@ -61,6 +70,7 @@ class MonteCarloEngine:
         points = np.zeros((N, self.n_teams), dtype=int)
         gd = np.zeros((N, self.n_teams), dtype=int)
         gf = np.zeros((N, self.n_teams), dtype=int)
+        mv = np.tile(self.market_value, (N, 1))
         
         # Vectorized accumulation across all N iterations
         for i in range(M):
@@ -81,10 +91,11 @@ class MonteCarloEngine:
         group_points = points.reshape(N, self.n_groups, self.teams_per_group)
         group_gd = gd.reshape(N, self.n_groups, self.teams_per_group)
         group_gf = gf.reshape(N, self.n_groups, self.teams_per_group)
+        group_mv = mv.reshape(N, self.n_groups, self.teams_per_group)
         
         # lexsort sorts ascending, so we use negative values to sort descending
-        # sort_keys shape: (3, N, 12, 4)
-        sort_keys = (-group_gf, -group_gd, -group_points)
+        # sort_keys shape: (4, N, 12, 4)
+        sort_keys = (-group_mv, -group_gf, -group_gd, -group_points)
         ranks = np.lexsort(sort_keys, axis=2) # Shape: (N, 12, 4) containing indices 0-3
         
         # Calculate probabilities
@@ -122,9 +133,10 @@ class MonteCarloEngine:
             thirds_pts = points[n, thirds_global_idx]
             thirds_gd = gd[n, thirds_global_idx]
             thirds_gf = gf[n, thirds_global_idx]
+            thirds_mv = mv[n, thirds_global_idx]
             
             # lexsort for thirds
-            t_sort_keys = (-thirds_gf, -thirds_gd, -thirds_pts)
+            t_sort_keys = (-thirds_mv, -thirds_gf, -thirds_gd, -thirds_pts)
             t_ranks = np.lexsort(t_sort_keys)
             
             # Top 8 qualify
