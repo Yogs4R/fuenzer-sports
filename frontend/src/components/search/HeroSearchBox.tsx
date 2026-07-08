@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowUp, Sparkles, ChevronDown, Image as ImageIcon, Mic, X, Loader2 } from 'lucide-react';
+import { ArrowUp, Sparkles, ChevronDown, Mic, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuickActionChips from './QuickActionChips';
 import { useAppStore } from '../../store/useAppStore';
@@ -14,7 +14,7 @@ declare global {
   }
 }
 
-type DropdownType = 'model' | 'mode' | 'style' | null;
+type DropdownType = 'competition' | 'model' | 'mode' | 'style' | null;
 
 const HeroSearchBox: React.FC = () => {
   const { language, runSimulation, isLoading } = useAppStore();
@@ -23,20 +23,14 @@ const HeroSearchBox: React.FC = () => {
   const [tempQuery, setTempQuery] = useState('');
   
   const [activeDropdown, setActiveDropdown] = useState<DropdownType>(null);
+  const [selectedCompetition, setSelectedCompetition] = useState('World Cup');
   const [selectedModel, setSelectedModel] = useState('Auto');
   const [selectedMode, setSelectedMode] = useState('Live Standings');
   const [selectedStyle, setSelectedStyle] = useState('Commentator Style');
 
-  interface UploadedImage {
-    file: File;
-    url: string;
-  }
-  const [images, setImages] = useState<UploadedImage[]>([]);
   const [isRecording, setIsRecording] = useState(false);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
   
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Handle click outside to close dropdowns
   useEffect(() => {
@@ -60,45 +54,6 @@ const HeroSearchBox: React.FC = () => {
   const handleChipClick = (chip: string) => {
     setQuery(chip);
     setTempQuery('');
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      const validFiles = newFiles.filter(file => {
-        if (file.size > 5 * 1024 * 1024) {
-          alert(`File ${file.name} is too large. Max 5MB allowed.`);
-          return false;
-        }
-        return true;
-      });
-
-      const newUploads = validFiles.map(file => ({
-        file,
-        url: URL.createObjectURL(file)
-      }));
-
-      setImages(prev => {
-        const combined = [...prev, ...newUploads];
-        if (combined.length > 5) {
-          alert('You can only upload up to 5 images.');
-          combined.slice(5).forEach(img => URL.revokeObjectURL(img.url));
-          return combined.slice(0, 5);
-        }
-        return combined;
-      });
-      // Clear input value to allow uploading the same file again
-      e.target.value = '';
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setImages(prev => {
-      if (prev[index]) {
-        URL.revokeObjectURL(prev[index].url);
-      }
-      return prev.filter((_, i) => i !== index);
-    });
   };
 
   const toggleRecording = () => {
@@ -160,30 +115,6 @@ const HeroSearchBox: React.FC = () => {
         animate={{ y: 0, opacity: 1 }}
         className="bg-bg-1 border border-white/10 rounded-3xl p-2 shadow-2xl relative mx-4 flex flex-col"
       >
-        {/* Image Previews */}
-        {images.length > 0 && (
-          <div className="flex flex-wrap gap-2 p-4 pb-0">
-            {images.map((imgItem, index) => {
-              const safeUrl = imgItem.url.startsWith('blob:') ? imgItem.url : '';
-              return (
-                <div 
-                  key={index} 
-                  onClick={() => setPreviewImage(safeUrl)}
-                  className="relative group rounded-xl overflow-hidden border border-white/10 w-16 h-16 cursor-zoom-in"
-                >
-                  <img src={safeUrl} alt="upload preview" className="w-full h-full object-cover" />
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); removeImage(index); }}
-                    className="absolute top-1 right-1 bg-black/70 hover:bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10"
-                    title="Remove image"
-                  >
-                    <X size={10} />
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
 
         <div className="relative">
           <textarea
@@ -200,27 +131,51 @@ const HeroSearchBox: React.FC = () => {
           />
         </div>
         
-        {/* Bottom Bar inside the search box */}
         <div className="flex flex-wrap items-center justify-between p-2 relative gap-y-3" ref={dropdownRef}>
           {/* Left: Action & Selectors */}
           <div className="flex flex-wrap items-center gap-2">
             
-            {/* Add Images Button */}
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleImageUpload} 
-              accept="image/*" 
-              multiple 
-              className="hidden" 
-            />
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="p-2.5 mr-1 text-gray-400 hover:text-white bg-bg-0 hover:bg-white/10 border border-white/5 rounded-full transition-all"
-              title="Add Images (Max 5)"
-            >
-              <ImageIcon size={18} />
-            </button>
+            {/* Competition Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setActiveDropdown(activeDropdown === 'competition' ? null : 'competition')}
+                className={`flex items-center gap-2 border transition-all rounded-full px-4 py-2 text-sm ${activeDropdown === 'competition' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-300'}`}
+              >
+                <span className="hidden sm:inline">Tournament: {selectedCompetition}</span>
+                <span className="sm:hidden">{selectedCompetition}</span>
+                <ChevronDown size={14} className={`transition-transform ${activeDropdown === 'competition' ? 'rotate-180' : ''}`} />
+              </button>
+              
+              <AnimatePresence>
+                {activeDropdown === 'competition' && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute bottom-full left-0 mb-2 w-48 bg-bg-0 border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
+                  >
+                    {[
+                      { name: 'World Cup', soon: false },
+                      { name: 'AFC', soon: true },
+                      { name: 'AFCON', soon: true },
+                      { name: 'UEFA', soon: true }
+                    ].map((opt) => (
+                      <button 
+                        key={opt.name}
+                        disabled={opt.soon}
+                        onClick={() => { setSelectedCompetition(opt.name); setActiveDropdown(null); }}
+                        className={`w-full text-left px-4 py-3 text-sm transition-colors flex items-center justify-between
+                          ${opt.soon ? 'text-gray-600 cursor-not-allowed' : 
+                            selectedCompetition === opt.name ? 'text-primary-cyan bg-primary-cyan/5 hover:bg-white/5' : 'text-gray-300 hover:bg-white/5'}`}
+                      >
+                        <span>{opt.name}</span>
+                        {opt.soon && <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-white/5 text-gray-500">soon</span>}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             {/* Model Dropdown */}
             <div className="relative">
@@ -349,35 +304,6 @@ const HeroSearchBox: React.FC = () => {
         onChipLeave={handleChipLeave}
         onChipClick={handleChipClick}
       />
-
-      {/* Image Preview Modal */}
-      <AnimatePresence>
-        {previewImage && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setPreviewImage(null)}
-            className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 cursor-zoom-out"
-          >
-            <motion.div 
-              initial={{ scale: 0.95 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.95 }}
-              className="relative max-w-4xl max-h-[85vh] overflow-hidden rounded-2xl bg-bg-1 border border-white/10 p-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <img src={previewImage && previewImage.startsWith('blob:') ? previewImage : ''} alt="Full preview" className="max-w-full max-h-[80vh] object-contain rounded-xl" />
-              <button 
-                onClick={() => setPreviewImage(null)} 
-                className="absolute top-4 right-4 bg-black/70 hover:bg-black text-white rounded-full p-2 border border-white/10 transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
