@@ -7,11 +7,16 @@ type Language = 'en' | 'id';
 export interface TeamStats {
   id: number;
   tla: string;
+  name: string;
+  crest: string;
   points: number;
   goals_for: number;
   goals_against: number;
   goal_difference: number;
   matches_played: number;
+  won: number;
+  draw: number;
+  lost: number;
 }
 
 export interface GroupStandings {

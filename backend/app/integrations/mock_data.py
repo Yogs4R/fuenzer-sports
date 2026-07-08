@@ -33,63 +33,65 @@ def get_wc_stats() -> dict:
     return stats_map
 
 def get_mock_wc_teams() -> Dict[str, Any]:
-    """Returns mock data for World Cup teams (48 teams)."""
-    countries = [
-        {"name": "Argentina", "code": "ARG"}, {"name": "France", "code": "FRA"}, {"name": "Japan", "code": "JPN"}, {"name": "Morocco", "code": "MAR"},
-        {"name": "Brazil", "code": "BRA"}, {"name": "Germany", "code": "GER"}, {"name": "Spain", "code": "ESP"}, {"name": "England", "code": "ENG"},
-        {"name": "Netherlands", "code": "NED"}, {"name": "Portugal", "code": "POR"}, {"name": "Croatia", "code": "CRO"}, {"name": "Belgium", "code": "BEL"},
-        {"name": "Uruguay", "code": "URU"}, {"name": "Senegal", "code": "SEN"}, {"name": "USA", "code": "USA"}, {"name": "Mexico", "code": "MEX"},
-        {"name": "South Korea", "code": "KOR"}, {"name": "Switzerland", "code": "SUI"}, {"name": "Cameroon", "code": "CMR"}, {"name": "Ghana", "code": "GHA"},
-        {"name": "Canada", "code": "CAN"}, {"name": "Ecuador", "code": "ECU"}, {"name": "Poland", "code": "POL"}, {"name": "Australia", "code": "AUS"},
-        {"name": "Denmark", "code": "DEN"}, {"name": "Tunisia", "code": "TUN"}, {"name": "Costa Rica", "code": "CRC"}, {"name": "Saudi Arabia", "code": "KSA"},
-        {"name": "Qatar", "code": "QAT"}, {"name": "Iran", "code": "IRN"}, {"name": "Serbia", "code": "SRB"}, {"name": "Wales", "code": "WAL"},
-        {"name": "Italy", "code": "ITA"}, {"name": "Colombia", "code": "COL"}, {"name": "Sweden", "code": "SWE"}, {"name": "Ukraine", "code": "UKR"},
-        {"name": "Peru", "code": "PER"}, {"name": "Chile", "code": "CHI"}, {"name": "Nigeria", "code": "NGA"}, {"name": "Egypt", "code": "EGY"},
-        {"name": "Algeria", "code": "ALG"}, {"name": "Turkey", "code": "TUR"}, {"name": "Austria", "code": "AUT"}, {"name": "Hungary", "code": "HUN"},
-        {"name": "Czech Republic", "code": "CZE"}, {"name": "Romania", "code": "ROU"}, {"name": "Greece", "code": "GRE"}, {"name": "New Zealand", "code": "NZL"}
-    ]
-    # 12 Groups (A to L), 4 teams per group
-    groups = [
-        "Group A", "Group B", "Group C", "Group D", "Group E", "Group F",
-        "Group G", "Group H", "Group I", "Group J", "Group K", "Group L"
-    ]
-    
+    """Returns mock data for World Cup teams (48 teams) loaded from live JSON."""
     # Load real Elo points
     elo_ratings = get_elo_ratings()
     # Load WC Stats (host, market value)
     wc_stats = get_wc_stats()
     
+    # Try to load live standings
+    live_standings_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "football_data_standings.json")
+    
     teams = []
-    for idx, c in enumerate(countries):
-        name = c["name"]
+    
+    # Name aliases mapping (football-data API -> kaggle/elo names)
+    name_aliases = {
+        "Korea Republic": "South Korea",
+        "Czechia": "Czech Republic",
+        "USA": "United States",
+        "IR Iran": "Iran"
+    }
+    
+    if os.path.exists(live_standings_path):
+        with open(live_standings_path, 'r', encoding='utf-8') as f:
+            try:
+                data = json.load(f)
+                idx = 0
+                for group_data in data.get("standings", []):
+                    group_name = group_data.get("group", "Unknown Group")
+                    for t_data in group_data.get("table", []):
+                        raw_name = t_data["team"]["name"]
+                        tla = t_data["team"].get("tla", raw_name[:3].upper())
+                        crest = t_data["team"].get("crest", f"https://crests.football-data.org/{t_data['team']['id']}.svg")
+                        
+                        # Apply alias if exists
+                        name = name_aliases.get(raw_name, raw_name)
         
-        # Get raw Elo points (default to 1500 if not found)
-        raw_points = elo_ratings.get(name, 1500.0)
-        
-        # Scale to a 0-100ish power rating for our Poisson calculation
-        # Elo ratings usually span from 1000 to 2200
-        # e.g., 2100 points -> 110 power, 1500 points -> 50 power
-        power = max(10, (raw_points - 1000) / 10)
-        
-        # Get WC Stats
-        stats = wc_stats.get(name, {})
-        is_host = stats.get("is_host", 0)
-        market_value = stats.get("squad_total_market_value_eur", 0)
-        if market_value is None:
-            market_value = 0
-            
-        group_idx = idx // 4
-        teams.append({
-            "id": idx + 1,
-            "name": c["name"],
-            "shortName": c["code"],
-            "tla": c["code"],
-            "crest": f"https://crests.football-data.org/{idx + 1}.svg",
-            "group": groups[group_idx],
-            "power_rating": power,
-            "is_host": is_host,
-            "market_value": market_value
-        })
+                        # Get raw Elo points (default to 1500 if not found)
+                        raw_points = elo_ratings.get(name, 1500.0)
+                        power = max(10, (raw_points - 1000) / 10)
+                        
+                        # Get WC Stats
+                        stats = wc_stats.get(name, {})
+                        is_host = stats.get("is_host", 0)
+                        market_value = stats.get("squad_total_market_value_eur", 0)
+                        if market_value is None:
+                            market_value = 0
+                            
+                        teams.append({
+                            "id": idx + 1,
+                            "name": name,
+                            "shortName": tla,
+                            "tla": tla,
+                            "crest": crest,
+                            "group": group_name,
+                            "power_rating": power,
+                            "is_host": is_host,
+                            "market_value": market_value
+                        })
+                        idx += 1
+            except Exception as e:
+                pass
         
     return {
         "count": len(teams),

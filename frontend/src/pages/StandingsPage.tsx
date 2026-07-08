@@ -1,13 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAppStore } from '../store/useAppStore';
 import { id } from '../locales/id';
 import { en } from '../locales/en';
-import { groups, bestThirdPlaceTeams } from '../data/standingsData';
+import { Loader2 } from 'lucide-react';
 
 const StandingsPage = () => {
-  const { language } = useAppStore();
+  const { language, simulationData, isLoading, runSimulation } = useAppStore();
   const t = language === 'id' ? id : en;
   const [activeTab, setActiveTab] = useState('World Cup');
+
+  useEffect(() => {
+    if (!simulationData && !isLoading) {
+      runSimulation('', 'Auto', 'Live Standings');
+    }
+  }, [simulationData, isLoading, runSimulation]);
+
+  const groups = simulationData?.sample_standings || [];
+
+  const bestThirdPlaceTeams = useMemo(() => {
+    if (!groups.length) return [];
+    
+    // Extract the 3rd place team from each group
+    const thirdPlaces = groups.map(g => {
+      const team = g.teams[2]; // index 2 is 3rd place
+      return {
+        ...team,
+        group: g.group_name
+      };
+    });
+
+    // Sort by points, then goal difference, then goals for
+    thirdPlaces.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.goal_difference !== a.goal_difference) return b.goal_difference - a.goal_difference;
+      return b.goals_for - a.goals_for;
+    });
+
+    return thirdPlaces;
+  }, [groups]);
 
   const tabs = [
     { name: 'World Cup', soon: false },
@@ -69,16 +99,24 @@ const StandingsPage = () => {
           ))}
         </div>
 
+        {/* Loading State */}
+        {isLoading && groups.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="animate-spin text-primary-cyan mb-4" size={40} />
+            <p className="text-gray-400">Loading live standings data...</p>
+          </div>
+        )}
+
         {/* Tab Content */}
-        {activeTab === 'World Cup' && (
+        {!isLoading && activeTab === 'World Cup' && groups.length > 0 && (
           <div className="space-y-16">
             
             {/* Groups Grid (12 Groups) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
               {groups.map((group, index) => (
                 <div key={index} className="bg-bg-1 border border-white/5 rounded-3xl p-6 shadow-2xl">
                   <h3 className="text-lg font-bold text-white mb-4 border-b border-white/5 pb-2">
-                    {group.name}
+                    {group.group_name}
                   </h3>
                   
                   <div className="overflow-x-auto w-full">
@@ -86,11 +124,14 @@ const StandingsPage = () => {
                       <thead>
                         <tr className="text-gray-500 border-b border-white/5 uppercase tracking-wider font-bold">
                           <th className="pb-3 w-8">Pos</th>
-                          <th className="pb-3">Team</th>
+                          <th className="pb-3 min-w-[120px]">Team</th>
                           <th className="pb-3 text-center w-8">Pld</th>
                           <th className="pb-3 text-center w-8">W</th>
                           <th className="pb-3 text-center w-8">D</th>
                           <th className="pb-3 text-center w-8">L</th>
+                          <th className="pb-3 text-center w-8">GF</th>
+                          <th className="pb-3 text-center w-8">GA</th>
+                          <th className="pb-3 text-center w-8">GD</th>
                           <th className="pb-3 text-center w-10 font-mono text-primary-cyan">Pts</th>
                         </tr>
                       </thead>
@@ -104,18 +145,21 @@ const StandingsPage = () => {
                             <td className="py-3 font-semibold text-white truncate max-w-[150px]">
                               <div className="flex items-center gap-2">
                                 <img 
-                                  src={`https://flagcdn.com/16x12/${team.code}.png`} 
+                                  src={team.crest} 
                                   alt={`${team.name} Flag`} 
-                                  className="w-4 h-3 object-cover rounded-[1px] border border-white/10"
+                                  className="w-5 h-4 object-contain rounded-[2px]"
                                 />
                                 <span>{team.name}</span>
                               </div>
                             </td>
-                            <td className="py-3 text-center">{team.pld}</td>
-                            <td className="py-3 text-center">{team.w}</td>
-                            <td className="py-3 text-center">{team.d}</td>
-                            <td className="py-3 text-center">{team.l}</td>
-                            <td className="py-3 text-center font-mono font-bold text-white">{team.pts}</td>
+                            <td className="py-3 text-center font-mono">{team.matches_played}</td>
+                            <td className="py-3 text-center font-mono">{team.won}</td>
+                            <td className="py-3 text-center font-mono">{team.draw}</td>
+                            <td className="py-3 text-center font-mono">{team.lost}</td>
+                            <td className="py-3 text-center font-mono text-gray-400">{team.goals_for}</td>
+                            <td className="py-3 text-center font-mono text-gray-400">{team.goals_against}</td>
+                            <td className="py-3 text-center font-mono text-gray-400">{team.goal_difference > 0 ? `+${team.goal_difference}` : team.goal_difference}</td>
+                            <td className="py-3 text-center font-mono font-bold text-white">{team.points}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -143,10 +187,13 @@ const StandingsPage = () => {
                       <th className="pb-4 w-12">Pos</th>
                       <th className="pb-4">Team</th>
                       <th className="pb-4 text-center w-16">Group</th>
-                      <th className="pb-4 text-center w-12">Pld</th>
-                      <th className="pb-4 text-center w-12">W</th>
-                      <th className="pb-4 text-center w-12">D</th>
-                      <th className="pb-4 text-center w-12">L</th>
+                      <th className="pb-4 text-center w-8">Pld</th>
+                      <th className="pb-4 text-center w-8">W</th>
+                      <th className="pb-4 text-center w-8">D</th>
+                      <th className="pb-4 text-center w-8">L</th>
+                      <th className="pb-4 text-center w-8">GF</th>
+                      <th className="pb-4 text-center w-8">GA</th>
+                      <th className="pb-4 text-center w-8">GD</th>
                       <th className="pb-4 text-center w-16 font-mono text-primary-cyan">Pts</th>
                     </tr>
                   </thead>
@@ -160,19 +207,22 @@ const StandingsPage = () => {
                         <td className="py-4 font-semibold text-white">
                           <div className="flex items-center gap-2">
                             <img 
-                              src={`https://flagcdn.com/16x12/${team.code}.png`} 
+                              src={team.crest} 
                               alt={`${team.name} Flag`} 
-                              className="w-4 h-3 object-cover rounded-[1px] border border-white/10"
+                              className="w-5 h-4 object-contain rounded-[2px]"
                             />
                             <span>{team.name}</span>
                           </div>
                         </td>
                         <td className="py-4 text-center text-gray-400 font-bold">{team.group}</td>
-                        <td className="py-4 text-center">{team.pld}</td>
-                        <td className="py-4 text-center">{team.w}</td>
-                        <td className="py-4 text-center">{team.d}</td>
-                        <td className="py-4 text-center">{team.l}</td>
-                        <td className="py-4 text-center font-mono font-bold text-white">{team.pts}</td>
+                        <td className="py-4 text-center font-mono">{team.matches_played}</td>
+                        <td className="py-4 text-center font-mono">{team.won}</td>
+                        <td className="py-4 text-center font-mono">{team.draw}</td>
+                        <td className="py-4 text-center font-mono">{team.lost}</td>
+                        <td className="py-4 text-center font-mono text-gray-400">{team.goals_for}</td>
+                        <td className="py-4 text-center font-mono text-gray-400">{team.goals_against}</td>
+                        <td className="py-4 text-center font-mono text-gray-400">{team.goal_difference > 0 ? `+${team.goal_difference}` : team.goal_difference}</td>
+                        <td className="py-4 text-center font-mono font-bold text-white">{team.points}</td>
                       </tr>
                     ))}
                   </tbody>

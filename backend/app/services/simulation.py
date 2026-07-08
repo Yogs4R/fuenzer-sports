@@ -70,6 +70,9 @@ class MonteCarloEngine:
         points = np.zeros((N, self.n_teams), dtype=int)
         gd = np.zeros((N, self.n_teams), dtype=int)
         gf = np.zeros((N, self.n_teams), dtype=int)
+        wins = np.zeros((N, self.n_teams), dtype=int)
+        draws_acc = np.zeros((N, self.n_teams), dtype=int)
+        losses = np.zeros((N, self.n_teams), dtype=int)
         mv = np.tile(self.market_value, (N, 1))
         
         # Vectorized accumulation across all N iterations
@@ -79,6 +82,15 @@ class MonteCarloEngine:
             
             points[:, h] += home_wins[:, i] * 3 + draws[:, i]
             points[:, a] += away_wins[:, i] * 3 + draws[:, i]
+            
+            wins[:, h] += home_wins[:, i]
+            wins[:, a] += away_wins[:, i]
+            
+            draws_acc[:, h] += draws[:, i]
+            draws_acc[:, a] += draws[:, i]
+            
+            losses[:, h] += away_wins[:, i]
+            losses[:, a] += home_wins[:, i]
             
             gd[:, h] += (home_goals[:, i] - away_goals[:, i])
             gd[:, a] += (away_goals[:, i] - home_goals[:, i])
@@ -151,25 +163,39 @@ class MonteCarloEngine:
             
         # Create 1 sample standing (from n=0)
         sample_standings = []
-        n = 0
         groups_names = ["Group A", "Group B", "Group C", "Group D", "Group E", "Group F", 
                         "Group G", "Group H", "Group I", "Group J", "Group K", "Group L"]
         
         for g in range(self.n_groups):
-            g_teams = []
-            for pos in range(4):
-                local_idx = ranks[n, g, pos]
-                global_idx = g*4 + local_idx
-                g_teams.append(TeamStats(
-                    id=self.teams_data[global_idx]["id"],
-                    tla=self.tlas[global_idx],
-                    points=int(points[n, global_idx]),
-                    goals_for=int(gf[n, global_idx]),
-                    goals_against=int(gf[n, global_idx] - gd[n, global_idx]),
-                    goal_difference=int(gd[n, global_idx]),
-                    matches_played=3
-                ))
-            sample_standings.append(GroupStandings(group_name=groups_names[g], teams=g_teams))
+            group_name = groups_names[g]
+            sorted_indices = ranks[0, g, ::-1] # reverse so highest is first
+                
+            team_stats_list = []
+            for rank_idx in sorted_indices:
+                global_team_idx = g * self.teams_per_group + rank_idx
+                team_info = self.teams_data[global_team_idx]
+                
+                # For goals against: GA = GF - GD
+                t_gf = int(group_gf[0, g, rank_idx])
+                t_gd = int(group_gd[0, g, rank_idx])
+                t_ga = t_gf - t_gd
+                
+                team_stats = TeamStats(
+                    id=team_info["id"],
+                    tla=team_info["tla"],
+                    name=team_info.get("name", team_info["tla"]),
+                    crest=team_info.get("crest", ""),
+                    points=int(group_points[0, g, rank_idx]),
+                    goals_for=t_gf,
+                    goals_against=t_ga,
+                    goal_difference=t_gd,
+                    matches_played=3,
+                    won=int(wins[0, global_team_idx]),
+                    draw=int(draws_acc[0, global_team_idx]),
+                    lost=int(losses[0, global_team_idx])
+                )
+                team_stats_list.append(team_stats)
+            sample_standings.append(GroupStandings(group_name=group_name, teams=team_stats_list))
             
         exec_time = (time.time() - start_time) * 1000
         
