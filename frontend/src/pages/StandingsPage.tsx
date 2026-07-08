@@ -5,17 +5,26 @@ import { en } from '../locales/en';
 import { Loader2 } from 'lucide-react';
 
 const StandingsPage = () => {
-  const { language, simulationData, isLoading, runSimulation } = useAppStore();
+  const { 
+    language, 
+    simulationData, 
+    isLoading, 
+    liveStandings, 
+    isLiveLoading, 
+    hasFetchedLive, 
+    fetchLiveStandings 
+  } = useAppStore();
   const t = language === 'id' ? id : en;
   const [activeTab, setActiveTab] = useState('World Cup');
 
   useEffect(() => {
-    if (!simulationData && !isLoading) {
-      runSimulation('', 'Auto', 'Live Standings');
+    if (!simulationData && !hasFetchedLive && !isLiveLoading) {
+      fetchLiveStandings();
     }
-  }, [simulationData, isLoading, runSimulation]);
+  }, [simulationData, hasFetchedLive, isLiveLoading, fetchLiveStandings]);
 
-  const groups = simulationData?.sample_standings || [];
+  const groups = simulationData?.sample_standings || liveStandings || [];
+  const showLoading = (isLoading && !simulationData) || (isLiveLoading && !liveStandings);
 
   const bestThirdPlaceTeams = useMemo(() => {
     if (!groups.length) return [];
@@ -100,7 +109,7 @@ const StandingsPage = () => {
         </div>
 
         {/* Loading State */}
-        {isLoading && groups.length === 0 && (
+        {showLoading && groups.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20">
             <Loader2 className="animate-spin text-primary-cyan mb-4" size={40} />
             <p className="text-gray-400">Loading live standings data...</p>
@@ -108,7 +117,7 @@ const StandingsPage = () => {
         )}
 
         {/* Tab Content */}
-        {!isLoading && activeTab === 'World Cup' && groups.length > 0 && (
+        {!showLoading && activeTab === 'World Cup' && groups.length > 0 && (
           <div className="space-y-16">
             
             {/* Groups Grid (12 Groups) */}

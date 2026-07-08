@@ -1,15 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { id } from '../../locales/id';
 import { en } from '../../locales/en';
-import { groups } from '../../data/standingsData';
 import { Search, Zap, BarChart3, ChevronRight, ChevronDown } from 'lucide-react';
 
 const BelowTheFold: React.FC = () => {
-  const { setCurrentPage, language } = useAppStore();
+  const { setCurrentPage, language, simulationData, liveStandings, isLiveLoading, hasFetchedLive, fetchLiveStandings } = useAppStore();
   const t = language === 'id' ? id : en;
   const [activeTab, setActiveTab] = useState('World Cup');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!simulationData && !hasFetchedLive && !isLiveLoading) {
+      fetchLiveStandings();
+    }
+  }, [simulationData, hasFetchedLive, isLiveLoading, fetchLiveStandings]);
+
+  const groups = simulationData?.sample_standings || liveStandings || [];
 
   const brands = [
     { name: 'Football-Data', logo: '/src/assets/images/football-data.webp' },
@@ -213,7 +220,7 @@ const BelowTheFold: React.FC = () => {
             {groups.slice(0, 3).map((group, index) => (
               <div key={index} className="bg-bg-1 border border-white/5 rounded-3xl p-6 shadow-2xl">
                 <h3 className="text-sm font-bold text-white mb-4 border-b border-white/5 pb-2 uppercase tracking-wider">
-                  {group.name}
+                  {group.group_name}
                 </h3>
                 
                 <div className="overflow-x-auto w-full">
@@ -226,6 +233,9 @@ const BelowTheFold: React.FC = () => {
                         <th className="pb-3 text-center w-8">W</th>
                         <th className="pb-3 text-center w-8">D</th>
                         <th className="pb-3 text-center w-8">L</th>
+                        <th className="pb-3 text-center w-8">GF</th>
+                        <th className="pb-3 text-center w-8">GA</th>
+                        <th className="pb-3 text-center w-8">GD</th>
                         <th className="pb-3 text-center w-10 font-mono text-primary-cyan">Pts</th>
                       </tr>
                     </thead>
@@ -239,18 +249,21 @@ const BelowTheFold: React.FC = () => {
                           <td className="py-3 font-semibold text-white truncate max-w-[120px]">
                             <div className="flex items-center gap-2">
                               <img 
-                                src={`https://flagcdn.com/16x12/${team.code}.png`} 
+                                src={team.crest} 
                                 alt={`${team.name} Flag`} 
-                                className="w-4 h-3 object-cover rounded-[1px] border border-white/10"
+                                className="w-5 h-4 object-contain rounded-[2px]"
                               />
-                              <span>{team.name.split(' - ')[1] || team.name}</span>
+                              <span>{team.name}</span>
                             </div>
                           </td>
-                          <td className="py-3 text-center">{team.pld}</td>
-                          <td className="py-3 text-center">{team.w}</td>
-                          <td className="py-3 text-center">{team.d}</td>
-                          <td className="py-3 text-center">{team.l}</td>
-                          <td className="py-3 text-center font-mono font-bold text-white">{team.pts}</td>
+                          <td className="py-3 text-center font-mono">{team.matches_played}</td>
+                          <td className="py-3 text-center font-mono">{team.won}</td>
+                          <td className="py-3 text-center font-mono">{team.draw}</td>
+                          <td className="py-3 text-center font-mono">{team.lost}</td>
+                          <td className="py-3 text-center font-mono text-gray-400">{team.goals_for}</td>
+                          <td className="py-3 text-center font-mono text-gray-400">{team.goals_against}</td>
+                          <td className="py-3 text-center font-mono text-gray-400">{team.goal_difference > 0 ? `+${team.goal_difference}` : team.goal_difference}</td>
+                          <td className="py-3 text-center font-mono font-bold text-white">{team.points}</td>
                         </tr>
                       ))}
                     </tbody>

@@ -41,6 +41,11 @@ interface AppState {
   isLoading: boolean;
   error: string | null;
 
+  // Live Standings State
+  liveStandings: GroupStandings[] | null;
+  isLiveLoading: boolean;
+  hasFetchedLive: boolean;
+
   // Actions
   setCurrentPage: (page: Page) => void;
   setLanguage: (lang: Language) => void;
@@ -49,6 +54,9 @@ interface AppState {
   // Simulation Actions
   runSimulation: (_prompt: string, _model: string, _mode: string) => Promise<void>;
   clearSimulationData: () => void;
+  
+  // Live Data Actions
+  fetchLiveStandings: () => Promise<void>;
 }
 
 export const useAppStore = create<AppState>()(
@@ -61,12 +69,31 @@ export const useAppStore = create<AppState>()(
       simulationData: null,
       isLoading: false,
       error: null,
+      
+      liveStandings: null,
+      isLiveLoading: false,
+      hasFetchedLive: false,
 
       setCurrentPage: (page) => set({ currentPage: page }),
       setLanguage: (lang) => set({ language: lang }),
       setShowNotifications: (show) => set({ showNotifications: show }),
       
       clearSimulationData: () => set({ simulationData: null, error: null }),
+      
+      fetchLiveStandings: async () => {
+        set({ isLiveLoading: true, hasFetchedLive: true });
+        try {
+          const response = await fetch('http://localhost:8000/api/standings/live');
+          if (response.ok) {
+            const data: GroupStandings[] = await response.json();
+            set({ liveStandings: data, isLiveLoading: false });
+          } else {
+            set({ isLiveLoading: false });
+          }
+        } catch (error) {
+          set({ isLiveLoading: false });
+        }
+      },
       
       runSimulation: async (_prompt: string, _model: string, _mode: string) => {
         set({ isLoading: true, error: null });
