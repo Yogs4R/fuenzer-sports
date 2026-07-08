@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowUp, Sparkles, ChevronDown, Image as ImageIcon, Mic, X } from 'lucide-react';
+import { ArrowUp, Sparkles, ChevronDown, Image as ImageIcon, Mic, X, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuickActionChips from './QuickActionChips';
 import { useAppStore } from '../../store/useAppStore';
@@ -17,7 +17,7 @@ declare global {
 type DropdownType = 'model' | 'mode' | 'style' | null;
 
 const HeroSearchBox: React.FC = () => {
-  const { language } = useAppStore();
+  const { language, runSimulation, isLoading } = useAppStore();
   const t = language === 'id' ? id : en;
   const [query, setQuery] = useState('');
   const [tempQuery, setTempQuery] = useState('');
@@ -25,7 +25,7 @@ const HeroSearchBox: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<DropdownType>(null);
   const [selectedModel, setSelectedModel] = useState('Auto');
   const [selectedMode, setSelectedMode] = useState('Live Standings');
-  const [selectedStyle, setSelectedStyle] = useState('Komentator Style');
+  const [selectedStyle, setSelectedStyle] = useState('Commentator Style');
 
   interface UploadedImage {
     file: File;
@@ -136,6 +136,12 @@ const HeroSearchBox: React.FC = () => {
   const displayQuery = tempQuery || query;
   const isSubmitActive = displayQuery.trim().length >= 4;
 
+  const handleSimulate = () => {
+    if (isSubmitActive && !isLoading) {
+      runSimulation(displayQuery, selectedModel, selectedMode);
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto mt-2 md:mt-6 relative z-10 flex flex-col">
       {/* Title */}
@@ -183,6 +189,12 @@ const HeroSearchBox: React.FC = () => {
           <textarea
             value={displayQuery}
             onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSimulate();
+              }
+            }}
             placeholder={t.components.hero.placeholder}
             className="w-full h-40 md:h-32 bg-transparent text-white placeholder-gray-500 p-6 pb-6 rounded-2xl resize-none focus:outline-none text-lg"
           />
@@ -296,7 +308,7 @@ const HeroSearchBox: React.FC = () => {
                     exit={{ opacity: 0, y: 10 }}
                     className="absolute bottom-full left-0 mb-2 w-56 bg-bg-0 border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
                   >
-                    {['Komentator Style', 'Coach Style', 'Football Analyst Style'].map((opt) => (
+                    {['Comentator Style', 'Coach Style', 'Football Analyst Style'].map((opt) => (
                       <button 
                         key={opt}
                         onClick={() => { setSelectedStyle(opt); setActiveDropdown(null); }}
@@ -321,10 +333,11 @@ const HeroSearchBox: React.FC = () => {
               <Mic size={20} />
             </button>
             <button 
-              disabled={!isSubmitActive}
-              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isSubmitActive ? 'bg-primary-cyan text-bg-0 hover:bg-cyan-300 shadow-[0_0_20px_rgba(76,215,246,0.3)] hover:shadow-[0_0_30px_rgba(76,215,246,0.5)] cursor-pointer' : 'bg-white/10 text-gray-500 cursor-not-allowed'}`}
+              disabled={!isSubmitActive || isLoading}
+              onClick={handleSimulate}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isSubmitActive && !isLoading ? 'bg-primary-cyan text-bg-0 hover:bg-cyan-300 shadow-[0_0_20px_rgba(76,215,246,0.3)] hover:shadow-[0_0_30px_rgba(76,215,246,0.5)] cursor-pointer' : 'bg-white/10 text-gray-500 cursor-not-allowed'}`}
             >
-              <ArrowUp size={24} strokeWidth={2.5} />
+              {isLoading ? <Loader2 size={24} className="animate-spin text-primary-cyan" /> : <ArrowUp size={24} strokeWidth={2.5} />}
             </button>
           </div>
         </div>
