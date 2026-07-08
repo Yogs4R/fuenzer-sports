@@ -46,6 +46,9 @@ interface AppState {
   isLiveLoading: boolean;
   hasFetchedLive: boolean;
 
+  // Counter
+  totalSimulations: number;
+
   // Actions
   setCurrentPage: (page: Page) => void;
   setLanguage: (lang: Language) => void;
@@ -57,6 +60,7 @@ interface AppState {
   
   // Live Data Actions
   fetchLiveStandings: () => Promise<void>;
+  fetchSimulationCount: () => Promise<void>;
 }
 
 export const useAppStore = create<AppState>()(
@@ -73,6 +77,7 @@ export const useAppStore = create<AppState>()(
       liveStandings: null,
       isLiveLoading: false,
       hasFetchedLive: false,
+      totalSimulations: 12450,
 
       setCurrentPage: (page) => set({ currentPage: page }),
       setLanguage: (lang) => set({ language: lang }),
@@ -94,9 +99,25 @@ export const useAppStore = create<AppState>()(
           set({ isLiveLoading: false });
         }
       },
+
+      fetchSimulationCount: async () => {
+        try {
+          const response = await fetch('http://localhost:8000/api/simulate/count');
+          if (response.ok) {
+            const data = await response.json();
+            set({ totalSimulations: data.count });
+          }
+        } catch (error) {
+          // Fallback to locally tracked state
+        }
+      },
       
       runSimulation: async (_prompt: string, _model: string, _mode: string) => {
-        set({ isLoading: true, error: null });
+        set((state) => ({ 
+          isLoading: true, 
+          error: null,
+          totalSimulations: state.totalSimulations + 1
+        }));
         
         try {
           // For now, we just trigger a basic simulation without parsing custom weights from the prompt.

@@ -76,8 +76,9 @@ export const id = {
       stats: {
         iterations: "Iterasi Monte Carlo",
         teams: "Tim Disimulasikan",
-        time: "Rata-rata Waktu Prediksi",
-        accuracy: "Akurasi Mesin"
+        time: "Total Simulasi Dijalankan",
+        accuracy: "Kecepatan Prediksi AI",
+        accuracyValue: "Instan"
       },
       currentStandings: {
         title: "Klasemen Saat Ini",

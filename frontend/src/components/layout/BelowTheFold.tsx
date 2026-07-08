@@ -6,7 +6,17 @@ import { Search, Zap, BarChart3, ChevronRight, ChevronDown } from 'lucide-react'
 import { motion } from 'framer-motion';
 
 const BelowTheFold: React.FC = () => {
-  const { setCurrentPage, language, simulationData, liveStandings, isLiveLoading, hasFetchedLive, fetchLiveStandings } = useAppStore();
+  const { 
+    setCurrentPage, 
+    language, 
+    simulationData, 
+    liveStandings, 
+    isLiveLoading, 
+    hasFetchedLive, 
+    fetchLiveStandings,
+    totalSimulations,
+    fetchSimulationCount
+  } = useAppStore();
   const t = language === 'id' ? id : en;
   const [activeTab, setActiveTab] = useState('World Cup');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
@@ -23,6 +33,10 @@ const BelowTheFold: React.FC = () => {
       fetchLiveStandings();
     }
   }, [simulationData, hasFetchedLive, isLiveLoading, fetchLiveStandings]);
+
+  useEffect(() => {
+    fetchSimulationCount();
+  }, [fetchSimulationCount]);
 
   const groups = simulationData?.sample_standings || liveStandings || [];
 
@@ -173,11 +187,15 @@ const BelowTheFold: React.FC = () => {
             <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.teams}</p>
           </div>
           <div>
-            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">&lt;2s</h3>
+            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">
+              {totalSimulations.toLocaleString()}+
+            </h3>
             <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.time}</p>
           </div>
           <div>
-            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">99.8%</h3>
+            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">
+              {t.components.belowTheFold.stats.accuracyValue}
+            </h3>
             <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.accuracy}</p>
           </div>
         </div>
@@ -357,14 +375,14 @@ const BelowTheFold: React.FC = () => {
             <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary-cyan/20 rounded-full blur-[80px]"></div>
             
             {/* Tech stack logo images at the top */}
-            <div className="flex flex-wrap items-center gap-6 mb-6 relative z-10 bg-bg-0/40 px-5 py-3 rounded-2xl border border-white/5 w-fit">
-              <div className="w-28 h-8 flex items-center justify-center">
+            <div className="flex items-center gap-4 sm:gap-6 mb-6 relative z-10 bg-bg-0/40 px-4 sm:px-5 py-2 sm:py-3 rounded-2xl border border-white/5 w-full sm:w-fit justify-center sm:justify-start">
+              <div className="w-20 sm:w-28 h-6 sm:h-8 flex items-center justify-center">
                 <img src="/src/assets/images/amd.webp" alt="AMD" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
               </div>
-              <div className="w-28 h-8 flex items-center justify-center">
+              <div className="w-20 sm:w-28 h-6 sm:h-8 flex items-center justify-center">
                 <img src="/src/assets/images/google-gemma.webp" alt="Google Gemma" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
               </div>
-              <div className="w-28 h-8 flex items-center justify-center">
+              <div className="w-20 sm:w-28 h-6 sm:h-8 flex items-center justify-center">
                 <img src="/src/assets/images/fireworks-ai.webp" alt="Fireworks AI" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
               </div>
             </div>

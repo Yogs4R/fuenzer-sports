@@ -76,8 +76,9 @@ export const en = {
       stats: {
         iterations: "Monte Carlo Iterations",
         teams: "Teams Simulated",
-        time: "Average Prediction Time",
-        accuracy: "Engine Accuracy"
+        time: "Total Simulations Run",
+        accuracy: "AI Prediction Speed",
+        accuracyValue: "Instant"
       },
       currentStandings: {
         title: "Current Standings",
