@@ -7,7 +7,7 @@ This document outlines the step-by-step execution plan for the development phase
 | [x] | **1. Core Foundation** | **1. Frontend Base Setup** | • Install Tailwind CSS, Zustand, Framer Motion.<br>• Create global styles (`index.css`) for Strict Dark Mode.<br>• Build `Navbar` and `Footer` components. |
 | [x] | **1. Core Foundation** | **2. Landing Page UI** | • Build `LandingPage.tsx`.<br>• Create Stitch-style `Hero Search Box` with Model/Mode selectors.<br>• Add `Quick Action Chips`.<br>• Implement "Below the Fold" sections (Statistics, Features, Benefits, FAQ). |
 | [x] | **2. Backend Logic** | **3. External Data** | • Implement `integrations/football_data.py` to fetch from `football-data.org`.<br>• Create mock data handlers for local development. |
-| [ ] | **2. Backend Logic** | **4. Monte Carlo Engine** | • Develop simulation logic in `services/`.<br>• Implement 48-team, 12-group World Cup 2026 rules.<br>• Optimize using vectorized `NumPy` operations. |
+| [x] | **2. Backend Logic** | **4. Monte Carlo Engine** | • Develop simulation logic in `services/`.<br>• Implement 48-team, 12-group World Cup 2026 rules.<br>• Optimize using vectorized `NumPy` operations. |
 | [ ] | **2. Backend Logic** | **5. FastAPI Endpoints** | • Define Pydantic models.<br>• Build `POST /simulate` endpoint in `api/simulate.py` to process prompts and return JSON results. |
 | [ ] | **2. Backend Logic** | **6. Backend Testing** | • Install `pytest`, `pytest-asyncio`, `pytest-cov`.<br>• Setup `backend/tests/` structure.<br>• Write tests for external integrations and APIs. |
 | [ ] | **3. Integration** | **7. State & API Hookup** | • Configure `Zustand` (persist middleware) for Guest Mode `localStorage`.<br>• Connect Frontend search to Backend `/simulate` API. |
