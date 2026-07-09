@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import TypewriterText from './TypewriterText';
 import ProcessingState from './ProcessingState';
-import { Mic, ArrowUp, MoreVertical, X, Edit2, Trash2, ChevronDown, Sparkles } from 'lucide-react';
+import { Mic, ArrowUp, MoreVertical, X, Edit2, Trash2, ChevronDown, Sparkles, Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface LeftPanelProps {
@@ -21,12 +21,22 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
   } = useAppStore();
   
   const [prompt, setPrompt] = useState('');
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<'model' | 'style' | null>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [title, setTitle] = useState('World Cup Simulation');
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: isFirstRender.current ? 'instant' : 'smooth'
+      });
+      isFirstRender.current = false;
+    }
   }, [chatHistory, isLoading]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -84,9 +94,14 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
     setIsMenuOpen(false);
   };
 
-  const handleEditTitle = () => {
-    // Add logic to edit title, for now just close
-    alert("Edit title feature coming soon!");
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const getProcessingTime = (idx: number) => {
+    return ((Math.sin(idx + 1) * 1.5) + 2.5).toFixed(1) + 's';
   };
 
   return (
@@ -103,10 +118,24 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
           </button>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-white leading-tight">World Cup Simulation</h2>
-              <button onClick={handleEditTitle} className="text-gray-400 hover:text-white transition-colors">
-                <Edit2 size={12} />
-              </button>
+              {isEditingTitle ? (
+                <input 
+                  type="text" 
+                  value={title} 
+                  onChange={(e) => setTitle(e.target.value)} 
+                  onBlur={() => setIsEditingTitle(false)}
+                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
+                  autoFocus
+                  className="text-sm font-bold text-white bg-white/10 px-2 py-0.5 rounded outline-none border border-primary-cyan/50 w-full max-w-[160px]"
+                />
+              ) : (
+                <>
+                  <h2 className="text-sm font-bold text-white leading-tight truncate max-w-[160px]">{title}</h2>
+                  <button onClick={() => setIsEditingTitle(true)} className="text-gray-400 hover:text-white transition-colors">
+                    <Edit2 size={12} />
+                  </button>
+                </>
+              )}
             </div>
             <p className="text-[10px] text-gray-500 font-mono">ID: SIM-4829A • {selectedCompetition}</p>
           </div>
@@ -138,7 +167,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
       </div>
 
       {/* Chat History */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-6">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-6">
         {chatHistory.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center px-6 opacity-60">
             <Sparkles size={32} className="text-primary-cyan mb-4" />
@@ -156,7 +185,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
             )}
             
             <div 
-              className={`max-w-[92%] rounded-2xl px-3 py-2 text-xs md:text-sm wrap-break-word ${
+              className={`max-w-[92%] rounded-2xl px-3 py-2 text-[10px] md:text-xs wrap-break-word ${
                 msg.role === 'user' 
                   ? 'bg-primary-cyan/20 border border-primary-cyan/30 text-white rounded-br-none' 
                   : 'bg-white/5 border border-white/10 text-gray-200 rounded-bl-none'
@@ -172,9 +201,24 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
                 msg.content
               )}
             </div>
-            <span className="text-[10px] text-gray-500 mt-1 px-1">
-              {msg.role === 'user' ? 'You' : 'Fuenzer AI'}
-            </span>
+            
+            <div className={`flex items-center gap-2 mt-1 px-1 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+              <span className="text-[10px] text-gray-500">
+                {msg.role === 'user' ? 'You' : 'Fuenzer AI'}
+              </span>
+              {msg.role === 'ai' && (
+                <span className="text-[10px] text-gray-500 font-mono">
+                  {getProcessingTime(idx)}
+                </span>
+              )}
+              <button 
+                onClick={() => handleCopy(msg.content, idx)}
+                className="text-gray-500 hover:text-gray-300 transition-colors"
+                title="Copy to clipboard"
+              >
+                {copiedIndex === idx ? <Check size={10} className="text-green-400" /> : <Copy size={10} />}
+              </button>
+            </div>
           </div>
         ))}
         {isLoading && (
@@ -182,7 +226,6 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
             <ProcessingState />
           </div>
         )}
-        <div ref={chatEndRef} />
       </div>
 
       <div className="p-4 bg-[#0a1128] border-t border-white/10">

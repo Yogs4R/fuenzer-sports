@@ -54,12 +54,12 @@ const ProcessingState: React.FC<ProcessingStateProps> = ({ isCompleted = false }
         onClick={() => isCompleted && setIsExpanded(false)}
       >
         <div className="flex items-center gap-2">
-          {isCompleted ? <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-primary-cyan" /> : <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />}
-          <span className="font-semibold text-xs md:text-sm">{isCompleted ? 'Processing Complete' : 'Processing'}</span>
+          {isCompleted ? <CheckCircle2 className="w-4 h-4 text-primary-cyan" /> : <Loader2 className="w-4 h-4 animate-spin" />}
+          <span className="font-semibold text-[10px] md:text-xs">{isCompleted ? 'Processing Complete' : 'Processing'}</span>
         </div>
         {isCompleted && <ChevronDown size={14} className="text-gray-400" />}
       </div>
-      <div className="space-y-1.5 text-xs md:text-sm text-gray-300 font-mono">
+      <div className="space-y-1 text-[10px] md:text-xs text-gray-300 font-mono">
         <AnimatePresence>
           {steps.slice(0, currentStep + 1).map((step, index) => (
             <motion.div

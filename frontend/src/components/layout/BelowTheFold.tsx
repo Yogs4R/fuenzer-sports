@@ -9,10 +9,8 @@ const BelowTheFold: React.FC = () => {
   const { 
     setCurrentPage, 
     language, 
-    simulationData, 
     liveStandings, 
     isLiveLoading, 
-    hasFetchedLive, 
     fetchLiveStandings,
     totalSimulations,
     fetchSimulationCount
@@ -29,10 +27,10 @@ const BelowTheFold: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!simulationData && !hasFetchedLive && !isLiveLoading) {
+    if (!liveStandings && !isLiveLoading) {
       fetchLiveStandings();
     }
-  }, [simulationData, hasFetchedLive, isLiveLoading, fetchLiveStandings]);
+  }, [liveStandings, isLiveLoading, fetchLiveStandings]);
 
   useEffect(() => {
     fetchSimulationCount();

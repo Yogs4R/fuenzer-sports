@@ -45,7 +45,9 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams }) => {
           {sortedTeams.map((team, index) => {
             const prevIndex = prevOrderRef.current[team.id];
             const hasPrev = prevIndex !== undefined;
-            const diff = hasPrev ? prevIndex - index : 0;
+            const rawDiff = hasPrev ? prevIndex - index : 0;
+            const isPreTournament = team.matches_played === 0;
+            const diff = isPreTournament ? 0 : rawDiff;
             
             return (
               <motion.div
