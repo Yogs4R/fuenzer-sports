@@ -66,6 +66,7 @@ interface AppState {
   
   // Simulation Actions
   runSimulation: (prompt: string, _model: string, _mode: string) => Promise<void>;
+  reRunSimulation: () => Promise<void>;
   clearSimulationData: () => void;
   setChatStreamingComplete: (index: number) => void;
   
@@ -145,9 +146,16 @@ export const useAppStore = create<AppState>()(
           isLoading: true, 
           error: null,
           totalSimulations: state.totalSimulations + 1,
-          chatHistory: [...state.chatHistory, { role: 'user', content: prompt }]
+          chatHistory: [...state.chatHistory, { role: 'user', content: prompt }],
+          currentPage: '/playground',
+          simulationData: null
         }));
         
+        // Ensure URL updates without reload immediately
+        if (window.location.pathname !== '/playground') {
+          window.history.pushState({}, '', '/playground');
+        }
+
         // Wait 2.5 seconds to simulate network request and "processing" time for the animation
         await new Promise((resolve) => setTimeout(resolve, 2500));
         
@@ -159,15 +167,27 @@ export const useAppStore = create<AppState>()(
             simulationData: nextMock,
             chatHistory: [...state.chatHistory, { role: 'ai', content: narrative, isStreaming: true }],
             mockStep: state.mockStep + 1,
-            isLoading: false,
-            currentPage: '/playground'
+            isLoading: false
           };
         });
+      },
 
-        // Ensure URL updates without reload
-        if (window.location.pathname !== '/playground') {
-          window.history.pushState({}, '', '/playground');
-        }
+      reRunSimulation: async () => {
+        // Reset to initial state without adding to chat history or showing processing
+        set({ simulationData: null });
+        
+        // Short delay before showing the new state to trigger animation
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        
+        set((state) => {
+          // Just re-apply the last mock simulation (or advance if we want)
+          // For now, let's just show the last one again to trigger the F1 animation
+          const mockIndex = state.mockStep > 0 ? (state.mockStep - 1) : 0;
+          const nextMock = mockSimulations[mockIndex % mockSimulations.length];
+          return {
+            simulationData: nextMock
+          };
+        });
       }
     }),
     {

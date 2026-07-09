@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import StandingsTable from './StandingsTable';
 import { mockInitialStandings } from '../../data/mockSimulationData';
-import { Play, RotateCcw } from 'lucide-react';
+import { Play, RotateCcw, Menu } from 'lucide-react';
 
-const RightPanel: React.FC = () => {
-  const { simulationData, runSimulation, isLoading } = useAppStore();
+interface RightPanelProps {
+  onToggleMenu?: () => void;
+}
+
+const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
+  const { simulationData, reRunSimulation, isLoading } = useAppStore();
   const [activeTab, setActiveTab] = useState<'standings' | 'bracket'>('standings');
 
   // Probability Semantic Colors helper
@@ -20,15 +24,23 @@ const RightPanel: React.FC = () => {
 
   const handleSimulate = () => {
     if (!isLoading) {
-      runSimulation("Run general Monte Carlo simulation for the current stage.", 'auto', 'standings');
+      reRunSimulation();
     }
   };
 
   return (
     <div className="flex flex-col h-full bg-[#050814]">
       {/* Tabs Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#080d1e]">
-        <div className="flex items-center space-x-6">
+      <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-white/10 bg-[#080d1e]">
+        <div className="flex items-center space-x-2 md:space-x-6">
+          {onToggleMenu && (
+            <button 
+              onClick={onToggleMenu}
+              className="md:hidden text-gray-400 hover:text-white p-1.5 mr-2 bg-white/5 rounded-lg border border-white/10"
+            >
+              <Menu size={18} />
+            </button>
+          )}
           <button
             onClick={() => setActiveTab('standings')}
             className={`pb-2 text-sm font-semibold transition-colors relative ${

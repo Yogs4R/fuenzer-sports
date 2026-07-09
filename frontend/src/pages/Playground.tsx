@@ -17,41 +17,30 @@ const Playground: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen w-full pt-[72px] relative">
-      {/* Mobile Toggle Button (Visible only when Left Panel is closed on Mobile, positioned top-left under navbar) */}
-      {!isMobileMenuOpen && (
-        <button 
-          onClick={() => setIsMobileMenuOpen(true)}
-          className="md:hidden absolute top-[85px] left-4 z-40 bg-bg-1 border border-white/10 text-gray-300 hover:text-white p-2.5 rounded-full shadow-lg flex items-center justify-center"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-          </svg>
-        </button>
-      )}
-
-      {/* Left Panel (AI Chat) - Desktop: Fixed 35% width, Mobile: Slide over full screen */}
-      <div className="hidden md:block w-[35%] h-[calc(100vh-72px)] sticky top-[72px] z-30">
-        <LeftPanel onCloseMobile={() => {}} />
+    <div className="flex h-[calc(100vh-72px)] w-full pt-[72px] relative overflow-hidden">
+      {/* Left Panel (AI Chat) - Desktop: Fixed 25% width, Mobile: Slide over full screen */}
+      <div className="hidden md:block w-[25%] h-[calc(100vh-72px)] sticky top-[72px] z-30">
+        <LeftPanel onCloseMobile={() => setIsMobileMenuOpen(false)} />
       </div>
 
+      {/* Mobile Menu Panel */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div 
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="md:hidden absolute inset-0 z-50 w-full h-full bg-[#050814]"
+            transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
+            className="md:hidden fixed inset-0 z-50 bg-[#080d1e] pt-[72px]"
           >
             <LeftPanel onCloseMobile={() => setIsMobileMenuOpen(false)} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Right Panel (Data Viz) - Desktop: 65% width, Mobile: Full width */}
-      <div className="w-full md:w-[65%] min-h-[calc(100vh-72px)]">
-        <RightPanel />
+      {/* Right Panel (Data Viz) - Desktop: 75% width, Mobile: Full width */}
+      <div className="w-full md:w-[75%] h-[calc(100vh-72px)] overflow-hidden">
+        <RightPanel onToggleMenu={() => setIsMobileMenuOpen(true)} />
       </div>
     </div>
   );
