@@ -186,7 +186,7 @@ export const useAppStore = create<AppState>()(
            set({ simulationData: intermediateMock });
            
            if (md < 3) {
-             await new Promise(r => setTimeout(r, 1000));
+             await new Promise(r => setTimeout(r, 2000));
            }
         }
         
@@ -231,7 +231,7 @@ export const useAppStore = create<AppState>()(
            set({ simulationData: intermediateMock });
            
            if (md < 3) {
-             await new Promise(r => setTimeout(r, 1000));
+             await new Promise(r => setTimeout(r, 2000));
            }
         }
       }

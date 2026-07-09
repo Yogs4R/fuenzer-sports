@@ -64,6 +64,21 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
     recognition.start();
   };
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  const handleClearChat = () => {
+    // clearSimulationData will be added to store
+    // For now, let's just use window.location.reload() or we can add it later
+    useAppStore.setState({ chatHistory: [], simulationData: null, mockStep: 0 });
+    setIsMenuOpen(false);
+  };
+
+  const handleEditTitle = () => {
+    // Add logic to edit title, for now just close
+    alert("Edit title feature coming soon!");
+    setIsMenuOpen(false);
+  };
+
   return (
     <div className="flex flex-col h-full bg-[#080d1e] border-r border-white/10 relative">
       {/* Header (Desktop & Mobile) */}
@@ -81,15 +96,49 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
             <p className="text-[10px] text-gray-500 font-mono">ID: SIM-4829A • Group Stage</p>
           </div>
         </div>
-        <button className="text-gray-400 hover:text-white p-1 rounded-full transition-colors">
-          <MoreVertical size={18} />
-        </button>
+        
+        {/* Header Actions Menu */}
+        <div className="relative">
+          <button 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="text-gray-400 hover:text-white p-1 rounded-full transition-colors focus:outline-none focus:ring-1 focus:ring-white/20"
+          >
+            <MoreVertical size={18} />
+          </button>
+          
+          {isMenuOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)}></div>
+              <div className="absolute right-0 mt-2 w-48 bg-[#0a1128] border border-white/10 rounded-xl shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in duration-200">
+                <button 
+                  onClick={handleEditTitle}
+                  className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center"
+                >
+                  <span className="w-5 h-5 mr-2 opacity-70">✏️</span> Edit Title
+                </button>
+                <div className="h-px bg-white/5 my-1"></div>
+                <button 
+                  onClick={handleClearChat}
+                  className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-400/10 transition-colors flex items-center"
+                >
+                  <span className="w-5 h-5 mr-2 opacity-70">🗑️</span> Clear Chat
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Chat History */}
       <div className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-6">
         {chatHistory.map((msg, idx) => (
           <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+            {msg.role === 'ai' && (
+              <div className="w-full mb-1">
+                <ProcessingState isCompleted={true} />
+              </div>
+            )}
+            
             <div 
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm md:text-base wrap-break-word ${
                 msg.role === 'user' 

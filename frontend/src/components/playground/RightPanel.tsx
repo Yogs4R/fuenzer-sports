@@ -31,19 +31,19 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
   return (
     <div className="flex flex-col h-full bg-[#050814]">
       {/* Tabs Header */}
-      <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-white/10 bg-[#080d1e]">
-        <div className="flex items-center space-x-2 md:space-x-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 md:px-6 py-4 border-b border-white/10 bg-[#080d1e] gap-4 sm:gap-0">
+        <div className="flex items-center space-x-3 md:space-x-6 overflow-x-auto scrollbar-hide pb-1 sm:pb-0">
           {onToggleMenu && (
             <button 
               onClick={onToggleMenu}
-              className="md:hidden text-gray-400 hover:text-white p-1.5 mr-2 bg-white/5 rounded-lg border border-white/10"
+              className="md:hidden text-gray-400 hover:text-white p-1.5 shrink-0 bg-white/5 rounded-lg border border-white/10"
             >
               <Menu size={18} />
             </button>
           )}
           <button
             onClick={() => setActiveTab('standings')}
-            className={`pb-2 text-sm font-semibold transition-colors relative ${
+            className={`pb-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
               activeTab === 'standings' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
             }`}
           >
@@ -54,7 +54,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
           </button>
           <button
             onClick={() => setActiveTab('bracket')}
-            className={`pb-2 text-sm font-semibold transition-colors relative ${
+            className={`pb-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
               activeTab === 'bracket' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
             }`}
           >
@@ -64,16 +64,21 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             )}
           </button>
         </div>
+        
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10 ml-auto mr-4">
+          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider">World Cup</span>
+        </div>
 
         {/* Simulate / Restart Trigger Button */}
         {activeTab === 'standings' && (
           <button 
             onClick={handleSimulate}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary-cyan/10 hover:bg-primary-cyan/20 text-primary-cyan text-xs font-semibold rounded-lg border border-primary-cyan/30 transition-colors disabled:opacity-50"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-cyan/10 hover:bg-primary-cyan/20 text-primary-cyan text-xs font-semibold rounded-lg border border-primary-cyan/30 transition-colors disabled:opacity-50 w-full sm:w-auto"
           >
             {isSimulated ? <RotateCcw size={14} /> : <Play size={14} />}
-            {isSimulated ? 'Re-simulate' : 'Play Simulation'}
+            Play Simulation
           </button>
         )}
       </div>
