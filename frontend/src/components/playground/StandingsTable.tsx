@@ -54,7 +54,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, qualifyCount = 2
             
             return (
               <motion.div
-                key={`${team.tla}-${index}`}
+                key={team.tla}
                 layout
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}

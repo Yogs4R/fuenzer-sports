@@ -168,7 +168,7 @@ class MonteCarloEngine:
         
         for g in range(self.n_groups):
             group_name = groups_names[g]
-            sorted_indices = ranks[0, g, ::-1] # reverse so highest is first
+            sorted_indices = ranks[0, g] # ranks already has the best team at index 0 because we used negative values in lexsort
                 
             team_stats_list = []
             for rank_idx in sorted_indices:

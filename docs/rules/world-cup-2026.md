@@ -82,7 +82,7 @@ The remaining four matches strictly pit eight group runner-up teams against one 
 
 * **Runner-up Group A** vs. Runner-up Group B
 * **Runner-up Group D** vs. Runner-up Group E
-* **Runner-up Group G** vs. Runner-up Group H
+* **Runner-up Group G** vs. Runner-up Group I
 * **Runner-up Group K** vs. Runner-up Group L
 
 ---

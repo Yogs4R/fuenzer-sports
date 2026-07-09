@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
-import { generateBracket, type MatchNode } from '../../utils/bracketGenerator';
+import { generateBracket } from '../../utils/bracketGenerator';
 import { motion } from 'framer-motion';
 
 const ROUNDS = ['R32', 'R16', 'QF', 'SF', 'FINAL'];
@@ -13,18 +13,25 @@ const ROUND_NAMES: Record<string, string> = {
 };
 
 const BracketView: React.FC = () => {
-  const { simulationData } = useAppStore();
-  const [matches, setMatches] = useState<MatchNode[]>([]);
-  const [isSimulating, setIsSimulating] = useState(false);
+  const { 
+    simulationData, 
+    liveStandings, 
+    selectedMode, 
+    isSimulatingKnockout, 
+    setIsSimulatingKnockout,
+    bracketMatches: matches,
+    setBracketMatches: setMatches
+  } = useAppStore();
 
   useEffect(() => {
-    if (simulationData?.sample_standings && simulationData.sample_standings.length > 0) {
+    const dataToUse = selectedMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
+    if (dataToUse && dataToUse.length > 0) {
       // Only generate if matches are empty or we want to reset
       if (matches.length === 0 || matches[0]?.homeScore === undefined) {
-          setMatches(generateBracket(simulationData.sample_standings));
+          setMatches(generateBracket(dataToUse));
       }
     }
-  }, [simulationData]);
+  }, [simulationData, liveStandings, selectedMode]);
 
   const simulateMatch = (homePower: number, awayPower: number) => {
     const lamHome = Math.max(0.1, 1.2 + (homePower - awayPower) * 0.03);
@@ -49,8 +56,8 @@ const BracketView: React.FC = () => {
   };
 
   const handleSimulateKnockout = async () => {
-    if (isSimulating || matches.length === 0) return;
-    setIsSimulating(true);
+    if (isSimulatingKnockout || matches.length === 0) return;
+    setIsSimulatingKnockout(true);
 
     let currentMatches = [...matches];
 
@@ -75,12 +82,24 @@ const BracketView: React.FC = () => {
           if (match.nextMatchId) {
             const nextMatch = currentMatches.find(m => m.id === match.nextMatchId);
             if (nextMatch) {
-              // R32-1 goes to home of R16-1, R32-2 goes to away of R16-1
               const isHome = parseInt(match.id.split('-')[1]) % 2 !== 0;
               if (isHome) {
                 nextMatch.home = homeGoals > awayGoals ? match.home : match.away;
               } else {
                 nextMatch.away = homeGoals > awayGoals ? match.home : match.away;
+              }
+            }
+          }
+          
+          // Advance loser (for 3rd place match)
+          if (match.loserNextMatchId) {
+            const nextMatch = currentMatches.find(m => m.id === match.loserNextMatchId);
+            if (nextMatch) {
+              const isHome = parseInt(match.id.split('-')[1]) % 2 !== 0;
+              if (isHome) {
+                nextMatch.home = homeGoals < awayGoals ? match.home : match.away;
+              } else {
+                nextMatch.away = homeGoals < awayGoals ? match.home : match.away;
               }
             }
           }
@@ -93,10 +112,28 @@ const BracketView: React.FC = () => {
       }
     }
     
-    setIsSimulating(false);
+    // Trigger confetti if final match is played
+    import('canvas-confetti').then((confetti) => {
+      confetti.default({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#4cd7f6', '#ffffff', '#eab308']
+      });
+    }).catch(err => console.log('Confetti not loaded', err));
+
+    setIsSimulatingKnockout(false);
   };
 
-  if (!simulationData || matches.length === 0) {
+  useEffect(() => {
+    const handleTriggerSim = () => handleSimulateKnockout();
+    window.addEventListener('simulate-knockout', handleTriggerSim);
+    return () => window.removeEventListener('simulate-knockout', handleTriggerSim);
+  });
+
+  const dataToUse = selectedMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
+  
+  if (!dataToUse || matches.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-500 min-h-[400px]">
         <svg className="w-16 h-16 mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
@@ -108,72 +145,102 @@ const BracketView: React.FC = () => {
 
   return (
     <div className="relative w-full h-full flex flex-col bg-[#050814]">
-      {/* Header & Controls */}
-      <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5 sticky top-0 z-20">
-        <div>
-          <h2 className="text-white font-bold text-lg">Knockout Stage</h2>
-          <p className="text-xs text-gray-400">Round of 32 to Final</p>
-        </div>
-        <button 
-          onClick={handleSimulateKnockout}
-          disabled={isSimulating}
-          className="bg-primary-cyan text-black px-4 py-2 rounded-lg font-bold text-sm hover:bg-cyan-400 disabled:opacity-50 transition-colors"
-        >
-          {isSimulating ? 'Simulating...' : 'Play Knockout Simulation'}
-        </button>
-      </div>
-
       {/* Bracket Container (Scrollable) */}
-      <div className="flex-1 overflow-auto p-8">
-        <div className="flex gap-16 min-w-max pb-16">
-          {ROUNDS.map((round) => {
+      <div className="flex-1 overflow-auto p-4 md:p-8 scrollbar-custom">
+        <div className="flex gap-12 md:gap-16 min-w-max pb-16 pt-8">
+          {ROUNDS.map((round, rIndex) => {
             const roundMatches = matches.filter(m => m.round === round);
-            
+            // If it's the FINAL round, also include the 3RD place match
+            if (round === 'FINAL') {
+              const thirdPlaceMatch = matches.find(m => m.round === '3RD');
+              if (thirdPlaceMatch) roundMatches.push(thirdPlaceMatch);
+            }
+
+            const matchSpacing = rIndex === 0 ? 'mt-0' : (rIndex === 1 ? 'mt-12' : (rIndex === 2 ? 'mt-36' : (rIndex === 3 ? 'mt-[220px]' : 'mt-[400px]')));
+            const matchGap = rIndex === 0 ? 'gap-4' : (rIndex === 1 ? 'gap-12' : (rIndex === 2 ? 'gap-[104px]' : (rIndex === 3 ? 'gap-[280px]' : 'gap-[150px]')));
+
             return (
-              <div key={round} className="flex flex-col gap-4 relative justify-around" style={{ minWidth: '220px' }}>
+              <div key={round} className="flex flex-col relative" style={{ minWidth: '220px' }}>
                 {/* Round Header */}
-                <div className="text-center font-bold text-sm text-primary-cyan mb-4 uppercase tracking-widest sticky top-0 z-10 bg-[#050814] py-2">
+                <div className="text-center font-bold text-sm text-primary-cyan mb-4 uppercase tracking-widest sticky top-0 z-20 bg-[#050814] py-2 border-b border-primary-cyan/20 w-full shadow-[0_4px_6px_-1px_rgba(5,8,20,1)]">
                   {ROUND_NAMES[round]}
                 </div>
                 
-                {/* Matches */}
-                {roundMatches.map((match) => (
-                  <motion.div 
-                    key={match.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="flex flex-col bg-white/5 border border-white/10 rounded-lg overflow-hidden shadow-lg"
-                  >
-                    {/* Home Team */}
-                    <div className={`flex items-center justify-between p-2 text-sm border-b border-white/5 ${match.winnerId === match.home?.id ? 'bg-primary-cyan/10 font-bold text-white' : 'text-gray-300'}`}>
-                      <div className="flex items-center gap-2">
-                        {match.home?.crest ? (
-                          <img src={match.home.crest} alt="" className="w-5 h-5 object-contain" />
-                        ) : (
-                          <div className="w-5 h-5 bg-white/10 rounded-full" />
-                        )}
-                        <span className="truncate max-w-[120px]">{match.home?.name || 'TBD'}</span>
-                      </div>
-                      <span className="font-mono text-white">{match.homeScore ?? '-'}</span>
+                {round === 'FINAL' && (
+                  <div className="absolute top-[320px] left-1/2 -translate-x-1/2 flex justify-center z-0">
+                    <div className="text-yellow-400 text-6xl drop-shadow-[0_0_15px_rgba(250,204,21,0.5)] opacity-80">🏆</div>
+                  </div>
+                )}
+                
+                {/* Matches Container */}
+                <div className={`flex flex-col ${matchGap} ${matchSpacing} relative`}>
+                  {roundMatches.map((match, mIndex) => (
+                    <div key={match.id} className="relative flex flex-col items-center">
+                      {match.round === '3RD' && (
+                        <div className="text-yellow-500 font-bold text-xs uppercase mb-2 tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">3rd Place Match</div>
+                      )}
+                      <motion.div 
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className={`flex flex-col bg-white/5 border rounded-lg overflow-hidden shadow-lg w-full z-10 ${match.round === 'FINAL' ? 'border-yellow-400/50 shadow-[0_0_15px_rgba(250,204,21,0.2)]' : 'border-white/10'}`}
+                      >
+                        {/* Home Team */}
+                        <div className={`flex items-center justify-between p-2 text-sm border-b border-white/5 ${match.winnerId === match.home?.id ? 'bg-primary-cyan/10 font-bold text-white' : 'text-gray-300'}`}>
+                          <div className="flex items-center gap-2">
+                            {match.home?.crest ? (
+                              <img src={match.home.crest} alt="" className="w-5 h-5 object-contain" />
+                            ) : (
+                              <div className="w-5 h-5 bg-white/10 rounded-full" />
+                            )}
+                            <span className="truncate max-w-[120px]">{match.home?.name || 'TBD'}</span>
+                          </div>
+                          <span className="font-mono text-white">{match.homeScore ?? '-'}</span>
+                        </div>
+                        {/* Away Team */}
+                        <div className={`flex items-center justify-between p-2 text-sm ${match.winnerId === match.away?.id ? 'bg-primary-cyan/10 font-bold text-white' : 'text-gray-300'}`}>
+                          <div className="flex items-center gap-2">
+                            {match.away?.crest ? (
+                              <img src={match.away.crest} alt="" className="w-5 h-5 object-contain" />
+                            ) : (
+                              <div className="w-5 h-5 bg-white/10 rounded-full" />
+                            )}
+                            <span className="truncate max-w-[120px]">{match.away?.name || 'TBD'}</span>
+                          </div>
+                          <span className="font-mono text-white">{match.awayScore ?? '-'}</span>
+                        </div>
+                      </motion.div>
+                      
+                      {/* Connection Lines to Next Round */}
+                      {match.nextMatchId && rIndex < ROUNDS.length - 1 && (
+                        <div className="absolute left-full top-1/2 w-6 md:w-8 border-t-2 border-white/20 z-0"></div>
+                      )}
+                      
+                      {/* Vertical Connection Line for Home/Away Pairs */}
+                      {match.nextMatchId && rIndex < ROUNDS.length - 1 && mIndex % 2 === 0 && (
+                        <div className={`absolute left-[calc(100%+24px)] md:left-[calc(100%+32px)] top-1/2 w-0.5 border-l-2 border-white/20 z-0
+                          ${rIndex === 0 ? 'h-[92px]' : (rIndex === 1 ? 'h-[156px]' : (rIndex === 2 ? 'h-[280px]' : 'h-[500px]'))}
+                        `}></div>
+                      )}
+                      {/* Horizontal line entering next match */}
+                      {match.nextMatchId && rIndex < ROUNDS.length - 1 && mIndex % 2 === 0 && (
+                        <div className={`absolute left-[calc(100%+24px)] md:left-[calc(100%+32px)] top-[calc(50%+46px)] 
+                          ${rIndex === 1 ? 'top-[calc(50%+78px)]' : (rIndex === 2 ? 'top-[calc(50%+140px)]' : (rIndex === 3 ? 'top-[calc(50%+250px)]' : ''))}
+                          w-6 md:w-8 border-t-2 border-white/20 z-0`}></div>
+                      )}
                     </div>
-                    {/* Away Team */}
-                    <div className={`flex items-center justify-between p-2 text-sm ${match.winnerId === match.away?.id ? 'bg-primary-cyan/10 font-bold text-white' : 'text-gray-300'}`}>
-                      <div className="flex items-center gap-2">
-                        {match.away?.crest ? (
-                          <img src={match.away.crest} alt="" className="w-5 h-5 object-contain" />
-                        ) : (
-                          <div className="w-5 h-5 bg-white/10 rounded-full" />
-                        )}
-                        <span className="truncate max-w-[120px]">{match.away?.name || 'TBD'}</span>
-                      </div>
-                      <span className="font-mono text-white">{match.awayScore ?? '-'}</span>
-                    </div>
-                  </motion.div>
-                ))}
+                  ))}
+                </div>
               </div>
             );
           })}
+        </div>
+      </div>
+      
+      {/* Disclaimer */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
+        <div className="bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 text-[10px] text-gray-400 text-center whitespace-nowrap">
+          Simulation results are purely hypothetical and based on Monte Carlo calculations.
         </div>
       </div>
     </div>

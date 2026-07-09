@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import StandingsTable from './StandingsTable';
 import BracketView from './BracketView';
-import { Play, RotateCcw, Menu, Info, Trophy, Target, Shield, Search, Filter } from 'lucide-react';
+import { Play, Menu, Info, Trophy, Target, Shield, Search, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface RightPanelProps {
@@ -10,13 +10,17 @@ interface RightPanelProps {
 }
 
 const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
-  const { simulationData, runSimulation, isLoading, liveStandings, selectedModel, selectedMode } = useAppStore();
+  const { simulationData, runSimulation, isLoading, liveStandings, selectedModel, selectedMode, isSimulatingKnockout } = useAppStore();
   const [activeTab, setActiveTab] = useState<'standings' | 'bracket'>('standings');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterOptions = ['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G', 'Group H', 'Group I', 'Group J', 'Group K', 'Group L', 'Best 3rd Place'];
   const [selectedFilters, setSelectedFilters] = useState<string[]>(filterOptions);
+  
+  const [showMetrics, setShowMetrics] = useState(true);
+  type MetricSort = 'default' | 'highest_1st' | 'lowest_1st' | 'highest_adv' | 'lowest_adv';
+  const [metricSort, setMetricSort] = useState<MetricSort>('default');
 
   // Probability Semantic Colors helper
   const getProbColor = (prob: number) => {
@@ -26,7 +30,6 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
   };
 
   const currentStandingsRaw = simulationData?.sample_standings || liveStandings || [];
-  const isSimulated = !!simulationData;
   const currentMatchday = currentStandingsRaw[0]?.teams[0]?.matches_played || 0;
 
   // Search and Checkbox Filter Logic
@@ -68,7 +71,18 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#050814]">
+    <div className="flex flex-col h-full bg-[#050814] relative">
+      {isLoading && (
+        <div className="absolute inset-0 z-50 bg-[#050814]/80 backdrop-blur-sm flex flex-col items-center justify-center">
+          <div className="flex gap-1.5 mb-4">
+            <div className="w-3 h-3 rounded-full bg-primary-cyan animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-3 h-3 rounded-full bg-primary-cyan animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-3 h-3 rounded-full bg-primary-cyan animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+          <p className="text-primary-cyan font-semibold animate-pulse">Running Monte Carlo Simulations...</p>
+        </div>
+      )}
+
       {/* Tabs Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 md:px-6 py-4 border-b border-white/10 bg-[#080d1e] gap-4 sm:gap-0">
         <div className="flex items-center space-x-3 md:space-x-6 overflow-x-auto scrollbar-hide pb-1 sm:pb-0">
@@ -105,20 +119,24 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
         </div>
         
         {/* Simulate / Restart Trigger Button */}
-        {activeTab === 'standings' && (
-          <button 
-            onClick={handleSimulate}
-            disabled={isLoading}
-            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-cyan/10 hover:bg-primary-cyan/20 text-primary-cyan text-xs font-semibold rounded-lg border border-primary-cyan/30 transition-colors disabled:opacity-50 w-full sm:w-auto ml-auto"
-          >
-            {isSimulated ? <RotateCcw size={14} /> : <Play size={14} />}
-            Play Simulation
-          </button>
-        )}
+        <button 
+          onClick={() => {
+            if (activeTab === 'standings') {
+              handleSimulate();
+            } else {
+              window.dispatchEvent(new Event('simulate-knockout'));
+            }
+          }}
+          disabled={isLoading || isSimulatingKnockout}
+          className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-cyan/10 hover:bg-primary-cyan/20 text-primary-cyan text-xs font-semibold rounded-lg border border-primary-cyan/30 transition-colors disabled:opacity-50 w-full sm:w-auto ml-auto"
+        >
+          <Play size={14} />
+          Play Simulation
+        </button>
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 md:p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 md:p-6 space-y-6 relative">
         {activeTab === 'standings' ? (
           <>
             {/* Matchday Badge and Search */}
@@ -154,6 +172,13 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                   >
                     <Filter size={14} className={selectedFilters.length < filterOptions.length ? 'text-primary-cyan' : ''} />
                     <span className="hidden sm:inline">Filter</span>
+                  </button>
+                  <button
+                    onClick={() => setShowMetrics(!showMetrics)}
+                    className={`bg-[#0a1128] text-white text-xs px-3 py-2 rounded-lg border transition-colors flex items-center gap-2 ${showMetrics ? 'border-primary-cyan/50 bg-primary-cyan/5' : 'border-white/10 hover:bg-white/5'}`}
+                  >
+                    <Target size={14} className={showMetrics ? 'text-primary-cyan' : ''} />
+                    <span className="hidden sm:inline">{showMetrics ? 'Hide Metrics' : 'Show Metrics'}</span>
                   </button>
                   <AnimatePresence>
                     {isFilterOpen && (
@@ -195,57 +220,87 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             </div>
 
             {/* Probability Metrics Overview */}
-            {simulationData && (
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Object.entries(simulationData.probabilities).map(([teamCode, metrics]) => {
-                  let groupName = "";
-                  let crest = "";
-                  for (const group of currentStandings) {
-                    const t = group.teams.find(t => t.tla === teamCode);
-                    if (t) {
-                      groupName = group.group_name;
-                      crest = t.crest;
-                      break;
-                    }
-                  }
-                  
-                  return (
-                    <div key={teamCode} className="bg-linear-to-br from-white/10 to-white/5 border border-white/10 rounded-xl p-4 relative overflow-hidden group hover:border-primary-cyan/50 transition-colors">
-                      <div className="absolute top-0 right-0 bg-white/10 px-2 py-1 text-[10px] text-gray-300 rounded-bl-lg font-bold uppercase tracking-wider backdrop-blur-sm z-10">{groupName}</div>
-                      
-                      <div className="flex items-center gap-3 mb-4">
-                        {crest && <img src={crest} alt={teamCode} className="w-8 h-8 object-contain drop-shadow-md" />}
-                        <h3 className="text-white font-black text-xl tracking-tight">{teamCode}</h3>
+            {simulationData && showMetrics && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Probability Overview</h3>
+                  <select 
+                    value={metricSort}
+                    onChange={(e) => setMetricSort(e.target.value as MetricSort)}
+                    className="bg-[#0a1128] text-white text-xs px-2 py-1 rounded border border-white/10 outline-none cursor-pointer"
+                  >
+                    <option value="default">Default Sort</option>
+                    <option value="highest_1st">Highest 1st Place %</option>
+                    <option value="lowest_1st">Lowest 1st Place %</option>
+                    <option value="highest_adv">Highest Advancing %</option>
+                    <option value="lowest_adv">Lowest Advancing %</option>
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {Object.entries(simulationData.probabilities)
+                    .map(([teamCode, metrics]) => {
+                      let groupName = "";
+                      let crest = "";
+                      for (const group of currentStandings) {
+                        const t = group.teams.find(t => t.tla === teamCode);
+                        if (t) {
+                          groupName = group.group_name;
+                          crest = t.crest;
+                          break;
+                        }
+                      }
+                      return { teamCode, metrics, groupName, crest };
+                    })
+                    .filter(item => item.groupName !== "")
+                    .sort((a, b) => {
+                      if (metricSort === 'highest_1st') return b.metrics['1st'] - a.metrics['1st'];
+                      if (metricSort === 'lowest_1st') return a.metrics['1st'] - b.metrics['1st'];
+                      if (metricSort === 'highest_adv') return b.metrics['qualify'] - a.metrics['qualify'];
+                      if (metricSort === 'lowest_adv') return a.metrics['qualify'] - b.metrics['qualify'];
+                      return 0; // Default sort
+                    })
+                    .map(({ teamCode, metrics, groupName, crest }) => (
+                      <div key={teamCode} className="bg-linear-to-br from-white/10 to-white/5 border border-white/10 rounded-xl p-4 relative overflow-hidden group hover:border-primary-cyan/50 transition-colors">
+                        <div className="absolute top-0 right-0 bg-white/10 px-2 py-1 text-[10px] text-gray-300 rounded-bl-lg font-bold uppercase tracking-wider backdrop-blur-sm z-10">{groupName}</div>
+                        
+                        <div className="flex items-center gap-3 mb-4">
+                          {crest && <img src={crest} alt={teamCode} className="w-8 h-8 object-contain drop-shadow-md" />}
+                          <h3 className="text-white font-black text-xl tracking-tight">{teamCode}</h3>
+                        </div>
+                        
+                        <div className="space-y-2 font-mono text-xs">
+                          <div className="flex justify-between items-center bg-black/20 px-1.5 sm:px-2 py-1.5 rounded">
+                            <span className="text-gray-400 flex items-center gap-1 sm:gap-1.5 truncate mr-1"><Trophy size={12} className="shrink-0"/> <span className="truncate">1st Place</span></span>
+                            <span className={`font-bold shrink-0 ${getProbColor(metrics['1st'])}`}>{metrics['1st']}%</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-black/20 px-1.5 sm:px-2 py-1.5 rounded">
+                            <span className="text-gray-400 flex items-center gap-1 sm:gap-1.5 truncate mr-1"><Target size={12} className="shrink-0"/> <span className="truncate">2nd Place</span></span>
+                            <span className={`font-bold shrink-0 ${getProbColor(metrics['2nd'])}`}>{metrics['2nd']}%</span>
+                          </div>
+                          <div className="flex justify-between items-center bg-primary-cyan/10 px-1.5 sm:px-2 py-1.5 rounded border border-primary-cyan/20 mt-2">
+                            <span className="text-primary-cyan font-bold flex items-center gap-1 sm:gap-1.5 truncate mr-1"><Shield size={12} className="shrink-0"/> <span className="truncate">Advancing</span></span>
+                            <span className={`font-black shrink-0 ${getProbColor(metrics['qualify'])}`}>{metrics['qualify']}%</span>
+                          </div>
+                        </div>
+                        
+                        {/* Decorative background accent */}
+                        <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary-cyan/10 rounded-full blur-2xl group-hover:bg-primary-cyan/20 transition-colors pointer-events-none" />
                       </div>
-                      
-                      <div className="space-y-2 font-mono text-xs">
-                        <div className="flex justify-between items-center bg-black/20 px-2 py-1.5 rounded">
-                          <span className="text-gray-400 flex items-center gap-1.5"><Trophy size={12}/> 1st Place</span>
-                          <span className={`font-bold ${getProbColor(metrics['1st'])}`}>{metrics['1st']}%</span>
-                        </div>
-                        <div className="flex justify-between items-center bg-black/20 px-2 py-1.5 rounded">
-                          <span className="text-gray-400 flex items-center gap-1.5"><Target size={12}/> 2nd Place</span>
-                          <span className={`font-bold ${getProbColor(metrics['2nd'])}`}>{metrics['2nd']}%</span>
-                        </div>
-                        <div className="flex justify-between items-center bg-primary-cyan/10 px-2 py-1.5 rounded border border-primary-cyan/20 mt-2">
-                          <span className="text-primary-cyan font-bold flex items-center gap-1.5"><Shield size={12}/> Advancing</span>
-                          <span className={`font-black ${getProbColor(metrics['qualify'])}`}>{metrics['qualify']}%</span>
-                        </div>
-                      </div>
-                      
-                      {/* Decorative background accent */}
-                      <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary-cyan/10 rounded-full blur-2xl group-hover:bg-primary-cyan/20 transition-colors pointer-events-none" />
-                    </div>
-                  );
-                })}
+                    ))}
+                </div>
               </div>
             )}
 
             {/* Standings Tables */}
-            {currentStandings.length === 0 ? (
+            {currentStandingsRaw.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 space-y-4">
                 <div className="w-8 h-8 border-2 border-primary-cyan border-t-transparent rounded-full animate-spin"></div>
                 <p className="text-gray-400 text-sm animate-pulse">Loading stadium data...</p>
+              </div>
+            ) : currentStandings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-48 space-y-4 border border-dashed border-white/10 rounded-xl bg-white/5">
+                <svg className="w-12 h-12 text-gray-500 opacity-50 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                <p className="text-gray-400 text-sm font-semibold">No groups match the selected filters.</p>
               </div>
             ) : (
               <>
@@ -280,6 +335,15 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                   </div>
                 )}
               </>
+            )}
+            
+            {/* Disclaimer */}
+            {activeTab === 'standings' && (
+              <div className="mt-8 text-center">
+                <p className="text-gray-500 text-[10px] italic">
+                  Simulation results are purely hypothetical and based on Monte Carlo calculations.
+                </p>
+              </div>
             )}
           </>
         ) : (

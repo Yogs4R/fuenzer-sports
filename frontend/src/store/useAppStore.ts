@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { MatchNode } from '../utils/bracketGenerator';
 
 type Page = '/' | '/playground' | '/standings' | '/history' | '/signin' | '/signup' | '/privacy' | '/terms';
 type Language = 'en' | 'id';
@@ -53,6 +54,10 @@ interface AppState {
   isLoading: boolean;
   error: string | null;
 
+  // Knockout State
+  bracketMatches: MatchNode[];
+  setBracketMatches: (matches: MatchNode[]) => void;
+
   // Live Standings State
   liveStandings: GroupStandings[] | null;
   isLiveLoading: boolean;
@@ -66,6 +71,7 @@ interface AppState {
   selectedModel: string;
   selectedMode: string;
   selectedStyle: string;
+  isSimulatingKnockout: boolean;
   
   // Actions
   setCurrentPage: (page: Page) => void;
@@ -76,6 +82,7 @@ interface AppState {
   setSelectedModel: (model: string) => void;
   setSelectedMode: (mode: string) => void;
   setSelectedStyle: (style: string) => void;
+  setIsSimulatingKnockout: (val: boolean) => void;
   
   // Simulation Actions
   runSimulation: (prompt: string, model: string, mode: string) => Promise<void>;
@@ -101,6 +108,8 @@ export const useAppStore = create<AppState>()(
       chatHistory: [],
       mockStep: 0,
       isLoading: false,
+      isSimulatingKnockout: false,
+      bracketMatches: [],
       error: null,
       
       liveStandings: null,
@@ -121,6 +130,8 @@ export const useAppStore = create<AppState>()(
       setSelectedModel: (model) => set({ selectedModel: model }),
       setSelectedMode: (mode) => set({ selectedMode: mode }),
       setSelectedStyle: (style) => set({ selectedStyle: style }),
+      setIsSimulatingKnockout: (val) => set({ isSimulatingKnockout: val }),
+      setBracketMatches: (matches) => set({ bracketMatches: matches }),
       
       clearSimulationData: () => set({ 
         simulationData: null, 
@@ -209,35 +220,36 @@ export const useAppStore = create<AppState>()(
           
           // Progressive Matchday Animation
           const nextMock = data;
-          for (let md = 1; md <= 3; md++) {
-             const intermediateMock = {
-                ...nextMock,
-                sample_standings: nextMock.sample_standings.map(group => ({
-                   ...group,
-                   teams: group.teams.map(team => ({
-                      ...team,
-                      matches_played: md,
-                      points: Math.round((team.points / 3) * md),
-                      won: Math.round((team.won / 3) * md),
-                      draw: Math.round((team.draw / 3) * md),
-                      lost: Math.round((team.lost / 3) * md),
-                      goals_for: Math.round((team.goals_for / 3) * md),
-                      goals_against: Math.round((team.goals_against / 3) * md),
-                      goal_difference: Math.round((team.goal_difference / 3) * md),
-                   }))
-                }))
-             };
-             
-             set({ simulationData: intermediateMock });
-             
-             if (md < 3) {
-               await new Promise(r => setTimeout(r, 1000));
-             }
+          
+          if (mode === 'From Scratch') {
+            for (let md = 1; md <= 3; md++) {
+               const intermediateMock = {
+                  ...nextMock,
+                  sample_standings: nextMock.sample_standings.map(group => ({
+                     ...group,
+                     teams: group.teams.map(team => ({
+                        ...team,
+                        matches_played: md,
+                        points: Math.round((team.points / 3) * md),
+                        won: Math.round((team.won / 3) * md),
+                        draw: Math.round((team.draw / 3) * md),
+                        lost: Math.round((team.lost / 3) * md),
+                        goals_for: Math.round((team.goals_for / 3) * md),
+                        goals_against: Math.round((team.goals_against / 3) * md),
+                        goal_difference: Math.round((team.goal_difference / 3) * md),
+                     }))
+                  }))
+               };
+               set({ simulationData: intermediateMock as any });
+               await new Promise(r => setTimeout(r, 600)); 
+            }
           }
           
           set((state) => ({
             chatHistory: prompt.trim() ? [...state.chatHistory, { role: 'ai', content: data.ai_narrative || "Done.", isStreaming: true }] : state.chatHistory,
             simulationTitle: data.title || state.simulationTitle,
+            simulationData: data,
+            bracketMatches: [],
             isLoading: false
           }));
           

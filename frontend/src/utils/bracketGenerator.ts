@@ -2,13 +2,14 @@ import type { GroupStandings, TeamStats } from '../store/useAppStore';
 
 export interface MatchNode {
   id: string;
-  round: string; // 'R32', 'R16', 'QF', 'SF', 'FINAL'
+  round: string; // 'R32', 'R16', 'QF', 'SF', 'FINAL', '3RD'
   home?: TeamStats;
   away?: TeamStats;
   homeScore?: number;
   awayScore?: number;
   winnerId?: number;
   nextMatchId?: string;
+  loserNextMatchId?: string;
   position: number; // Vertical ordering
 }
 
@@ -36,7 +37,7 @@ const W_R_MAPPING: Array<[string, string]> = [
 const R_R_MAPPING: Array<[string, string]> = [
   ['A', 'B'],
   ['D', 'E'],
-  ['G', 'H'],
+  ['G', 'I'],
   ['K', 'L'],
 ];
 
@@ -129,7 +130,7 @@ export const generateBracket = (standings: GroupStandings[]): MatchNode[] => {
     addMatch(winners.get(wGrp), assignments.get(wGrp));
   });
 
-  // Pre-generate empty slots for R16, QF, SF, FINAL
+  // Pre-generate empty slots for R16, QF, SF, FINAL, 3RD
   const generateEmptyRounds = (roundName: string, count: number, startPos: number) => {
     for (let i = 0; i < count; i++) {
       matches.push({
@@ -144,6 +145,7 @@ export const generateBracket = (standings: GroupStandings[]): MatchNode[] => {
   generateEmptyRounds('QF', 4, 1);
   generateEmptyRounds('SF', 2, 1);
   generateEmptyRounds('FINAL', 1, 1);
+  generateEmptyRounds('3RD', 1, 1);
 
   // Link matches
   const linkRounds = (prevRound: string, currRound: string, prevCount: number) => {
@@ -151,6 +153,11 @@ export const generateBracket = (standings: GroupStandings[]): MatchNode[] => {
       const pMatch = matches.find(m => m.id === `${prevRound}-${i}`);
       const currMatchId = `${currRound}-${Math.ceil(i / 2)}`;
       if (pMatch) pMatch.nextMatchId = currMatchId;
+      
+      // Special case for Semi-Finals going to 3rd Place match
+      if (prevRound === 'SF') {
+        if (pMatch) pMatch.loserNextMatchId = `3RD-1`;
+      }
     }
   };
 
