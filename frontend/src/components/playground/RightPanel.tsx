@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import StandingsTable from './StandingsTable';
-import { Play, RotateCcw, Menu, Info, Trophy, Target, Shield } from 'lucide-react';
+import { Play, RotateCcw, Menu, Info, Trophy, Target, Shield, Search } from 'lucide-react';
 
 interface RightPanelProps {
   onToggleMenu?: () => void;
 }
 
 const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
-  const { simulationData, reRunSimulation, isLoading, liveStandings } = useAppStore();
+  const { simulationData, runSimulation, isLoading, liveStandings, selectedModel, selectedMode } = useAppStore();
   const [activeTab, setActiveTab] = useState<'standings' | 'bracket'>('standings');
+
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Probability Semantic Colors helper
   const getProbColor = (prob: number) => {
@@ -18,23 +20,36 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
     return 'text-red-400';
   };
 
-  const currentStandings = simulationData?.sample_standings || liveStandings || [];
+  const currentStandingsRaw = simulationData?.sample_standings || liveStandings || [];
   const isSimulated = !!simulationData;
-  const currentMatchday = currentStandings[0]?.teams[0]?.matches_played || 0;
+  const currentMatchday = currentStandingsRaw[0]?.teams[0]?.matches_played || 0;
+
+  // Search Filter Logic
+  const currentStandings = currentStandingsRaw.map(group => ({
+    ...group,
+    teams: group.teams.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.tla.toLowerCase().includes(searchQuery.toLowerCase()))
+  })).filter(group => group.teams.length > 0);
 
   // Compute Best Third-Placed Teams
-  const thirdPlacedTeams = currentStandings
-    .map(group => group.teams[2])
-    .filter(Boolean)
+  const thirdPlacedTeams = currentStandingsRaw
+    .map(group => {
+      const team = group.teams[2];
+      if (team) {
+        return { ...team, group_name: group.group_name };
+      }
+      return null;
+    })
+    .filter((t): t is (typeof currentStandingsRaw[0]['teams'][0] & { group_name: string }) => t !== null)
     .sort((a, b) => {
       if (b.points !== a.points) return b.points - a.points;
       if (b.goal_difference !== a.goal_difference) return b.goal_difference - a.goal_difference;
       return b.goals_for - a.goals_for;
-    });
+    })
+    .filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.tla.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const handleSimulate = () => {
     if (!isLoading) {
-      reRunSimulation();
+      runSimulation('', selectedModel, selectedMode);
     }
   };
 
@@ -92,14 +107,28 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
       <div className="flex-1 overflow-y-auto scrollbar-hide p-4 md:p-6 space-y-6">
         {activeTab === 'standings' ? (
           <>
-            {/* Matchday Badge (Moved from Header) */}
-            <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Live Progression</h2>
-              <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 bg-white/5 rounded-full border border-white/10 transition-all duration-300">
-                <span className={`w-2 h-2 rounded-full shrink-0 ${isLoading || currentMatchday < 3 ? 'bg-primary-cyan animate-pulse' : 'bg-green-500'}`}></span>
-                <span className="text-xs font-bold text-white uppercase tracking-wider whitespace-nowrap">
-                  {currentMatchday === 0 ? 'Pre-Tournament' : `Matchday ${currentMatchday}`}
-                </span>
+            {/* Matchday Badge and Search */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
+              <div className="flex items-center gap-4">
+                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Live Progression</h2>
+                <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 bg-white/5 rounded-full border border-white/10 transition-all duration-300">
+                  <span className={`w-2 h-2 rounded-full shrink-0 ${isLoading || currentMatchday < 3 ? 'bg-primary-cyan animate-pulse' : 'bg-green-500'}`}></span>
+                  <span className="text-xs font-bold text-white uppercase tracking-wider whitespace-nowrap">
+                    {currentMatchday === 0 ? 'Pre-Tournament' : `Matchday ${currentMatchday}`}
+                  </span>
+                </div>
+              </div>
+
+              {/* Search Box */}
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                <input 
+                  type="text"
+                  placeholder="Search team..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-[#0a1128] text-white text-xs pl-8 pr-4 py-2 rounded-lg border border-white/10 focus:border-primary-cyan/50 outline-none w-full sm:w-48 transition-colors"
+                />
               </div>
             </div>
 
@@ -138,7 +167,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                         </div>
                         <div className="flex justify-between items-center bg-primary-cyan/10 px-2 py-1.5 rounded border border-primary-cyan/20 mt-2">
                           <span className="text-primary-cyan font-bold flex items-center gap-1.5"><Shield size={12}/> Advancing</span>
-                          <span className={`font-black ${getProbColor(metrics['Knockout'])}`}>{metrics['Knockout']}%</span>
+                          <span className={`font-black ${getProbColor(metrics['qualify'])}`}>{metrics['qualify']}%</span>
                         </div>
                       </div>
                       

@@ -168,7 +168,7 @@ export const useAppStore = create<AppState>()(
           isLoading: true, 
           error: null,
           totalSimulations: state.totalSimulations + 1,
-          chatHistory: [...state.chatHistory, { role: 'user', content: prompt }],
+          chatHistory: prompt.trim() ? [...state.chatHistory, { role: 'user', content: prompt }] : state.chatHistory,
           currentPage: '/playground',
           simulationData: null
         }));
@@ -231,7 +231,7 @@ export const useAppStore = create<AppState>()(
           }
           
           set((state) => ({
-            chatHistory: [...state.chatHistory, { role: 'ai', content: data.ai_narrative || "Done.", isStreaming: true }],
+            chatHistory: prompt.trim() ? [...state.chatHistory, { role: 'ai', content: data.ai_narrative || "Done.", isStreaming: true }] : state.chatHistory,
             isLoading: false
           }));
           

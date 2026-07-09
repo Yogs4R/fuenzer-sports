@@ -4,6 +4,7 @@ import TypewriterText from './TypewriterText';
 import ProcessingState from './ProcessingState';
 import { Mic, ArrowUp, MoreVertical, X, Edit2, Trash2, ChevronDown, Sparkles, Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
 
 interface LeftPanelProps {
   onCloseMobile: () => void;
@@ -26,8 +27,13 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
   const [activeDropdown, setActiveDropdown] = useState<'model' | 'style' | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [title, setTitle] = useState('World Cup Simulation');
+  const [simId, setSimId] = useState('SIM-....');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isFirstRender = useRef(true);
+
+  useEffect(() => {
+    setSimId(`SIM-${Math.floor(1000 + Math.random() * 9000)}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`);
+  }, []);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -137,7 +143,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
                 </>
               )}
             </div>
-            <p className="text-[10px] text-gray-500 font-mono">ID: SIM-4829A • {selectedCompetition}</p>
+            <p className="text-[10px] text-gray-500 font-mono">ID: {simId} • {selectedCompetition}</p>
           </div>
         </div>
         
@@ -197,6 +203,12 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
                   isStreaming={true} 
                   onComplete={() => setChatStreamingComplete(idx)}
                 />
+              ) : msg.role === 'ai' ? (
+                <div className="prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/20 prose-pre:p-2 prose-pre:rounded-lg prose-a:text-primary-cyan text-[10px] md:text-xs">
+                  <ReactMarkdown>
+                    {msg.content}
+                  </ReactMarkdown>
+                </div>
               ) : (
                 msg.content
               )}

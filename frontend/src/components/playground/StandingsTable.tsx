@@ -53,7 +53,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, qualifyCount = 2
             
             return (
               <motion.div
-                key={team.id}
+                key={`${team.tla}-${index}`}
                 layout
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -82,6 +82,13 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, qualifyCount = 2
                   <img src={team.crest} alt={team.name} className="w-6 h-6 object-contain" onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${team.tla}&background=random&color=fff&rounded=true&font-size=0.4` }} />
                   <span className="font-semibold text-white truncate">{team.name}</span>
                   <span className="text-xs text-gray-500 hidden sm:inline">{team.tla}</span>
+                  {/* @ts-ignore */}
+                  {team.group_name && (
+                    <span className="text-[10px] font-bold text-yellow-500 bg-yellow-500/10 border border-yellow-500/20 px-1.5 py-0.5 rounded ml-2 whitespace-nowrap">
+                      {/* @ts-ignore */}
+                      {team.group_name}
+                    </span>
+                  )}
                 </div>
                 <div className="col-span-1 text-center text-gray-300">{team.matches_played}</div>
                 <div className="col-span-1 text-center text-gray-300">{team.won}</div>

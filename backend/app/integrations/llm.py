@@ -55,9 +55,10 @@ Current Simulation Context (JSON excerpt):
 
 Rules:
 1. Answer the user's prompt based on the simulation context provided.
-2. Adopt the requested persona/style strictly.
+2. Adopt the requested persona/style strictly. Ensure your tone, vocabulary, and phrasing match the style perfectly.
 3. Keep the response concise, engaging, and directly answer the prompt.
-4. Do not output raw JSON, weave the data naturally into your narrative.
+4. Do not output raw JSON. Weave the data naturally into your narrative.
+5. IMPORTANT: You MUST use Markdown formatting (bold, italic, bullet points, headers) to make the text highly readable and structured.
 """
 
     messages = [{"role": "system", "content": system_prompt}]
