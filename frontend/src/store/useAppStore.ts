@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { mockSimulations } from '../data/mockSimulationData';
 
-type Page = '/' | '/standings' | '/history' | '/signin' | '/signup' | '/privacy' | '/terms';
+type Page = '/' | '/playground' | '/standings' | '/history' | '/signin' | '/signup' | '/privacy' | '/terms';
 type Language = 'en' | 'id';
 
 export interface TeamStats {
@@ -29,6 +30,13 @@ export interface SimulationResponse {
   execution_time_ms: number;
   probabilities: Record<string, Record<string, number>>;
   sample_standings: GroupStandings[];
+  ai_narrative?: string;
+}
+
+export interface ChatMessage {
+  role: 'user' | 'ai';
+  content: string;
+  isStreaming?: boolean;
 }
 
 interface AppState {
@@ -38,6 +46,8 @@ interface AppState {
   
   // Simulation State
   simulationData: SimulationResponse | null;
+  chatHistory: ChatMessage[];
+  mockStep: number;
   isLoading: boolean;
   error: string | null;
 
@@ -55,8 +65,9 @@ interface AppState {
   setShowNotifications: (show: boolean) => void;
   
   // Simulation Actions
-  runSimulation: (_prompt: string, _model: string, _mode: string) => Promise<void>;
+  runSimulation: (prompt: string, _model: string, _mode: string) => Promise<void>;
   clearSimulationData: () => void;
+  setChatStreamingComplete: (index: number) => void;
   
   // Live Data Actions
   fetchLiveStandings: () => Promise<void>;
@@ -71,6 +82,8 @@ export const useAppStore = create<AppState>()(
       showNotifications: false,
       
       simulationData: null,
+      chatHistory: [],
+      mockStep: 0,
       isLoading: false,
       error: null,
       
@@ -83,7 +96,22 @@ export const useAppStore = create<AppState>()(
       setLanguage: (lang) => set({ language: lang }),
       setShowNotifications: (show) => set({ showNotifications: show }),
       
-      clearSimulationData: () => set({ simulationData: null, error: null }),
+      clearSimulationData: () => set({ 
+        simulationData: null, 
+        chatHistory: [],
+        mockStep: 0,
+        error: null 
+      }),
+
+      setChatStreamingComplete: (index: number) => {
+        set((state) => {
+          const newHistory = [...state.chatHistory];
+          if (newHistory[index]) {
+            newHistory[index].isStreaming = false;
+          }
+          return { chatHistory: newHistory };
+        });
+      },
       
       fetchLiveStandings: async () => {
         set({ isLiveLoading: true, hasFetchedLive: true });
@@ -112,52 +140,43 @@ export const useAppStore = create<AppState>()(
         }
       },
       
-      runSimulation: async (_prompt: string, _model: string, _mode: string) => {
+      runSimulation: async (prompt: string, _model: string, _mode: string) => {
         set((state) => ({ 
           isLoading: true, 
           error: null,
-          totalSimulations: state.totalSimulations + 1
+          totalSimulations: state.totalSimulations + 1,
+          chatHistory: [...state.chatHistory, { role: 'user', content: prompt }]
         }));
         
-        try {
-          // For now, we just trigger a basic simulation without parsing custom weights from the prompt.
-          // Eventually, an NLP engine will convert `prompt` -> `custom_weights`.
-          const requestBody = {
-            iterations: 10000,
-            custom_weights: null // To be implemented later with AI routing
-          };
-
-          const response = await fetch('http://localhost:8000/api/simulate', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestBody)
-          });
-
-          if (!response.ok) {
-            throw new Error(`Failed to run simulation: ${response.statusText}`);
-          }
-
-          const data: SimulationResponse = await response.json();
-          set({ simulationData: data, isLoading: false });
+        // Wait 1.5 seconds to simulate network request and "processing" time
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        
+        set((state) => {
+          const nextMock = mockSimulations[state.mockStep % mockSimulations.length];
+          const narrative = nextMock.ai_narrative || "Simulation complete.";
           
-          // Redirect to standings page implicitly handled by components observing state,
-          // but we can update the currentPage explicitly
-          set({ currentPage: '/standings' });
-          window.history.pushState({}, '', '/standings');
+          return {
+            simulationData: nextMock,
+            chatHistory: [...state.chatHistory, { role: 'ai', content: narrative, isStreaming: true }],
+            mockStep: state.mockStep + 1,
+            isLoading: false,
+            currentPage: '/playground'
+          };
+        });
 
-        } catch (error: any) {
-          set({ error: error.message || 'An error occurred', isLoading: false });
+        // Ensure URL updates without reload
+        if (window.location.pathname !== '/playground') {
+          window.history.pushState({}, '', '/playground');
         }
       }
     }),
     {
       name: 'fuenzer-storage', // Key used in localStorage
-      // We only persist some fields, we don't want to persist isLoading state
       partialize: (state) => ({ 
         language: state.language,
-        simulationData: state.simulationData
+        simulationData: state.simulationData,
+        chatHistory: state.chatHistory,
+        mockStep: state.mockStep
       }),
     }
   )

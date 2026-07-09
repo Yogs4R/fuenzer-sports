@@ -3,7 +3,7 @@ import { useAppStore } from './store/useAppStore';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import LandingPage from './pages/LandingPage';
-import StandingsPage from './pages/StandingsPage';
+import Playground from './pages/Playground';
 import HistoryPage from './pages/HistoryPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
@@ -25,8 +25,8 @@ function App() {
     switch (currentPage) {
       case '/':
         return <LandingPage />;
-      case '/standings':
-        return <StandingsPage />;
+      case '/playground':
+        return <Playground />;
       case '/history':
         return <HistoryPage />;
       case '/signin':
