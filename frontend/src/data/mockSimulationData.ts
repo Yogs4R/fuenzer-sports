@@ -8,7 +8,7 @@ export const mockPrompts = [
 
 export const mockInitialStandings: GroupStandings[] = [
   {
-    group_name: "Group C",
+    group_name: "Group A",
     teams: [
       { id: 1, tla: "ARG", name: "Argentina", crest: "https://crests.football-data.org/762.png", points: 0, matches_played: 0, won: 0, draw: 0, lost: 0, goals_for: 0, goals_against: 0, goal_difference: 0 },
       { id: 2, tla: "MEX", name: "Mexico", crest: "https://crests.football-data.org/769.png", points: 0, matches_played: 0, won: 0, draw: 0, lost: 0, goals_for: 0, goals_against: 0, goal_difference: 0 },
@@ -44,7 +44,7 @@ export const mockSimulations: SimulationResponse[] = [
     },
     sample_standings: [
       {
-        group_name: "Group C",
+        group_name: "Group A",
         teams: [
           { id: 1, tla: "ARG", name: "Argentina", crest: "https://crests.football-data.org/762.png", points: 9, matches_played: 3, won: 3, draw: 0, lost: 0, goals_for: 6, goals_against: 1, goal_difference: 5 },
           { id: 2, tla: "MEX", name: "Mexico", crest: "https://crests.football-data.org/769.png", points: 4, matches_played: 3, won: 1, draw: 1, lost: 1, goals_for: 3, goals_against: 3, goal_difference: 0 },

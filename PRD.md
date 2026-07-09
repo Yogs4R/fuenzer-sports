@@ -31,8 +31,8 @@ Fuenzer Sports is an AI-driven sports analytics simulation platform. It function
 
 ### Phase 3: The Workspace / Playground
 - The screen is divided into a split-view (100vh).
-- **Left Panel (35%):** AI Chat. Where the *user* provides follow-up *prompts* and views the AI's analytical narrative.
-- **Right Panel (65%):** Simulation Visuals. Contains the live standings table, tournament bracket, and probability metrics.
+- **Left Panel (30%):** AI Chat. Where the *user* provides follow-up *prompts* and views the AI's analytical narrative.
+- **Right Panel (70%):** Simulation Visuals. Contains the live standings table, tournament bracket, and probability metrics.
 - **Mandatory:** The standings table must have a shift up/down animation (*smooth translation*) like F1/MotoGP broadcasts every time the simulation data changes.
 
 ## 3. API & Authentication Flow

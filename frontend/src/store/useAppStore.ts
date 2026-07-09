@@ -77,7 +77,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       currentPage: (window.location.pathname as Page) || '/',
       language: 'en',
       showNotifications: false,
@@ -159,17 +159,42 @@ export const useAppStore = create<AppState>()(
         // Wait 2.5 seconds to simulate network request and "processing" time for the animation
         await new Promise((resolve) => setTimeout(resolve, 2500));
         
-        set((state) => {
-          const nextMock = mockSimulations[state.mockStep % mockSimulations.length];
-          const narrative = nextMock.ai_narrative || "Simulation complete.";
-          
-          return {
-            simulationData: nextMock,
-            chatHistory: [...state.chatHistory, { role: 'ai', content: narrative, isStreaming: true }],
-            mockStep: state.mockStep + 1,
-            isLoading: false
-          };
-        });
+        const state = get();
+        const nextMock = mockSimulations[state.mockStep % mockSimulations.length];
+        const narrative = nextMock.ai_narrative || "Simulation complete.";
+
+        // Progressive Matchday Animation
+        for (let md = 1; md <= 3; md++) {
+           const intermediateMock = {
+              ...nextMock,
+              sample_standings: nextMock.sample_standings.map(group => ({
+                 ...group,
+                 teams: group.teams.map(team => ({
+                    ...team,
+                    matches_played: md,
+                    points: Math.round((team.points / 3) * md),
+                    won: Math.round((team.won / 3) * md),
+                    draw: Math.round((team.draw / 3) * md),
+                    lost: Math.round((team.lost / 3) * md),
+                    goals_for: Math.round((team.goals_for / 3) * md),
+                    goals_against: Math.round((team.goals_against / 3) * md),
+                    goal_difference: Math.round((team.goal_difference / 3) * md),
+                 }))
+              }))
+           };
+           
+           set({ simulationData: intermediateMock });
+           
+           if (md < 3) {
+             await new Promise(r => setTimeout(r, 1000));
+           }
+        }
+        
+        set((state) => ({
+          chatHistory: [...state.chatHistory, { role: 'ai', content: narrative, isStreaming: true }],
+          mockStep: state.mockStep + 1,
+          isLoading: false
+        }));
       },
 
       reRunSimulation: async () => {
@@ -179,15 +204,36 @@ export const useAppStore = create<AppState>()(
         // Short delay before showing the new state to trigger animation
         await new Promise((resolve) => setTimeout(resolve, 500));
         
-        set((state) => {
-          // Just re-apply the last mock simulation (or advance if we want)
-          // For now, let's just show the last one again to trigger the F1 animation
-          const mockIndex = state.mockStep > 0 ? (state.mockStep - 1) : 0;
-          const nextMock = mockSimulations[mockIndex % mockSimulations.length];
-          return {
-            simulationData: nextMock
-          };
-        });
+        const state = get();
+        const mockIndex = state.mockStep > 0 ? (state.mockStep - 1) : 0;
+        const nextMock = mockSimulations[mockIndex % mockSimulations.length];
+        
+        // Progressive Matchday Animation
+        for (let md = 1; md <= 3; md++) {
+           const intermediateMock = {
+              ...nextMock,
+              sample_standings: nextMock.sample_standings.map(group => ({
+                 ...group,
+                 teams: group.teams.map(team => ({
+                    ...team,
+                    matches_played: md,
+                    points: Math.round((team.points / 3) * md),
+                    won: Math.round((team.won / 3) * md),
+                    draw: Math.round((team.draw / 3) * md),
+                    lost: Math.round((team.lost / 3) * md),
+                    goals_for: Math.round((team.goals_for / 3) * md),
+                    goals_against: Math.round((team.goals_against / 3) * md),
+                    goal_difference: Math.round((team.goal_difference / 3) * md),
+                 }))
+              }))
+           };
+           
+           set({ simulationData: intermediateMock });
+           
+           if (md < 3) {
+             await new Promise(r => setTimeout(r, 1000));
+           }
+        }
       }
     }),
     {

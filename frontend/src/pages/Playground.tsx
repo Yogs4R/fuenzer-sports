@@ -17,9 +17,9 @@ const Playground: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex h-[calc(100vh-72px)] w-full pt-[72px] relative overflow-hidden">
-      {/* Left Panel (AI Chat) - Desktop: Fixed 25% width, Mobile: Slide over full screen */}
-      <div className="hidden md:block w-[25%] h-[calc(100vh-72px)] sticky top-[72px] z-30">
+    <div className="flex h-[calc(100vh-72px)] w-full mt-[72px] relative overflow-hidden">
+      {/* Left Panel (AI Chat) - Desktop: Fixed 30% width, Mobile: Slide over full screen */}
+      <div className="hidden md:block w-[30%] h-full z-30">
         <LeftPanel onCloseMobile={() => setIsMobileMenuOpen(false)} />
       </div>
 
@@ -31,15 +31,15 @@ const Playground: React.FC = () => {
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', bounce: 0, duration: 0.4 }}
-            className="md:hidden fixed inset-0 z-50 bg-[#080d1e] pt-[72px]"
+            className="md:hidden fixed top-[72px] bottom-0 left-0 right-0 z-50 bg-[#080d1e]"
           >
             <LeftPanel onCloseMobile={() => setIsMobileMenuOpen(false)} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Right Panel (Data Viz) - Desktop: 75% width, Mobile: Full width */}
-      <div className="w-full md:w-[75%] h-[calc(100vh-72px)] overflow-hidden">
+      {/* Right Panel (Data Viz) - Desktop: 70% width, Mobile: Full width */}
+      <div className="w-full md:w-[70%] h-full overflow-hidden">
         <RightPanel onToggleMenu={() => setIsMobileMenuOpen(true)} />
       </div>
     </div>

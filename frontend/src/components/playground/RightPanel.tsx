@@ -85,9 +85,19 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             {/* Probability Metrics Overview */}
             {simulationData && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Object.entries(simulationData.probabilities).map(([teamCode, metrics]) => (
-                  <div key={teamCode} className="bg-white/5 border border-white/10 rounded-xl p-4">
-                    <h3 className="text-white font-bold mb-2">{teamCode}</h3>
+                {Object.entries(simulationData.probabilities).map(([teamCode, metrics]) => {
+                  let groupName = "";
+                  for (const group of currentStandings) {
+                    if (group.teams.some(t => t.tla === teamCode)) {
+                      groupName = group.group_name;
+                      break;
+                    }
+                  }
+                  
+                  return (
+                    <div key={teamCode} className="bg-white/5 border border-white/10 rounded-xl p-4 relative overflow-hidden">
+                      <div className="absolute top-0 right-0 bg-white/5 px-2 py-1 text-[10px] text-gray-400 rounded-bl-lg font-semibold uppercase">{groupName}</div>
+                      <h3 className="text-white font-bold mb-2">{teamCode}</h3>
                     <div className="space-y-1 font-mono text-xs">
                       <div className="flex justify-between">
                         <span className="text-gray-400">1st Place:</span>
@@ -101,9 +111,10 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                         <span className="text-gray-300 font-semibold">Knockout:</span>
                         <span className={`font-bold ${getProbColor(metrics['Knockout'])}`}>{metrics['Knockout']}%</span>
                       </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 
