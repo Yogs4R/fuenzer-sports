@@ -156,7 +156,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
             )}
             
             <div 
-              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm md:text-base wrap-break-word ${
+              className={`max-w-[92%] rounded-2xl px-3 py-2 text-xs md:text-sm wrap-break-word ${
                 msg.role === 'user' 
                   ? 'bg-primary-cyan/20 border border-primary-cyan/30 text-white rounded-br-none' 
                   : 'bg-white/5 border border-white/10 text-gray-200 rounded-bl-none'
@@ -185,84 +185,88 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
         <div ref={chatEndRef} />
       </div>
 
-      {/* Input Area */}
-      <div className="p-4 bg-[#0a1128] border-t border-white/10 flex flex-col gap-2">
-        {/* Dropdowns */}
-        <div className="flex items-center gap-2 px-1">
-          <div className="relative">
-            <button 
-              type="button"
-              onClick={() => setActiveDropdown(activeDropdown === 'model' ? null : 'model')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${activeDropdown === 'model' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-[#050814] border-white/10 text-gray-400 hover:text-white'}`}
-            >
-              <Sparkles size={12} className={activeDropdown === 'model' ? 'text-primary-cyan' : 'text-gray-500'} />
-              {selectedModel}
-              <ChevronDown size={12} />
-            </button>
-            <AnimatePresence>
-              {activeDropdown === 'model' && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
-                  className="absolute bottom-full left-0 mb-2 w-32 bg-[#050814] border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
-                >
-                  {['Auto', 'Fast', 'Pro'].map((opt) => (
-                    <button key={opt} type="button" onClick={() => { setSelectedModel(opt); setActiveDropdown(null); }} className={`w-full text-left px-4 py-2 text-xs transition-colors ${selectedModel === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300 hover:bg-white/5'}`}>{opt}</button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+      <div className="p-4 bg-[#0a1128] border-t border-white/10">
+        <form onSubmit={handleSubmit} className="flex flex-col bg-[#050814] rounded-2xl border border-white/10 focus-within:border-primary-cyan/50 transition-colors p-2 px-3">
           
-          <div className="relative">
-            <button 
-              type="button"
-              onClick={() => setActiveDropdown(activeDropdown === 'style' ? null : 'style')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${activeDropdown === 'style' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-[#050814] border-white/10 text-gray-400 hover:text-white'}`}
-            >
-              {selectedStyle}
-              <ChevronDown size={12} />
-            </button>
-            <AnimatePresence>
-              {activeDropdown === 'style' && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
-                  className="absolute bottom-full left-0 mb-2 w-48 bg-[#050814] border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
-                >
-                  {['Commentator Style', 'Coach Style', 'Football Analyst Style'].map((opt) => (
-                    <button key={opt} type="button" onClick={() => { setSelectedStyle(opt); setActiveDropdown(null); }} className={`w-full text-left px-4 py-2 text-xs transition-colors ${selectedStyle === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300 hover:bg-white/5'}`}>{opt}</button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+          <div className="flex items-start w-full">
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask a follow-up question..."
+              className="flex-1 max-h-32 min-h-[40px] bg-transparent text-white py-2 outline-none resize-none overflow-y-auto scrollbar-hide text-sm w-full"
+              rows={prompt.split('\n').length > 1 ? Math.min(prompt.split('\n').length, 4) : 1}
+              disabled={isLoading}
+            />
           </div>
-        </div>
 
-        <form onSubmit={handleSubmit} className="relative flex items-center bg-[#050814] rounded-2xl border border-white/10 focus-within:border-primary-cyan/50 transition-colors p-1.5 px-3">
-          <button 
-            type="button"
-            onClick={toggleRecording}
-            className={`mr-2 p-1.5 rounded-full transition-colors shrink-0 ${isRecording ? 'text-red-400 animate-pulse bg-red-400/10' : 'text-gray-400 hover:text-white'}`}
-          >
-            <Mic size={18} />
-          </button>
-          
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask a follow-up question..."
-            className="flex-1 max-h-32 min-h-[40px] bg-transparent text-white py-2.5 outline-none resize-none overflow-y-auto scrollbar-hide text-sm flex items-center"
-            rows={prompt.split('\n').length > 1 ? Math.min(prompt.split('\n').length, 4) : 1}
-            disabled={isLoading}
-          />
-          
-          <button
-            type="submit"
-            disabled={!prompt.trim() || isLoading}
-            className="ml-2 p-2 bg-primary-cyan text-[#050814] rounded-xl shrink-0 disabled:opacity-50 disabled:bg-white/10 disabled:text-gray-500 hover:bg-cyan-400 transition-colors"
-          >
-            <ArrowUp size={20} strokeWidth={2.5} />
-          </button>
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
+            <div className="flex items-center gap-2">
+              <button 
+                type="button"
+                onClick={toggleRecording}
+                className={`p-1.5 rounded-full transition-colors shrink-0 ${isRecording ? 'text-red-400 animate-pulse bg-red-400/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                title="Voice Input"
+              >
+                <Mic size={16} />
+              </button>
+              
+              <div className="relative">
+                <button 
+                  type="button"
+                  onClick={() => setActiveDropdown(activeDropdown === 'model' ? null : 'model')}
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] md:text-xs font-medium border transition-colors ${activeDropdown === 'model' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-transparent border-white/10 text-gray-400 hover:text-white hover:border-white/20'}`}
+                >
+                  <Sparkles size={10} className={activeDropdown === 'model' ? 'text-primary-cyan' : 'text-gray-500'} />
+                  {selectedModel}
+                  <ChevronDown size={10} />
+                </button>
+                <AnimatePresence>
+                  {activeDropdown === 'model' && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+                      className="absolute bottom-full left-0 mb-2 w-32 bg-[#0a1128] border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
+                    >
+                      {['Auto', 'Fast', 'Pro'].map((opt) => (
+                        <button key={opt} type="button" onClick={() => { setSelectedModel(opt); setActiveDropdown(null); }} className={`w-full text-left px-4 py-2 text-xs transition-colors ${selectedModel === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300 hover:bg-white/5'}`}>{opt}</button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              
+              <div className="relative">
+                <button 
+                  type="button"
+                  onClick={() => setActiveDropdown(activeDropdown === 'style' ? null : 'style')}
+                  className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10px] md:text-xs font-medium border transition-colors ${activeDropdown === 'style' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-transparent border-white/10 text-gray-400 hover:text-white hover:border-white/20'}`}
+                >
+                  {selectedStyle}
+                  <ChevronDown size={10} />
+                </button>
+                <AnimatePresence>
+                  {activeDropdown === 'style' && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
+                      className="absolute bottom-full left-0 mb-2 w-48 bg-[#0a1128] border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
+                    >
+                      {['Commentator Style', 'Coach Style', 'Football Analyst Style'].map((opt) => (
+                        <button key={opt} type="button" onClick={() => { setSelectedStyle(opt); setActiveDropdown(null); }} className={`w-full text-left px-4 py-2 text-xs transition-colors ${selectedStyle === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300 hover:bg-white/5'}`}>{opt}</button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!prompt.trim() || isLoading}
+              className="p-1.5 bg-primary-cyan text-[#050814] rounded-lg shrink-0 disabled:opacity-50 disabled:bg-white/10 disabled:text-gray-500 hover:bg-cyan-400 transition-colors"
+            >
+              <ArrowUp size={16} strokeWidth={2.5} />
+            </button>
+          </div>
         </form>
       </div>
     </div>

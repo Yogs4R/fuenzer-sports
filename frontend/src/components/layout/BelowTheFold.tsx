@@ -38,7 +38,7 @@ const BelowTheFold: React.FC = () => {
     fetchSimulationCount();
   }, [fetchSimulationCount]);
 
-  const groups = simulationData?.sample_standings || liveStandings || [];
+  const groups = liveStandings || [];
 
   const brands = [
     { name: 'Football-Data', logo: '/src/assets/images/football-data.webp' },

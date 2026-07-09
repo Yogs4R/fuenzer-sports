@@ -3,7 +3,6 @@ import { useAppStore } from '../../store/useAppStore';
 import StandingsTable from './StandingsTable';
 import { mockInitialStandings } from '../../data/mockSimulationData';
 import { Play, RotateCcw, Menu } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface RightPanelProps {
   onToggleMenu?: () => void;
@@ -67,29 +66,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
           </button>
         </div>
         
-        <AnimatePresence mode="wait">
-          {activeTab === 'standings' && (
-            <motion.div 
-              key={currentMatchday}
-              initial={{ opacity: 0, scale: 0.8, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: 10 }}
-              className="hidden lg:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10 ml-auto mr-4"
-            >
-              <span className={`w-2 h-2 rounded-full ${isLoading || currentMatchday < 3 ? 'bg-primary-cyan animate-pulse' : 'bg-green-500'}`}></span>
-              <span className="text-xs font-semibold text-white uppercase tracking-wider">
-                {currentMatchday === 0 ? 'Pre-Tournament' : `Matchday ${currentMatchday}`}
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Simulate / Restart Trigger Button */}
         {activeTab === 'standings' && (
           <button 
             onClick={handleSimulate}
             disabled={isLoading}
-            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-cyan/10 hover:bg-primary-cyan/20 text-primary-cyan text-xs font-semibold rounded-lg border border-primary-cyan/30 transition-colors disabled:opacity-50 w-full sm:w-auto"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-cyan/10 hover:bg-primary-cyan/20 text-primary-cyan text-xs font-semibold rounded-lg border border-primary-cyan/30 transition-colors disabled:opacity-50 w-full sm:w-auto ml-auto"
           >
             {isSimulated ? <RotateCcw size={14} /> : <Play size={14} />}
             Play Simulation
@@ -98,9 +80,20 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 md:p-6 space-y-8">
+      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 md:p-6 space-y-6">
         {activeTab === 'standings' ? (
           <>
+            {/* Matchday Badge (Moved from Header) */}
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Live Progression</h2>
+              <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 bg-white/5 rounded-full border border-white/10 transition-all duration-300">
+                <span className={`w-2 h-2 rounded-full shrink-0 ${isLoading || currentMatchday < 3 ? 'bg-primary-cyan animate-pulse' : 'bg-green-500'}`}></span>
+                <span className="text-xs font-bold text-white uppercase tracking-wider whitespace-nowrap">
+                  {currentMatchday === 0 ? 'Pre-Tournament' : `Matchday ${currentMatchday}`}
+                </span>
+              </div>
+            </div>
+
             {/* Probability Metrics Overview */}
             {simulationData && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -7,24 +7,21 @@ import { Loader2 } from 'lucide-react';
 const StandingsPage = () => {
   const { 
     language, 
-    simulationData, 
-    isLoading, 
     liveStandings, 
     isLiveLoading, 
-    hasFetchedLive, 
     fetchLiveStandings 
   } = useAppStore();
   const t = language === 'id' ? id : en;
   const [activeTab, setActiveTab] = useState('World Cup');
 
   useEffect(() => {
-    if (!simulationData && !hasFetchedLive && !isLiveLoading) {
+    if (!liveStandings && !isLiveLoading) {
       fetchLiveStandings();
     }
-  }, [simulationData, hasFetchedLive, isLiveLoading, fetchLiveStandings]);
+  }, [liveStandings, isLiveLoading, fetchLiveStandings]);
 
-  const groups = simulationData?.sample_standings || liveStandings || [];
-  const showLoading = (isLoading && !simulationData) || (isLiveLoading && !liveStandings);
+  const groups = liveStandings || [];
+  const showLoading = isLiveLoading && !liveStandings;
 
   const bestThirdPlaceTeams = useMemo(() => {
     if (!groups.length) return [];

@@ -48,18 +48,18 @@ const ProcessingState: React.FC<ProcessingStateProps> = ({ isCompleted = false }
   }
 
   return (
-    <div className={`bg-white/5 border border-white/10 text-primary-cyan rounded-2xl p-4 max-w-[85%] ${isCompleted ? 'mb-2' : 'rounded-bl-none'}`}>
+    <div className={`bg-white/5 border border-white/10 text-primary-cyan rounded-2xl px-3 py-2 max-w-[92%] ${isCompleted ? 'mb-2' : 'rounded-bl-none'}`}>
       <div 
-        className={`flex items-center justify-between gap-2 mb-3 ${isCompleted ? 'cursor-pointer' : ''}`}
+        className={`flex items-center justify-between gap-2 mb-2 ${isCompleted ? 'cursor-pointer' : ''}`}
         onClick={() => isCompleted && setIsExpanded(false)}
       >
         <div className="flex items-center gap-2">
-          {isCompleted ? <CheckCircle2 className="w-5 h-5 text-primary-cyan" /> : <Loader2 className="w-5 h-5 animate-spin" />}
-          <span className="font-semibold">{isCompleted ? 'Processing Complete' : 'Processing'}</span>
+          {isCompleted ? <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-primary-cyan" /> : <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />}
+          <span className="font-semibold text-xs md:text-sm">{isCompleted ? 'Processing Complete' : 'Processing'}</span>
         </div>
-        {isCompleted && <ChevronDown size={16} className="text-gray-400" />}
+        {isCompleted && <ChevronDown size={14} className="text-gray-400" />}
       </div>
-      <div className="space-y-2 text-sm text-gray-300 font-mono">
+      <div className="space-y-1.5 text-xs md:text-sm text-gray-300 font-mono">
         <AnimatePresence>
           {steps.slice(0, currentStep + 1).map((step, index) => (
             <motion.div

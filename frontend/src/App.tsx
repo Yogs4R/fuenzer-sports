@@ -4,6 +4,7 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import LandingPage from './pages/LandingPage';
 import Playground from './pages/Playground';
+import StandingsPage from './pages/StandingsPage';
 import HistoryPage from './pages/HistoryPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
@@ -27,6 +28,8 @@ function App() {
         return <LandingPage />;
       case '/playground':
         return <Playground />;
+      case '/standings':
+        return <StandingsPage />;
       case '/history':
         return <HistoryPage />;
       case '/signin':

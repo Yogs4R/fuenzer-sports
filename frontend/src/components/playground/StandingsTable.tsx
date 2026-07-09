@@ -55,8 +55,8 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams }) => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
                   type: "spring",
-                  stiffness: 300,
-                  damping: 30,
+                  stiffness: 60,
+                  damping: 15,
                   mass: 1
                 }}
                 className="grid grid-cols-12 gap-1 md:gap-2 p-3 items-center border-b border-white/5 hover:bg-white/5 transition-colors text-xs md:text-sm font-mono"
