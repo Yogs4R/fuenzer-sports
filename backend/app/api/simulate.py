@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from app.models.simulation import SimulationRequest, SimulationResponse
 from app.integrations.mock_data import get_mock_wc_teams
 from app.services.simulation import MonteCarloEngine
+from app.integrations.llm import generate_narrative
 
 router = APIRouter()
 
@@ -49,10 +50,22 @@ def run_simulation(request: SimulationRequest = None):
     # Setup parameters
     iterations = 10000
     custom_weights = None
+    prompt = ""
+    model = "Auto"
+    competition = "World Cup"
+    mode = "Live Standings"
+    style = "Commentator Style"
+    chat_history = []
     
     if request:
         iterations = request.iterations
         custom_weights = request.custom_weights
+        prompt = request.prompt
+        model = request.model
+        competition = request.competition
+        mode = request.mode
+        style = request.style
+        chat_history = request.chat_history
         
     # Get base teams
     teams_dict = get_mock_wc_teams()
@@ -75,4 +88,22 @@ def run_simulation(request: SimulationRequest = None):
     # Run simulation
     response = engine.run()
     
+    # Generate Narrative if there is a prompt
+    ai_narrative = "Simulation complete."
+    if prompt:
+        try:
+            ai_narrative = generate_narrative(
+                prompt=prompt,
+                chat_history=chat_history,
+                simulation_results=response.model_dump(),
+                selected_model=model,
+                competition=competition,
+                mode=mode,
+                style=style
+            )
+        except Exception as e:
+            from fastapi import HTTPException
+            raise HTTPException(status_code=500, detail=str(e))
+            
+    response.ai_narrative = ai_narrative
     return response

@@ -37,7 +37,18 @@ class SimulationResponse(BaseModel):
     execution_time_ms: float
     probabilities: Dict[str, Dict[str, float]]
     sample_standings: List[GroupStandings]
+    ai_narrative: str = None
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
 
 class SimulationRequest(BaseModel):
     iterations: int = 10000
     custom_weights: Dict[str, float] = None
+    prompt: str = ""
+    model: str = "Auto"
+    competition: str = "World Cup"
+    mode: str = "Live Standings"
+    style: str = "Commentator Style"
+    chat_history: List[ChatMessage] = []
