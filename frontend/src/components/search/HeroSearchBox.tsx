@@ -17,16 +17,21 @@ declare global {
 type DropdownType = 'competition' | 'model' | 'mode' | 'style' | null;
 
 const HeroSearchBox: React.FC = () => {
-  const { language, runSimulation, isLoading } = useAppStore();
+  const { 
+    language, 
+    runSimulation, 
+    isLoading,
+    selectedCompetition, setSelectedCompetition,
+    selectedModel, setSelectedModel,
+    selectedMode, setSelectedMode,
+    selectedStyle, setSelectedStyle
+  } = useAppStore();
+  
   const t = language === 'id' ? id : en;
   const [query, setQuery] = useState('');
   const [tempQuery, setTempQuery] = useState('');
   
   const [activeDropdown, setActiveDropdown] = useState<DropdownType>(null);
-  const [selectedCompetition, setSelectedCompetition] = useState('World Cup');
-  const [selectedModel, setSelectedModel] = useState('Auto');
-  const [selectedMode, setSelectedMode] = useState('Live Standings');
-  const [selectedStyle, setSelectedStyle] = useState('Commentator Style');
 
   const [isRecording, setIsRecording] = useState(false);
   

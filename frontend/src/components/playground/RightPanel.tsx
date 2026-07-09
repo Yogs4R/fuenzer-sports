@@ -3,6 +3,7 @@ import { useAppStore } from '../../store/useAppStore';
 import StandingsTable from './StandingsTable';
 import { mockInitialStandings } from '../../data/mockSimulationData';
 import { Play, RotateCcw, Menu } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface RightPanelProps {
   onToggleMenu?: () => void;
@@ -21,6 +22,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
 
   const currentStandings = simulationData?.sample_standings || mockInitialStandings;
   const isSimulated = !!simulationData;
+  const currentMatchday = currentStandings[0]?.teams[0]?.matches_played || 0;
 
   const handleSimulate = () => {
     if (!isLoading) {
@@ -65,10 +67,22 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
           </button>
         </div>
         
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10 ml-auto mr-4">
-          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-          <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider">World Cup</span>
-        </div>
+        <AnimatePresence mode="wait">
+          {activeTab === 'standings' && (
+            <motion.div 
+              key={currentMatchday}
+              initial={{ opacity: 0, scale: 0.8, y: -10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.8, y: 10 }}
+              className="hidden lg:flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10 ml-auto mr-4"
+            >
+              <span className={`w-2 h-2 rounded-full ${isLoading || currentMatchday < 3 ? 'bg-primary-cyan animate-pulse' : 'bg-green-500'}`}></span>
+              <span className="text-xs font-semibold text-white uppercase tracking-wider">
+                {currentMatchday === 0 ? 'Pre-Tournament' : `Matchday ${currentMatchday}`}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Simulate / Restart Trigger Button */}
         {activeTab === 'standings' && (

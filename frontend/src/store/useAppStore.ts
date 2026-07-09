@@ -59,10 +59,21 @@ interface AppState {
   // Counter
   totalSimulations: number;
 
+  // Global Settings
+  selectedCompetition: string;
+  selectedModel: string;
+  selectedMode: string;
+  selectedStyle: string;
+  
   // Actions
   setCurrentPage: (page: Page) => void;
   setLanguage: (lang: Language) => void;
   setShowNotifications: (show: boolean) => void;
+  
+  setSelectedCompetition: (comp: string) => void;
+  setSelectedModel: (model: string) => void;
+  setSelectedMode: (mode: string) => void;
+  setSelectedStyle: (style: string) => void;
   
   // Simulation Actions
   runSimulation: (prompt: string, _model: string, _mode: string) => Promise<void>;
@@ -92,10 +103,20 @@ export const useAppStore = create<AppState>()(
       isLiveLoading: false,
       hasFetchedLive: false,
       totalSimulations: 12450,
+      
+      selectedCompetition: 'World Cup',
+      selectedModel: 'Auto',
+      selectedMode: 'Live Standings',
+      selectedStyle: 'Commentator Style',
 
       setCurrentPage: (page) => set({ currentPage: page }),
       setLanguage: (lang) => set({ language: lang }),
       setShowNotifications: (show) => set({ showNotifications: show }),
+      
+      setSelectedCompetition: (comp) => set({ selectedCompetition: comp }),
+      setSelectedModel: (model) => set({ selectedModel: model }),
+      setSelectedMode: (mode) => set({ selectedMode: mode }),
+      setSelectedStyle: (style) => set({ selectedStyle: style }),
       
       clearSimulationData: () => set({ 
         simulationData: null, 
@@ -199,10 +220,21 @@ export const useAppStore = create<AppState>()(
 
       reRunSimulation: async () => {
         // Reset to initial state without adding to chat history or showing processing
-        set({ simulationData: null });
+        // We use mockInitialStandings instead of null to prevent the tables from unmounting and causing scroll jump
+        const { mockInitialStandings, mockSimulations } = await import('../data/mockSimulationData');
+        
+        // Find the original simulation data to get the iterations/execution_time etc
+        const finalMock = mockSimulations[get().mockStep % mockSimulations.length];
+        
+        set({ 
+          simulationData: {
+            ...finalMock,
+            sample_standings: JSON.parse(JSON.stringify(mockInitialStandings))
+          } 
+        });
         
         // Short delay before showing the new state to trigger animation
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         const state = get();
         const mockIndex = state.mockStep > 0 ? (state.mockStep - 1) : 0;

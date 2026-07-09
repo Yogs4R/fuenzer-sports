@@ -27,9 +27,9 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams }) => {
 
   return (
     <div className="w-full overflow-x-auto scrollbar-hide rounded-xl border border-white/10 bg-[#080d1e]">
-      <div className="min-w-[600px]">
+      <div className="min-w-[500px]">
         {/* Header */}
-        <div className="grid grid-cols-12 gap-2 p-3 text-xs md:text-sm font-semibold text-gray-400 border-b border-white/10 bg-white/5 uppercase">
+        <div className="grid grid-cols-12 gap-1 md:gap-2 p-3 text-[10px] md:text-sm font-semibold text-gray-400 border-b border-white/10 bg-white/5 uppercase">
           <div className="col-span-2 text-center">Pos</div>
           <div className="col-span-4 text-left">Club</div>
           <div className="col-span-1 text-center">MP</div>
@@ -59,7 +59,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams }) => {
                   damping: 30,
                   mass: 1
                 }}
-                className="grid grid-cols-12 gap-2 p-3 items-center border-b border-white/5 hover:bg-white/5 transition-colors text-sm font-mono"
+                className="grid grid-cols-12 gap-1 md:gap-2 p-3 items-center border-b border-white/5 hover:bg-white/5 transition-colors text-xs md:text-sm font-mono"
               >
                 <div className="col-span-2 flex items-center justify-center space-x-2 text-gray-400">
                   <span className="font-bold text-white">{index + 1}</span>

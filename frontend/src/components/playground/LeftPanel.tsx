@@ -2,17 +2,28 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import TypewriterText from './TypewriterText';
 import ProcessingState from './ProcessingState';
-import { Mic, ArrowUp, MoreVertical, X } from 'lucide-react';
+import { Mic, ArrowUp, MoreVertical, X, Edit2, Trash2, ChevronDown, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LeftPanelProps {
   onCloseMobile: () => void;
 }
 
 const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
-  const { chatHistory, runSimulation, isLoading, setChatStreamingComplete } = useAppStore();
+  const { 
+    chatHistory, 
+    runSimulation, 
+    isLoading, 
+    setChatStreamingComplete,
+    selectedCompetition,
+    selectedModel, setSelectedModel,
+    selectedStyle, setSelectedStyle
+  } = useAppStore();
+  
   const [prompt, setPrompt] = useState('');
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState<'model' | 'style' | null>(null);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -21,7 +32,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (prompt.trim() && !isLoading) {
-      runSimulation(prompt.trim(), 'auto', 'standings');
+      runSimulation(prompt.trim(), selectedModel, 'standings');
       setPrompt('');
     }
   };
@@ -76,14 +87,13 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
   const handleEditTitle = () => {
     // Add logic to edit title, for now just close
     alert("Edit title feature coming soon!");
-    setIsMenuOpen(false);
   };
 
   return (
     <div className="flex flex-col h-full bg-[#080d1e] border-r border-white/10 relative">
       {/* Header (Desktop & Mobile) */}
       <div className="flex items-center justify-between p-4 border-b border-white/10 bg-[#050814]/50">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1">
           {/* Mobile Close Button */}
           <button 
             onClick={onCloseMobile}
@@ -91,9 +101,14 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
           >
             <X size={18} />
           </button>
-          <div>
-            <h2 className="text-sm font-bold text-white leading-tight">World Cup Simulation</h2>
-            <p className="text-[10px] text-gray-500 font-mono">ID: SIM-4829A • Group Stage</p>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-white leading-tight">World Cup Simulation</h2>
+              <button onClick={handleEditTitle} className="text-gray-400 hover:text-white transition-colors">
+                <Edit2 size={12} />
+              </button>
+            </div>
+            <p className="text-[10px] text-gray-500 font-mono">ID: SIM-4829A • {selectedCompetition}</p>
           </div>
         </div>
         
@@ -111,17 +126,10 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
               <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)}></div>
               <div className="absolute right-0 mt-2 w-48 bg-[#0a1128] border border-white/10 rounded-xl shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in duration-200">
                 <button 
-                  onClick={handleEditTitle}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors flex items-center"
-                >
-                  <span className="w-5 h-5 mr-2 opacity-70">✏️</span> Edit Title
-                </button>
-                <div className="h-px bg-white/5 my-1"></div>
-                <button 
                   onClick={handleClearChat}
                   className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-400/10 transition-colors flex items-center"
                 >
-                  <span className="w-5 h-5 mr-2 opacity-70">🗑️</span> Clear Chat
+                  <Trash2 size={16} className="mr-2 opacity-70" /> Clear Chat
                 </button>
               </div>
             </>
@@ -131,6 +139,14 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
 
       {/* Chat History */}
       <div className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-6">
+        {chatHistory.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-center px-6 opacity-60">
+            <Sparkles size={32} className="text-primary-cyan mb-4" />
+            <h3 className="text-lg font-bold text-white mb-2">Ready to explore?</h3>
+            <p className="text-sm text-gray-400">Ask a follow-up question or tweak the scenario to see how the simulation responds.</p>
+          </div>
+        )}
+        
         {chatHistory.map((msg, idx) => (
           <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             {msg.role === 'ai' && (
@@ -170,7 +186,57 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-[#0a1128] border-t border-white/10">
+      <div className="p-4 bg-[#0a1128] border-t border-white/10 flex flex-col gap-2">
+        {/* Dropdowns */}
+        <div className="flex items-center gap-2 px-1">
+          <div className="relative">
+            <button 
+              type="button"
+              onClick={() => setActiveDropdown(activeDropdown === 'model' ? null : 'model')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${activeDropdown === 'model' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-[#050814] border-white/10 text-gray-400 hover:text-white'}`}
+            >
+              <Sparkles size={12} className={activeDropdown === 'model' ? 'text-primary-cyan' : 'text-gray-500'} />
+              {selectedModel}
+              <ChevronDown size={12} />
+            </button>
+            <AnimatePresence>
+              {activeDropdown === 'model' && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
+                  className="absolute bottom-full left-0 mb-2 w-32 bg-[#050814] border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
+                >
+                  {['Auto', 'Fast', 'Pro'].map((opt) => (
+                    <button key={opt} type="button" onClick={() => { setSelectedModel(opt); setActiveDropdown(null); }} className={`w-full text-left px-4 py-2 text-xs transition-colors ${selectedModel === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300 hover:bg-white/5'}`}>{opt}</button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+          
+          <div className="relative">
+            <button 
+              type="button"
+              onClick={() => setActiveDropdown(activeDropdown === 'style' ? null : 'style')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${activeDropdown === 'style' ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-[#050814] border-white/10 text-gray-400 hover:text-white'}`}
+            >
+              {selectedStyle}
+              <ChevronDown size={12} />
+            </button>
+            <AnimatePresence>
+              {activeDropdown === 'style' && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
+                  className="absolute bottom-full left-0 mb-2 w-48 bg-[#050814] border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
+                >
+                  {['Commentator Style', 'Coach Style', 'Football Analyst Style'].map((opt) => (
+                    <button key={opt} type="button" onClick={() => { setSelectedStyle(opt); setActiveDropdown(null); }} className={`w-full text-left px-4 py-2 text-xs transition-colors ${selectedStyle === opt ? 'text-primary-cyan bg-primary-cyan/5' : 'text-gray-300 hover:bg-white/5'}`}>{opt}</button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="relative flex items-center bg-[#050814] rounded-2xl border border-white/10 focus-within:border-primary-cyan/50 transition-colors p-1.5 px-3">
           <button 
             type="button"
@@ -198,9 +264,6 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
             <ArrowUp size={20} strokeWidth={2.5} />
           </button>
         </form>
-        <div className="text-center mt-2 hidden md:block">
-          <span className="text-[10px] text-gray-500">Press Enter to send, Shift+Enter for new line</span>
-        </div>
       </div>
     </div>
   );
