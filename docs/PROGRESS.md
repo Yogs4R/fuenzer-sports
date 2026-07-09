@@ -14,6 +14,8 @@ This document outlines the step-by-step execution plan for the development phase
 | [ ] | **3. Integration** | **8. Playground UI** | • Build split-view `Playground.tsx`.<br>• Create Left Panel: AI Chat.<br>• Create Right Panel: `StandingsTable`.<br>• **Crucial:** Add `Framer Motion` layout animations for smooth row transitions. |
 | [ ] | **4. Polish** | **9. UI/UX Refinement** | • Apply semantic colors for probabilities (Green/Yellow/Red).<br>• Enforce `JetBrains Mono` font for all numbers.<br>• Test Landing Page to Playground smooth transition. |
 | [ ] | **4. Polish** | **10. Final Review & Demo** | • Record Video Demo / GIF of the platform.<br>• Update `README.md` if setup steps changed.<br>• Final repository check for Hackathon submission. |
+| [ ] | **5. Post-MVP Enhancements** | **11. Auth & Firestore** | • Setup Firebase Auth (Google Sign-In).<br>• Sync `localStorage` history to Firestore for cloud backup. |
+| [ ] | **5. Post-MVP Enhancements** | **12. SEO & Security Check** | • Implement SEO tags in `public` folder.<br>• Perform frontend and API security checks. |
 
 *Note: Mark the `Status` column with `[x]` as each step is completed.*
 
