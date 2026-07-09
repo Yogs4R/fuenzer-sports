@@ -148,8 +148,8 @@ export const useAppStore = create<AppState>()(
           chatHistory: [...state.chatHistory, { role: 'user', content: prompt }]
         }));
         
-        // Wait 1.5 seconds to simulate network request and "processing" time
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        // Wait 2.5 seconds to simulate network request and "processing" time for the animation
+        await new Promise((resolve) => setTimeout(resolve, 2500));
         
         set((state) => {
           const nextMock = mockSimulations[state.mockStep % mockSimulations.length];

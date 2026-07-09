@@ -1,9 +1,30 @@
-import type { SimulationResponse } from '../store/useAppStore';
+import type { SimulationResponse, GroupStandings } from '../store/useAppStore';
 
 export const mockPrompts = [
   "What are the chances of Argentina and Spain passing the group stage?",
   "What if Spain loses to Croatia in their first match?",
   "Who is the most likely to win Group B now?"
+];
+
+export const mockInitialStandings: GroupStandings[] = [
+  {
+    group_name: "Group C",
+    teams: [
+      { id: 1, tla: "ARG", name: "Argentina", crest: "https://crests.football-data.org/762.png", points: 0, matches_played: 0, won: 0, draw: 0, lost: 0, goals_for: 0, goals_against: 0, goal_difference: 0 },
+      { id: 2, tla: "MEX", name: "Mexico", crest: "https://crests.football-data.org/769.png", points: 0, matches_played: 0, won: 0, draw: 0, lost: 0, goals_for: 0, goals_against: 0, goal_difference: 0 },
+      { id: 4, tla: "POL", name: "Poland", crest: "https://crests.football-data.org/794.png", points: 0, matches_played: 0, won: 0, draw: 0, lost: 0, goals_for: 0, goals_against: 0, goal_difference: 0 },
+      { id: 3, tla: "KSA", name: "Saudi Arabia", crest: "https://crests.football-data.org/801.png", points: 0, matches_played: 0, won: 0, draw: 0, lost: 0, goals_for: 0, goals_against: 0, goal_difference: 0 }
+    ]
+  },
+  {
+    group_name: "Group B",
+    teams: [
+      { id: 8, tla: "ALB", name: "Albania", crest: "https://crests.football-data.org/ALB.png", points: 0, matches_played: 0, won: 0, draw: 0, lost: 0, goals_for: 0, goals_against: 0, goal_difference: 0 },
+      { id: 6, tla: "CRO", name: "Croatia", crest: "https://crests.football-data.org/799.png", points: 0, matches_played: 0, won: 0, draw: 0, lost: 0, goals_for: 0, goals_against: 0, goal_difference: 0 },
+      { id: 7, tla: "ITA", name: "Italy", crest: "https://crests.football-data.org/784.png", points: 0, matches_played: 0, won: 0, draw: 0, lost: 0, goals_for: 0, goals_against: 0, goal_difference: 0 },
+      { id: 5, tla: "ESP", name: "Spain", crest: "https://crests.football-data.org/760.png", points: 0, matches_played: 0, won: 0, draw: 0, lost: 0, goals_for: 0, goals_against: 0, goal_difference: 0 }
+    ]
+  }
 ];
 
 export const mockSimulations: SimulationResponse[] = [
@@ -16,7 +37,10 @@ export const mockSimulations: SimulationResponse[] = [
       "ESP": { "1st": 55.2, "2nd": 30.1, "Knockout": 85.3 },
       "CRO": { "1st": 30.5, "2nd": 45.2, "Knockout": 75.7 },
       "MEX": { "1st": 20.0, "2nd": 60.0, "Knockout": 80.0 },
-      "KSA": { "1st": 4.5, "2nd": 20.5, "Knockout": 25.0 }
+      "KSA": { "1st": 4.5, "2nd": 20.5, "Knockout": 25.0 },
+      "POL": { "1st": 0.0, "2nd": 0.0, "Knockout": 0.0 },
+      "ITA": { "1st": 0.0, "2nd": 0.0, "Knockout": 0.0 },
+      "ALB": { "1st": 0.0, "2nd": 0.0, "Knockout": 0.0 }
     },
     sample_standings: [
       {
