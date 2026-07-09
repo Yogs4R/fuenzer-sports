@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import StandingsTable from './StandingsTable';
-import { mockInitialStandings } from '../../data/mockSimulationData';
-import { Play, RotateCcw, Menu } from 'lucide-react';
+import { Play, RotateCcw, Menu, Info, Trophy, Target, Shield } from 'lucide-react';
 
 interface RightPanelProps {
   onToggleMenu?: () => void;
 }
 
 const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
-  const { simulationData, reRunSimulation, isLoading } = useAppStore();
+  const { simulationData, reRunSimulation, isLoading, liveStandings } = useAppStore();
   const [activeTab, setActiveTab] = useState<'standings' | 'bracket'>('standings');
 
   // Probability Semantic Colors helper
@@ -19,9 +18,19 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
     return 'text-red-400';
   };
 
-  const currentStandings = simulationData?.sample_standings || mockInitialStandings;
+  const currentStandings = simulationData?.sample_standings || liveStandings || [];
   const isSimulated = !!simulationData;
   const currentMatchday = currentStandings[0]?.teams[0]?.matches_played || 0;
+
+  // Compute Best Third-Placed Teams
+  const thirdPlacedTeams = currentStandings
+    .map(group => group.teams[2])
+    .filter(Boolean)
+    .sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.goal_difference !== a.goal_difference) return b.goal_difference - a.goal_difference;
+      return b.goals_for - a.goals_for;
+    });
 
   const handleSimulate = () => {
     if (!isLoading) {
@@ -99,31 +108,42 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {Object.entries(simulationData.probabilities).map(([teamCode, metrics]) => {
                   let groupName = "";
+                  let crest = "";
                   for (const group of currentStandings) {
-                    if (group.teams.some(t => t.tla === teamCode)) {
+                    const t = group.teams.find(t => t.tla === teamCode);
+                    if (t) {
                       groupName = group.group_name;
+                      crest = t.crest;
                       break;
                     }
                   }
                   
                   return (
-                    <div key={teamCode} className="bg-white/5 border border-white/10 rounded-xl p-4 relative overflow-hidden">
-                      <div className="absolute top-0 right-0 bg-white/5 px-2 py-1 text-[10px] text-gray-400 rounded-bl-lg font-semibold uppercase">{groupName}</div>
-                      <h3 className="text-white font-bold mb-2">{teamCode}</h3>
-                    <div className="space-y-1 font-mono text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">1st Place:</span>
-                        <span className={getProbColor(metrics['1st'])}>{metrics['1st']}%</span>
+                    <div key={teamCode} className="bg-linear-to-br from-white/10 to-white/5 border border-white/10 rounded-xl p-4 relative overflow-hidden group hover:border-primary-cyan/50 transition-colors">
+                      <div className="absolute top-0 right-0 bg-white/10 px-2 py-1 text-[10px] text-gray-300 rounded-bl-lg font-bold uppercase tracking-wider backdrop-blur-sm z-10">{groupName}</div>
+                      
+                      <div className="flex items-center gap-3 mb-4">
+                        {crest && <img src={crest} alt={teamCode} className="w-8 h-8 object-contain drop-shadow-md" />}
+                        <h3 className="text-white font-black text-xl tracking-tight">{teamCode}</h3>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-400">2nd Place:</span>
-                        <span className={getProbColor(metrics['2nd'])}>{metrics['2nd']}%</span>
+                      
+                      <div className="space-y-2 font-mono text-xs">
+                        <div className="flex justify-between items-center bg-black/20 px-2 py-1.5 rounded">
+                          <span className="text-gray-400 flex items-center gap-1.5"><Trophy size={12}/> 1st Place</span>
+                          <span className={`font-bold ${getProbColor(metrics['1st'])}`}>{metrics['1st']}%</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-black/20 px-2 py-1.5 rounded">
+                          <span className="text-gray-400 flex items-center gap-1.5"><Target size={12}/> 2nd Place</span>
+                          <span className={`font-bold ${getProbColor(metrics['2nd'])}`}>{metrics['2nd']}%</span>
+                        </div>
+                        <div className="flex justify-between items-center bg-primary-cyan/10 px-2 py-1.5 rounded border border-primary-cyan/20 mt-2">
+                          <span className="text-primary-cyan font-bold flex items-center gap-1.5"><Shield size={12}/> Advancing</span>
+                          <span className={`font-black ${getProbColor(metrics['Knockout'])}`}>{metrics['Knockout']}%</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between pt-1 mt-1 border-t border-white/10">
-                        <span className="text-gray-300 font-semibold">Knockout:</span>
-                        <span className={`font-bold ${getProbColor(metrics['Knockout'])}`}>{metrics['Knockout']}%</span>
-                      </div>
-                      </div>
+                      
+                      {/* Decorative background accent */}
+                      <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-primary-cyan/10 rounded-full blur-2xl group-hover:bg-primary-cyan/20 transition-colors pointer-events-none" />
                     </div>
                   );
                 })}
@@ -131,15 +151,45 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             )}
 
             {/* Standings Tables */}
-            {currentStandings.map((group) => (
-              <div key={group.group_name} className="space-y-3">
-                <h2 className="text-xl font-bold text-white flex items-center">
-                  <span className="w-2 h-6 bg-primary-cyan rounded-full mr-3"></span>
-                  {group.group_name}
-                </h2>
-                <StandingsTable teams={group.teams} />
+            {currentStandings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-48 space-y-4">
+                <div className="w-8 h-8 border-2 border-primary-cyan border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-gray-400 text-sm animate-pulse">Loading stadium data...</p>
               </div>
-            ))}
+            ) : (
+              <>
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  {currentStandings.map((group) => (
+                    <div key={group.group_name} className="space-y-3">
+                      <h2 className="text-xl font-bold text-white flex items-center">
+                        <span className="w-2 h-6 bg-primary-cyan rounded-full mr-3"></span>
+                        {group.group_name}
+                      </h2>
+                      <StandingsTable teams={group.teams} qualifyCount={2} />
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Best Third-Placed Teams */}
+                {thirdPlacedTeams.length > 0 && (
+                  <div className="mt-8 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <h2 className="text-xl font-bold text-white flex items-center">
+                        <span className="w-2 h-6 bg-yellow-400 rounded-full mr-3"></span>
+                        Ranking of Third-Placed Teams
+                      </h2>
+                      <div className="flex items-center gap-2 text-xs text-gray-400 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10">
+                        <Info size={14} className="text-yellow-400" />
+                        <span>Top 8 advance to Round of 32</span>
+                      </div>
+                    </div>
+                    <div className="bg-[#0a1024] p-1 rounded-xl border border-white/10">
+                       <StandingsTable teams={thirdPlacedTeams} qualifyCount={8} />
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </>
         ) : (
           <div className="flex flex-col items-center justify-center h-64 text-gray-500 border border-dashed border-white/20 rounded-xl">

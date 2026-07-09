@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAppStore } from '../store/useAppStore';
 import LeftPanel from '../components/playground/LeftPanel';
 import RightPanel from '../components/playground/RightPanel';
 
@@ -11,10 +12,17 @@ const Playground: React.FC = () => {
   // Close mobile menu automatically if the chat responds (just for UX testing, or keep it open so user can see it)
   // Actually, better to keep it open so they can read the AI response.
 
+  const { fetchLiveStandings, liveStandings } = useAppStore();
+
   useEffect(() => {
     // Scroll to top when entering playground
     window.scrollTo(0, 0);
-  }, []);
+    
+    // Fetch live standings if empty
+    if (!liveStandings || liveStandings.length === 0) {
+      fetchLiveStandings();
+    }
+  }, [fetchLiveStandings, liveStandings?.length]);
 
   return (
     <div className="flex h-[calc(100vh-72px)] w-full mt-[72px] relative overflow-hidden">

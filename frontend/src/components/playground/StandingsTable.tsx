@@ -5,9 +5,10 @@ import { ChevronUp, ChevronDown, Minus } from 'lucide-react';
 
 interface StandingsTableProps {
   teams: TeamStats[];
+  qualifyCount?: number;
 }
 
-const StandingsTable: React.FC<StandingsTableProps> = ({ teams }) => {
+const StandingsTable: React.FC<StandingsTableProps> = ({ teams, qualifyCount = 2 }) => {
   // Sort teams by points (descending) as a fallback, though backend should send them sorted
   const sortedTeams = [...teams].sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
@@ -48,6 +49,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams }) => {
             const rawDiff = hasPrev ? prevIndex - index : 0;
             const isPreTournament = team.matches_played === 0;
             const diff = isPreTournament ? 0 : rawDiff;
+            const isQualified = qualifyCount > 0 && index < qualifyCount;
             
             return (
               <motion.div
@@ -61,7 +63,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams }) => {
                   damping: 15,
                   mass: 1
                 }}
-                className="grid grid-cols-12 gap-1 md:gap-2 p-3 items-center border-b border-white/5 hover:bg-white/5 transition-colors text-xs md:text-sm font-mono"
+                className={`grid grid-cols-12 gap-1 md:gap-2 p-3 items-center border-b hover:bg-white/5 transition-colors text-xs md:text-sm font-mono ${isQualified ? 'border-l-[3px] border-l-green-400 bg-green-500/5 border-b-white/5' : 'border-white/5 border-l-[3px] border-l-transparent'}`}
               >
                 <div className="col-span-2 flex items-center justify-center space-x-2 text-gray-400">
                   <span className="font-bold text-white">{index + 1}</span>
