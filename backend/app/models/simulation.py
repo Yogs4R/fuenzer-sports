@@ -37,6 +37,7 @@ class SimulationResponse(BaseModel):
     execution_time_ms: float
     probabilities: Dict[str, Dict[str, float]]
     sample_standings: List[GroupStandings]
+    title: str = "World Cup Simulation"
     ai_narrative: str = None
 
 class ChatMessage(BaseModel):

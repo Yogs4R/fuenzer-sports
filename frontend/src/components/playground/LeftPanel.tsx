@@ -13,13 +13,14 @@ interface LeftPanelProps {
 
 const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
   const { 
-    chatHistory, 
-    runSimulation, 
-    isLoading, 
+    chatHistory,
+    runSimulation,
+    isLoading,
     setChatStreamingComplete,
     selectedCompetition,
     selectedModel, setSelectedModel,
-    selectedStyle, setSelectedStyle
+    selectedStyle, setSelectedStyle,
+    simulationTitle
   } = useAppStore();
   
   const [prompt, setPrompt] = useState('');
@@ -27,7 +28,6 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<'model' | 'style' | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [title, setTitle] = useState('World Cup Simulation');
   const [simId, setSimId] = useState('SIM-....');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isFirstRender = useRef(true);
@@ -128,8 +128,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
               {isEditingTitle ? (
                 <input 
                   type="text" 
-                  value={title} 
-                  onChange={(e) => setTitle(e.target.value)} 
+                  value={simulationTitle} 
+                  onChange={(e) => useAppStore.setState({ simulationTitle: e.target.value })} 
                   onBlur={() => setIsEditingTitle(false)}
                   onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
                   autoFocus
@@ -137,7 +137,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
                 />
               ) : (
                 <>
-                  <h2 className="text-sm font-bold text-white leading-tight truncate max-w-[160px]">{title}</h2>
+                  <h2 className="text-sm font-bold text-white leading-tight truncate max-w-[160px]" title={simulationTitle}>{simulationTitle}</h2>
                   <button onClick={() => setIsEditingTitle(true)} className="text-gray-400 hover:text-white transition-colors">
                     <Edit2 size={12} />
                   </button>

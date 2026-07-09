@@ -264,7 +264,7 @@ const HeroSearchBox: React.FC = () => {
                     exit={{ opacity: 0, y: 10 }}
                     className="absolute bottom-full left-0 mb-2 w-48 bg-bg-0 border border-white/10 rounded-xl shadow-xl overflow-hidden z-20"
                   >
-                    {['Live Standings', 'Random Standings'].map((opt) => (
+                    {['Live Standings', 'From Scratch'].map((opt) => (
                       <button 
                         key={opt}
                         onClick={() => { setSelectedMode(opt); setActiveDropdown(null); }}

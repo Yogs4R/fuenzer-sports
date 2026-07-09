@@ -61,7 +61,9 @@ The eight group winners listed below are locked to face one of the best 3rd-plac
 * **Winner Group K** vs. 3rd Place Group D / G / H / I
 * **Winner Group L** vs. 3rd Place Group D / E / I / J
 
-*(AI Agent Note: Why not use rankings 1-8? FIFA deliberately avoids pairing 3rd-place teams based on their exact mini-table ranking order (e.g., Winner A vs. 1st Ranked 3rd-Place Team) to prevent match manipulation in the final group stage games and to ensure geographical/rest schedule security).*
+*(Note 1: Why not use rankings 1-8? FIFA deliberately avoids pairing 3rd-place teams based on their exact mini-table ranking order (e.g., Winner A vs. 1st Ranked 3rd-Place Team) to prevent match manipulation in the final group stage games and to ensure geographical/rest schedule security).*
+
+*(Note 2: The official FIFA Annex C matrix contains 495 possible combinations for placing the 8 best 3rd-place teams. To ensure O(1) matching performance in this software, the system uses a **Greedy Assignment Algorithm** that maps the 8 qualified 3rd-place teams dynamically, guaranteeing valid opponent combinations without hardcoding 495 permutations).*
 
 ---
 

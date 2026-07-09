@@ -106,4 +106,11 @@ def run_simulation(request: SimulationRequest = None):
             raise HTTPException(status_code=500, detail=str(e))
             
     response.ai_narrative = ai_narrative
+    response.title = "World Cup Simulation"
+    
+    if ai_narrative and ai_narrative.startswith("TITLE:"):
+        lines = ai_narrative.split("\n", 1)
+        response.title = lines[0].replace("TITLE:", "").strip()
+        response.ai_narrative = lines[1].strip() if len(lines) > 1 else ""
+
     return response

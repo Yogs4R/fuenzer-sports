@@ -59,7 +59,8 @@ Rules:
 3. Answer the user's prompt based on the simulation context provided.
 4. Adopt the requested persona/style strictly. Ensure your tone, vocabulary, and phrasing match the style perfectly.
 5. Keep the response concise, engaging, and directly answer the prompt. Do not output raw JSON.
-6. EXCELLENT MARKDOWN FORMATTING REQUIRED:
+6. TITLE GENERATION: You MUST output a short, catchy title (max 5 words) on the very first line of your response in this exact format: `TITLE: [Your Title Here]`.
+7. EXCELLENT MARKDOWN FORMATTING REQUIRED:
    - Use **bold** for Team Names and Key Metrics.
    - Use proper bullet points (`- `) or numbered lists.
    - Use Markdown Tables `| Col | Col |` ONLY when displaying structured data like standings or comparisons, and ensure they are well-formatted.

@@ -9,6 +9,7 @@ export interface TeamStats {
   tla: string;
   name: string;
   crest: string;
+  power_rating?: number;
   points: number;
   goals_for: number;
   goals_against: number;
@@ -29,6 +30,7 @@ export interface SimulationResponse {
   execution_time_ms: number;
   probabilities: Record<string, Record<string, number>>;
   sample_standings: GroupStandings[];
+  title?: string;
   ai_narrative?: string;
 }
 
@@ -45,6 +47,7 @@ interface AppState {
   
   // Simulation State
   simulationData: SimulationResponse | null;
+  simulationTitle: string;
   chatHistory: ChatMessage[];
   mockStep: number;
   isLoading: boolean;
@@ -94,6 +97,7 @@ export const useAppStore = create<AppState>()(
       showNotifications: false,
       
       simulationData: null,
+      simulationTitle: 'World Cup Simulation',
       chatHistory: [],
       mockStep: 0,
       isLoading: false,
@@ -120,6 +124,7 @@ export const useAppStore = create<AppState>()(
       
       clearSimulationData: () => set({ 
         simulationData: null, 
+        simulationTitle: 'World Cup Simulation',
         chatHistory: [],
         mockStep: 0,
         error: null 
@@ -232,6 +237,7 @@ export const useAppStore = create<AppState>()(
           
           set((state) => ({
             chatHistory: prompt.trim() ? [...state.chatHistory, { role: 'ai', content: data.ai_narrative || "Done.", isStreaming: true }] : state.chatHistory,
+            simulationTitle: data.title || state.simulationTitle,
             isLoading: false
           }));
           
@@ -259,6 +265,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({ 
         language: state.language,
         simulationData: state.simulationData,
+        simulationTitle: state.simulationTitle,
         chatHistory: state.chatHistory,
         mockStep: state.mockStep
       }),

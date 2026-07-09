@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import StandingsTable from './StandingsTable';
+import BracketView from './BracketView';
 import { Play, RotateCcw, Menu, Info, Trophy, Target, Shield, Search, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -53,8 +54,15 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
     })
     .filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.tla.toLowerCase().includes(searchQuery.toLowerCase())) : [];
 
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
   const handleSimulate = () => {
     if (!isLoading) {
+      if (activeTab === 'standings' && selectedMode === 'Live Standings') {
+        setToastMessage("Fase Grup telah selesai! Gunakan mode 'From Scratch' untuk mensimulasikan ulang grup, atau pindah ke tab Knockout Bracket untuk simulasi sisa turnamen.");
+        setTimeout(() => setToastMessage(null), 5000);
+        return;
+      }
       runSimulation('', selectedModel, selectedMode);
     }
   };
@@ -275,12 +283,24 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             )}
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center h-64 text-gray-500 border border-dashed border-white/20 rounded-xl">
-            <svg className="w-12 h-12 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-            <p>Tournament bracket visualization coming soon.</p>
-          </div>
+          <BracketView />
         )}
       </div>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 bg-red-500/90 text-white px-4 py-2 rounded-lg shadow-lg shadow-red-500/20 border border-red-400 text-sm flex items-center gap-2 w-[90%] sm:w-auto text-center font-sans"
+          >
+            <Info size={16} className="shrink-0" />
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
