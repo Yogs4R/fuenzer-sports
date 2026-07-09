@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { mockSimulations } from '../data/mockSimulationData';
 
 type Page = '/' | '/playground' | '/standings' | '/history' | '/signin' | '/signup' | '/privacy' | '/terms';
 type Language = 'en' | 'id';
@@ -76,10 +75,11 @@ interface AppState {
   setSelectedStyle: (style: string) => void;
   
   // Simulation Actions
-  runSimulation: (prompt: string, _model: string, _mode: string) => Promise<void>;
+  runSimulation: (prompt: string, model: string, mode: string) => Promise<void>;
   reRunSimulation: () => Promise<void>;
   clearSimulationData: () => void;
   setChatStreamingComplete: (index: number) => void;
+  clearError: () => void;
   
   // Live Data Actions
   fetchLiveStandings: () => Promise<void>;
@@ -124,6 +124,7 @@ export const useAppStore = create<AppState>()(
         mockStep: 0,
         error: null 
       }),
+      clearError: () => set({ error: null }),
 
       setChatStreamingComplete: (index: number) => {
         set((state) => {
@@ -162,7 +163,7 @@ export const useAppStore = create<AppState>()(
         }
       },
       
-      runSimulation: async (prompt: string, _model: string, _mode: string) => {
+      runSimulation: async (prompt: string, model: string, mode: string) => {
         set((state) => ({ 
           isLoading: true, 
           error: null,
@@ -177,94 +178,79 @@ export const useAppStore = create<AppState>()(
           window.history.pushState({}, '', '/playground');
         }
 
-        // Wait 2.5 seconds to simulate network request and "processing" time for the animation
-        await new Promise((resolve) => setTimeout(resolve, 2500));
-        
         const state = get();
-        const nextMock = mockSimulations[state.mockStep % mockSimulations.length];
-        const narrative = nextMock.ai_narrative || "Simulation complete.";
-
-        // Progressive Matchday Animation
-        for (let md = 1; md <= 3; md++) {
-           const intermediateMock = {
-              ...nextMock,
-              sample_standings: nextMock.sample_standings.map(group => ({
-                 ...group,
-                 teams: group.teams.map(team => ({
-                    ...team,
-                    matches_played: md,
-                    points: Math.round((team.points / 3) * md),
-                    won: Math.round((team.won / 3) * md),
-                    draw: Math.round((team.draw / 3) * md),
-                    lost: Math.round((team.lost / 3) * md),
-                    goals_for: Math.round((team.goals_for / 3) * md),
-                    goals_against: Math.round((team.goals_against / 3) * md),
-                    goal_difference: Math.round((team.goal_difference / 3) * md),
-                 }))
-              }))
-           };
-           
-           set({ simulationData: intermediateMock });
-           
-           if (md < 3) {
-             await new Promise(r => setTimeout(r, 2000));
-           }
+        try {
+          const payload = {
+            iterations: 10000,
+            prompt: prompt,
+            model: model,
+            competition: state.selectedCompetition,
+            mode: mode,
+            style: state.selectedStyle,
+            chat_history: state.chatHistory.slice(-5)
+          };
+          
+          const response = await fetch('http://localhost:8000/api/simulate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Simulation failed: ${response.statusText}`);
+          }
+          
+          const data: SimulationResponse = await response.json();
+          
+          // Progressive Matchday Animation
+          const nextMock = data;
+          for (let md = 1; md <= 3; md++) {
+             const intermediateMock = {
+                ...nextMock,
+                sample_standings: nextMock.sample_standings.map(group => ({
+                   ...group,
+                   teams: group.teams.map(team => ({
+                      ...team,
+                      matches_played: md,
+                      points: Math.round((team.points / 3) * md),
+                      won: Math.round((team.won / 3) * md),
+                      draw: Math.round((team.draw / 3) * md),
+                      lost: Math.round((team.lost / 3) * md),
+                      goals_for: Math.round((team.goals_for / 3) * md),
+                      goals_against: Math.round((team.goals_against / 3) * md),
+                      goal_difference: Math.round((team.goal_difference / 3) * md),
+                   }))
+                }))
+             };
+             
+             set({ simulationData: intermediateMock });
+             
+             if (md < 3) {
+               await new Promise(r => setTimeout(r, 1000));
+             }
+          }
+          
+          set((state) => ({
+            chatHistory: [...state.chatHistory, { role: 'ai', content: data.ai_narrative || "Done.", isStreaming: true }],
+            isLoading: false
+          }));
+          
+        } catch (error: any) {
+           console.error("Simulation error:", error);
+           set({ 
+             error: error.message || "Failed to connect to simulation server.",
+             isLoading: false
+           });
         }
-        
-        set((state) => ({
-          chatHistory: [...state.chatHistory, { role: 'ai', content: narrative, isStreaming: true }],
-          mockStep: state.mockStep + 1,
-          isLoading: false
-        }));
       },
 
       reRunSimulation: async () => {
-        // Reset to initial state without adding to chat history or showing processing
-        // We use mockInitialStandings instead of null to prevent the tables from unmounting and causing scroll jump
-        const { mockInitialStandings, mockSimulations } = await import('../data/mockSimulationData');
-        
-        // Find the original simulation data to get the iterations/execution_time etc
-        const finalMock = mockSimulations[get().mockStep % mockSimulations.length];
-        
-        set({ 
-          simulationData: {
-            ...finalMock,
-            sample_standings: JSON.parse(JSON.stringify(mockInitialStandings))
-          } 
-        });
-        
-        // Short delay before showing the new state to trigger animation
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
         const state = get();
-        const mockIndex = state.mockStep > 0 ? (state.mockStep - 1) : 0;
-        const nextMock = mockSimulations[mockIndex % mockSimulations.length];
-        
-        // Progressive Matchday Animation
-        for (let md = 1; md <= 3; md++) {
-           const intermediateMock = {
-              ...nextMock,
-              sample_standings: nextMock.sample_standings.map(group => ({
-                 ...group,
-                 teams: group.teams.map(team => ({
-                    ...team,
-                    matches_played: md,
-                    points: Math.round((team.points / 3) * md),
-                    won: Math.round((team.won / 3) * md),
-                    draw: Math.round((team.draw / 3) * md),
-                    lost: Math.round((team.lost / 3) * md),
-                    goals_for: Math.round((team.goals_for / 3) * md),
-                    goals_against: Math.round((team.goals_against / 3) * md),
-                    goal_difference: Math.round((team.goal_difference / 3) * md),
-                 }))
-              }))
-           };
-           
-           set({ simulationData: intermediateMock });
-           
-           if (md < 3) {
-             await new Promise(r => setTimeout(r, 2000));
-           }
+        if (state.chatHistory.length > 0) {
+            const lastPrompt = state.chatHistory.filter(c => c.role === 'user').pop();
+            if (lastPrompt) {
+                await get().runSimulation(lastPrompt.content, state.selectedModel, state.selectedMode);
+            }
         }
       }
     }),
