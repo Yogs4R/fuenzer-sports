@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import StandingsTable from './StandingsTable';
-import { Play, RotateCcw, Menu, Info, Trophy, Target, Shield, Search } from 'lucide-react';
+import { Play, RotateCcw, Menu, Info, Trophy, Target, Shield, Search, Filter } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface RightPanelProps {
   onToggleMenu?: () => void;
@@ -12,6 +13,9 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
   const [activeTab, setActiveTab] = useState<'standings' | 'bracket'>('standings');
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterOptions = ['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G', 'Group H', 'Group I', 'Group J', 'Group K', 'Group L', 'Best 3rd Place'];
+  const [selectedFilters, setSelectedFilters] = useState<string[]>(filterOptions);
 
   // Probability Semantic Colors helper
   const getProbColor = (prob: number) => {
@@ -24,14 +28,16 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
   const isSimulated = !!simulationData;
   const currentMatchday = currentStandingsRaw[0]?.teams[0]?.matches_played || 0;
 
-  // Search Filter Logic
-  const currentStandings = currentStandingsRaw.map(group => ({
-    ...group,
-    teams: group.teams.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.tla.toLowerCase().includes(searchQuery.toLowerCase()))
-  })).filter(group => group.teams.length > 0);
+  // Search and Checkbox Filter Logic
+  const currentStandings = currentStandingsRaw
+    .filter(group => selectedFilters.includes(group.group_name))
+    .map(group => ({
+      ...group,
+      teams: group.teams.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.tla.toLowerCase().includes(searchQuery.toLowerCase()))
+    })).filter(group => group.teams.length > 0);
 
   // Compute Best Third-Placed Teams
-  const thirdPlacedTeams = currentStandingsRaw
+  const thirdPlacedTeams = selectedFilters.includes('Best 3rd Place') ? currentStandingsRaw
     .map(group => {
       const team = group.teams[2];
       if (team) {
@@ -45,7 +51,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
       if (b.goal_difference !== a.goal_difference) return b.goal_difference - a.goal_difference;
       return b.goals_for - a.goals_for;
     })
-    .filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.tla.toLowerCase().includes(searchQuery.toLowerCase()));
+    .filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.tla.toLowerCase().includes(searchQuery.toLowerCase())) : [];
 
   const handleSimulate = () => {
     if (!isLoading) {
@@ -119,16 +125,64 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                 </div>
               </div>
 
-              {/* Search Box */}
-              <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                <input 
-                  type="text"
-                  placeholder="Search team..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-[#0a1128] text-white text-xs pl-8 pr-4 py-2 rounded-lg border border-white/10 focus:border-primary-cyan/50 outline-none w-full sm:w-48 transition-colors"
-                />
+              <div className="flex items-center gap-3 relative">
+                {/* Search Box */}
+                <div className="relative">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <input 
+                    type="text"
+                    placeholder="Search team..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-[#0a1128] text-white text-xs pl-8 pr-4 py-2 rounded-lg border border-white/10 focus:border-primary-cyan/50 outline-none w-full sm:w-48 transition-colors"
+                  />
+                </div>
+                
+                {/* Filter Dropdown */}
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    className={`bg-[#0a1128] text-white text-xs px-3 py-2 rounded-lg border transition-colors flex items-center gap-2 ${isFilterOpen || selectedFilters.length < filterOptions.length ? 'border-primary-cyan/50 bg-primary-cyan/5' : 'border-white/10 hover:bg-white/5'}`}
+                  >
+                    <Filter size={14} className={selectedFilters.length < filterOptions.length ? 'text-primary-cyan' : ''} />
+                    <span className="hidden sm:inline">Filter</span>
+                  </button>
+                  <AnimatePresence>
+                    {isFilterOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setIsFilterOpen(false)}></div>
+                        <motion.div 
+                          initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
+                          className="absolute right-0 top-full mt-2 w-48 bg-[#0a1128] border border-white/10 rounded-xl shadow-xl z-50 p-2 max-h-64 overflow-y-auto scrollbar-hide"
+                        >
+                          <div className="flex items-center justify-between px-2 pb-2 mb-2 border-b border-white/10">
+                            <span className="text-xs font-bold text-gray-300">Show Groups</span>
+                            <button 
+                              onClick={() => setSelectedFilters(selectedFilters.length === filterOptions.length ? [] : [...filterOptions])}
+                              className="text-[10px] text-primary-cyan hover:underline"
+                            >
+                              {selectedFilters.length === filterOptions.length ? 'Clear All' : 'Select All'}
+                            </button>
+                          </div>
+                          {filterOptions.map(opt => (
+                            <label key={opt} className="flex items-center gap-2 px-2 py-1.5 hover:bg-white/5 rounded cursor-pointer transition-colors">
+                              <input 
+                                type="checkbox" 
+                                checked={selectedFilters.includes(opt)}
+                                onChange={(e) => {
+                                  if (e.target.checked) setSelectedFilters([...selectedFilters, opt]);
+                                  else setSelectedFilters(selectedFilters.filter(f => f !== opt));
+                                }}
+                                className="accent-primary-cyan"
+                              />
+                              <span className="text-xs text-gray-300">{opt}</span>
+                            </label>
+                          ))}
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
 
