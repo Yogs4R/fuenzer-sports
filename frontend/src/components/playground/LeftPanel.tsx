@@ -206,7 +206,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
                   onComplete={() => setChatStreamingComplete(idx)}
                 />
               ) : msg.role === 'ai' ? (
-                <div className="prose prose-invert prose-p:leading-relaxed prose-pre:bg-black/20 prose-pre:p-2 prose-pre:rounded-lg prose-a:text-primary-cyan prose-table:border-collapse prose-table:w-full prose-td:border prose-td:border-white/20 prose-td:px-2 prose-td:py-1 prose-th:border prose-th:border-white/20 prose-th:px-2 prose-th:py-1 prose-th:bg-white/10 text-[10px] md:text-xs">
+                <div className="prose prose-invert max-w-full overflow-x-auto prose-p:leading-relaxed prose-pre:bg-black/20 prose-pre:p-2 prose-pre:rounded-lg prose-a:text-primary-cyan prose-table:border-collapse prose-table:w-full prose-td:border prose-td:border-white/20 prose-td:px-2 prose-td:py-1 prose-th:border prose-th:border-white/20 prose-th:px-2 prose-th:py-1 prose-th:bg-white/10 text-[10px] md:text-xs">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {msg.content}
                   </ReactMarkdown>

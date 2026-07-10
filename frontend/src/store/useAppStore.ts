@@ -180,6 +180,9 @@ export const useAppStore = create<AppState>()(
       },
       
       runSimulation: async (prompt: string, model: string, mode: string) => {
+        const currentState = get();
+        const cachedProbabilities = currentState.simulationData?.probabilities || {};
+        
         set((state) => ({ 
           isLoading: true, 
           error: null,
@@ -220,7 +223,7 @@ export const useAppStore = create<AppState>()(
           
           if (mode === 'Live Standings') {
             data.sample_standings = get().liveStandings || []; // Retain original group standings
-            data.probabilities = get().simulationData?.probabilities || {}; // Retain existing or empty probabilities
+            data.probabilities = cachedProbabilities; // Retain existing or empty probabilities
           }
           
           // Remove loading screen immediately so animation can be seen
@@ -262,7 +265,7 @@ export const useAppStore = create<AppState>()(
           }
           
           set((state) => ({
-            chatHistory: prompt.trim() ? [...state.chatHistory, { role: 'ai', content: data.ai_narrative || "Done.", isStreaming: true }] : state.chatHistory,
+            chatHistory: prompt.trim() ? [...state.chatHistory, { role: 'ai', content: data.ai_narrative || "Done.", isStreaming: false }] : state.chatHistory,
             simulationTitle: data.title || state.simulationTitle,
             simulationData: data,
             bracketMatches: [],
