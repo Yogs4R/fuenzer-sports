@@ -11,6 +11,8 @@ import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './config/firebase';
 
 function App() {
   const { currentPage, setCurrentPage } = useAppStore();
@@ -22,6 +24,25 @@ function App() {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, [setCurrentPage]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        useAppStore.getState().setUser({
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
+        });
+        await useAppStore.getState().syncSessionsToFirestore();
+      } else {
+        useAppStore.getState().setUser(null);
+      }
+      useAppStore.setState({ isAuthLoading: false });
+    });
+    
+    return () => unsubscribe();
+  }, []);
 
   const renderPage = () => {
     switch (currentPage) {

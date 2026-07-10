@@ -1,6 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { MatchNode } from '../utils/bracketGenerator';
+import { signInWithPopup, signOut, deleteUser } from 'firebase/auth';
+import { doc, getDocs, collection, writeBatch, deleteDoc, setDoc } from 'firebase/firestore';
+import { auth, googleProvider, db } from '../config/firebase';
+
+export interface AppUser {
+  uid: string;
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+}
 
 type Page = '/' | '/playground' | '/standings' | '/history' | '/signin' | '/signup' | '/privacy' | '/terms';
 type Language = 'en' | 'id';
@@ -88,6 +98,16 @@ interface AppState {
   selectedStyle: string;
   isSimulatingKnockout: boolean;
   
+  // Auth State
+  user: AppUser | null;
+  isAuthLoading: boolean;
+  setUser: (user: AppUser | null) => void;
+  setSavedSessions: (sessions: HistorySession[]) => void;
+  signInWithGoogle: () => Promise<void>;
+  signOutUser: () => Promise<void>;
+  deleteUserAccount: () => Promise<void>;
+  syncSessionsToFirestore: () => Promise<void>;
+  
   // Actions
   setCurrentPage: (page: Page) => void;
   setLanguage: (lang: Language) => void;
@@ -137,6 +157,92 @@ export const useAppStore = create<AppState>()(
       isLiveLoading: false,
       hasFetchedLive: false,
       totalSimulations: 12450,
+      
+      user: null,
+      isAuthLoading: true,
+
+      setUser: (user) => set({ user }),
+      setSavedSessions: (sessions) => set({ savedSessions: sessions }),
+
+      signInWithGoogle: async () => {
+        set({ isAuthLoading: true, error: null });
+        try {
+          const result = await signInWithPopup(auth, googleProvider);
+          const appUser: AppUser = {
+            uid: result.user.uid,
+            email: result.user.email,
+            displayName: result.user.displayName,
+            photoURL: result.user.photoURL,
+          };
+          set({ user: appUser });
+          await get().syncSessionsToFirestore();
+        } catch (err: any) {
+          set({ error: err.message || 'Failed to sign in' });
+        } finally {
+          set({ isAuthLoading: false });
+        }
+      },
+
+      signOutUser: async () => {
+        try {
+          await signOut(auth);
+          set({ user: null });
+        } catch (err: any) {
+          set({ error: err.message || 'Failed to sign out' });
+        }
+      },
+
+      deleteUserAccount: async () => {
+        const state = get();
+        if (!state.user) return;
+        set({ isAuthLoading: true, error: null });
+        try {
+          const sessionsRef = collection(db, 'users', state.user.uid, 'sessions');
+          const snapshot = await getDocs(sessionsRef);
+          const batch = writeBatch(db);
+          snapshot.docs.forEach((d) => batch.delete(d.ref));
+          await batch.commit();
+          
+          if (auth.currentUser) await deleteUser(auth.currentUser);
+          set({ user: null, savedSessions: [] });
+        } catch (err: any) {
+          set({ error: err.message || 'Failed to delete account' });
+        } finally {
+          set({ isAuthLoading: false });
+        }
+      },
+
+      syncSessionsToFirestore: async () => {
+        const state = get();
+        if (!state.user) return;
+        try {
+          const sessionsRef = collection(db, 'users', state.user.uid, 'sessions');
+          const snapshot = await getDocs(sessionsRef);
+          const firestoreSessions: HistorySession[] = [];
+          snapshot.forEach(doc => firestoreSessions.push(doc.data() as HistorySession));
+          
+          const localSessions = state.savedSessions;
+          const merged = [...firestoreSessions];
+          const firestoreIds = new Set(firestoreSessions.map(s => s.id));
+          const batch = writeBatch(db);
+          let hasLocalToUpload = false;
+          
+          localSessions.forEach(ls => {
+            if (!firestoreIds.has(ls.id)) {
+              merged.push(ls);
+              const docRef = doc(db, 'users', state.user!.uid, 'sessions', ls.id);
+              batch.set(docRef, ls);
+              hasLocalToUpload = true;
+            }
+          });
+          
+          merged.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          if (hasLocalToUpload) await batch.commit();
+          set({ savedSessions: merged });
+        } catch (err: any) {
+          console.error("Failed to sync sessions:", err);
+        }
+      },
       
       selectedCompetition: 'World Cup',
       selectedModel: 'Auto',
@@ -188,11 +294,19 @@ export const useAppStore = create<AppState>()(
         
         set((prev) => {
           const exists = prev.savedSessions.some(s => s.id === state.currentSessionId);
+          let newSaved = [];
           if (exists) {
-            return { savedSessions: prev.savedSessions.map(s => s.id === state.currentSessionId ? newSession : s) };
+            newSaved = prev.savedSessions.map(s => s.id === state.currentSessionId ? newSession : s);
           } else {
-            return { savedSessions: [newSession, ...prev.savedSessions] };
+            newSaved = [newSession, ...prev.savedSessions];
           }
+          
+          if (state.user) {
+             const docRef = doc(db, 'users', state.user.uid, 'sessions', newSession.id);
+             setDoc(docRef, newSession).catch(console.error);
+          }
+          
+          return { savedSessions: newSaved };
         });
       },
 
@@ -214,6 +328,11 @@ export const useAppStore = create<AppState>()(
       },
 
       deleteSession: (id: string) => {
+        const state = get();
+        if (state.user) {
+          const docRef = doc(db, 'users', state.user.uid, 'sessions', id);
+          deleteDoc(docRef).catch(console.error);
+        }
         set((state) => ({
           savedSessions: state.savedSessions.filter(s => s.id !== id),
           ...(state.currentSessionId === id ? {
