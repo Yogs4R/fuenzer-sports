@@ -34,8 +34,8 @@ const BracketView: React.FC = () => {
   }, [simulationData, liveStandings, selectedMode]);
 
   const simulateMatch = (homePower: number, awayPower: number) => {
-    const lamHome = Math.max(0.1, 1.2 + (homePower - awayPower) * 0.03);
-    const lamAway = Math.max(0.1, 1.0 + (awayPower - homePower) * 0.03);
+    const lamHome = Math.max(0.1, 1.2 + (homePower - awayPower) * 0.05);
+    const lamAway = Math.max(0.1, 1.0 + (awayPower - homePower) * 0.05);
     
     const samplePoisson = (lambda: number) => {
       let L = Math.exp(-lambda), k = 0, p = 1;
@@ -180,8 +180,10 @@ const BracketView: React.FC = () => {
                 
                 {/* Matches Container */}
                 <div className={`flex flex-col ${matchGap} ${matchSpacing} relative`}>
-                  {roundMatches.map((match, mIndex) => (
-                    <div key={match.id} className="relative flex flex-col items-center">
+                  {roundMatches.map((match, mIndex) => {
+                    const isSecondHalfStart = roundMatches.length > 1 && mIndex === roundMatches.length / 2 && round !== 'FINAL';
+                    return (
+                    <div key={match.id} className={`relative flex flex-col items-center ${isSecondHalfStart ? 'mt-12' : ''}`}>
                       {match.round === '3RD' && (
                         <div className="text-yellow-500 font-bold text-xs uppercase mb-2 tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">3rd Place Match</div>
                       )}
@@ -235,7 +237,8 @@ const BracketView: React.FC = () => {
                           w-6 md:w-8 border-t-2 border-white/20 z-0`}></div>
                       )}
                     </div>
-                  ))}
+                  );
+                })}
                 </div>
               </div>
             );

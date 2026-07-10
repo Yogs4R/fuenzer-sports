@@ -25,21 +25,7 @@ const W_3RD_MAPPING: Record<string, string[]> = {
   'L': ['D', 'E', 'I', 'J'],
 };
 
-// 4 Matches: Group Winners vs Runners-up
-const W_R_MAPPING: Array<[string, string]> = [
-  ['C', 'F'],
-  ['F', 'C'],
-  ['H', 'J'],
-  ['J', 'H'],
-];
-
-// 4 Matches: Runners-up vs Runners-up
-const R_R_MAPPING: Array<[string, string]> = [
-  ['A', 'B'],
-  ['D', 'E'],
-  ['G', 'I'],
-  ['K', 'L'],
-];
+// Note: W_R_MAPPING and R_R_MAPPING were removed because matches are now mapped to explicit slots.
 
 export const generateBracket = (standings: GroupStandings[]): MatchNode[] => {
   if (!standings || standings.length === 0) return [];
@@ -66,31 +52,8 @@ export const generateBracket = (standings: GroupStandings[]): MatchNode[] => {
   const best8Third = thirdPlaces.slice(0, 8);
 
   const matches: MatchNode[] = [];
-  let matchCounter = 1;
 
-  // Function to create a match
-  const addMatch = (home: TeamStats | undefined, away: TeamStats | undefined) => {
-    matches.push({
-      id: `R32-${matchCounter}`,
-      round: 'R32',
-      home,
-      away,
-      position: matchCounter
-    });
-    matchCounter++;
-  };
-
-  // 3. Assign 4 Matches: Winners vs Runners-up
-  W_R_MAPPING.forEach(([wGrp, rGrp]) => {
-    addMatch(winners.get(wGrp), runnersUp.get(rGrp));
-  });
-
-  // 4. Assign 4 Matches: Runners-up vs Runners-up
-  R_R_MAPPING.forEach(([r1Grp, r2Grp]) => {
-    addMatch(runnersUp.get(r1Grp), runnersUp.get(r2Grp));
-  });
-
-  // 5. Greedy Assignment (Bipartite matching) for Winners vs Best 3rd
+  // 3. Greedy Assignment (Bipartite matching) for Winners vs Best 3rd
   const wGroupLetters = Object.keys(W_3RD_MAPPING); // A, B, D, E, G, I, K, L
   const assignments = new Map<string, TeamStats>();
 
@@ -125,9 +88,37 @@ export const generateBracket = (standings: GroupStandings[]): MatchNode[] => {
      });
   }
 
-  // Add the 8 Winners vs 3rd matches
-  wGroupLetters.forEach(wGrp => {
-    addMatch(winners.get(wGrp), assignments.get(wGrp));
+  // After solving, map the exactly matched teams into their fixed horizontal bracket slots
+  const r32Slots: Array<{ home: TeamStats | undefined, away: TeamStats | undefined }> = new Array(16).fill({ home: undefined, away: undefined });
+
+  // Left Bracket (Matches 1-8)
+  r32Slots[0] = { home: winners.get('E'), away: assignments.get('E') }; // Match 1
+  r32Slots[1] = { home: winners.get('I'), away: assignments.get('I') }; // Match 2
+  r32Slots[2] = { home: runnersUp.get('A'), away: runnersUp.get('B') }; // Match 3
+  r32Slots[3] = { home: winners.get('F'), away: runnersUp.get('C') }; // Match 4
+  r32Slots[4] = { home: runnersUp.get('K'), away: runnersUp.get('L') }; // Match 5
+  r32Slots[5] = { home: winners.get('H'), away: runnersUp.get('J') }; // Match 6
+  r32Slots[6] = { home: winners.get('D'), away: assignments.get('D') }; // Match 7
+  r32Slots[7] = { home: winners.get('G'), away: assignments.get('G') }; // Match 8
+
+  // Right Bracket (Matches 9-16)
+  r32Slots[8] = { home: winners.get('C'), away: runnersUp.get('F') }; // Match 9
+  r32Slots[9] = { home: runnersUp.get('E'), away: runnersUp.get('I') }; // Match 10
+  r32Slots[10] = { home: winners.get('A'), away: assignments.get('A') }; // Match 11
+  r32Slots[11] = { home: winners.get('L'), away: assignments.get('L') }; // Match 12
+  r32Slots[12] = { home: winners.get('J'), away: runnersUp.get('H') }; // Match 13
+  r32Slots[13] = { home: runnersUp.get('D'), away: runnersUp.get('G') }; // Match 14
+  r32Slots[14] = { home: winners.get('B'), away: assignments.get('B') }; // Match 15
+  r32Slots[15] = { home: winners.get('K'), away: assignments.get('K') }; // Match 16
+
+  r32Slots.forEach((slot, idx) => {
+    matches.push({
+      id: `R32-${idx + 1}`,
+      round: 'R32',
+      home: slot.home,
+      away: slot.away,
+      position: idx + 1
+    });
   });
 
   // Pre-generate empty slots for R16, QF, SF, FINAL, 3RD

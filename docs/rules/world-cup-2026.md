@@ -97,3 +97,27 @@ To ensure your agent's calculations run validly without any missed or duplicated
 | Group Runner-up vs. Group Runner-up | 4 Matches | 8 Group Runners-up |
 | **GRAND TOTAL** | **16 Matches** | **32 Qualified Teams** |
 
+---
+
+### 5. Exact Round of 32 Bracket Slots (Visual Ordering)
+To align with the official horizontal bracket design, the 16 matches are strictly ordered from top to bottom, split into the **Left Bracket** (Matches 1-8) and **Right Bracket** (Matches 9-16).
+
+**Left Bracket (Matches 1-8):**
+1. **Match 1:** Winner Group E vs. 3rd Place (A/B/C/D/F)
+2. **Match 2:** Winner Group I vs. 3rd Place (C/D/F/G/H)
+3. **Match 3:** Runner-up Group A vs. Runner-up Group B
+4. **Match 4:** Winner Group F vs. Runner-up Group C
+5. **Match 5:** Runner-up Group K vs. Runner-up Group L
+6. **Match 6:** Winner Group H vs. Runner-up Group J
+7. **Match 7:** Winner Group D vs. 3rd Place (B/F/G/I)
+8. **Match 8:** Winner Group G vs. 3rd Place (I/J/K/L)
+
+**Right Bracket (Matches 9-16):**
+9. **Match 9:** Winner Group C vs. Runner-up Group F
+10. **Match 10:** Runner-up Group E vs. Runner-up Group I
+11. **Match 11:** Winner Group A vs. 3rd Place (C/E/F/H)
+12. **Match 12:** Winner Group L vs. 3rd Place (D/E/I/J)
+13. **Match 13:** Winner Group J vs. Runner-up Group H
+14. **Match 14:** Runner-up Group D vs. Runner-up Group G
+15. **Match 15:** Winner Group B vs. 3rd Place (A/C/E/F)
+16. **Match 16:** Winner Group K vs. 3rd Place (D/G/H/I)
