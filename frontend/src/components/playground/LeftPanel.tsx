@@ -6,7 +6,8 @@ import { Mic, ArrowUp, MoreVertical, X, Edit2, Trash2, ChevronDown, Sparkles, Co
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-
+import { en } from '../../locales/en';
+import { id } from '../../locales/id';
 interface LeftPanelProps {
   onCloseMobile: () => void;
 }
@@ -21,9 +22,12 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
     selectedModel, setSelectedModel,
     selectedMode,
     selectedStyle, setSelectedStyle,
-    simulationTitle
+    simulationTitle,
+    language
   } = useAppStore();
   
+  const t = language === 'id' ? id : en;
+  const p = t.components.playground.leftPanel;
   const [prompt, setPrompt] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -138,7 +142,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
                 />
               ) : (
                 <>
-                  <h2 className="text-white font-bold text-lg md:text-xl truncate mr-2">{simulationTitle || "Simulasi Tanpa Judul"}</h2>
+                  <h2 className="text-white font-bold text-lg md:text-xl truncate mr-2">{simulationTitle || p.untitled}</h2>
                   <button onClick={() => setIsEditingTitle(true)} className="text-gray-400 hover:text-white transition-colors">
                     <Edit2 size={12} />
                   </button>
@@ -162,8 +166,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)}></div>
               <div className="absolute right-0 mt-2 w-48 bg-[#0a1128] border border-white/10 rounded-xl shadow-2xl z-50 py-1 overflow-hidden animate-in fade-in zoom-in duration-200">
-                <button onClick={() => { setIsEditingTitle(true); setIsMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white flex items-center"><Edit2 size={14} className="mr-2" /> Ubah Nama</button>
-                <button onClick={() => { handleClearChat(); setIsMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10 hover:text-red-300 flex items-center border-t border-white/10 mt-1 pt-2"><Trash2 size={14} className="mr-2" /> Hapus Obrolan</button>
+                <button onClick={() => { setIsEditingTitle(true); setIsMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white flex items-center"><Edit2 size={14} className="mr-2" /> {p.rename}</button>
+                <button onClick={() => { handleClearChat(); setIsMenuOpen(false); }} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10 hover:text-red-300 flex items-center border-t border-white/10 mt-1 pt-2"><Trash2 size={14} className="mr-2" /> {p.clearChat}</button>
               </div>
             </>
           )}
@@ -175,8 +179,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
         {chatHistory.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center px-6 opacity-60">
             <Sparkles size={32} className="text-primary-cyan mb-4" />
-            <h3 className="text-lg font-bold text-white mb-2">Siap untuk mengeksplorasi?</h3>
-            <p className="text-sm text-gray-400">Ajukan pertanyaan lanjutan atau sesuaikan skenario untuk melihat bagaimana simulasi merespons.</p>
+            <h3 className="text-lg font-bold text-white mb-2">{p.readyToExplore}</h3>
+            <p className="text-sm text-gray-400">{p.readyDesc}</p>
           </div>
         )}
         
@@ -184,7 +188,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
           <div key={idx} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             {msg.role === 'ai' && (
               <div className="w-full mb-1">
-                <ProcessingState message="Memproses..." />
+                <ProcessingState isCompleted={true} />
               </div>
             )}
             
@@ -214,7 +218,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
             
             <div className={`flex items-center gap-2 mt-1 px-1 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
               <span className="text-[10px] text-gray-500">
-                {msg.role === 'user' ? 'Anda' : 'Fuenzer AI'}
+                {msg.role === 'user' ? p.you : p.ai}
               </span>
               {msg.role === 'ai' && (
                 <span className="text-[10px] text-gray-500 font-mono">
@@ -223,9 +227,11 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
               )}
               <button 
                 onClick={() => handleCopy(msg.content, idx)}
-                className="text-gray-500 hover:text-gray-300 transition-colors"
-                title="Salin ke clipboard"
+                className="relative group text-gray-500 hover:text-gray-300 transition-colors"
               >
+                <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-[#080d1e] text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                    {copiedIndex === idx ? p.copied : p.copyResponse}
+                </span>
                 {copiedIndex === idx ? <Check size={10} className="text-green-400" /> : <Copy size={10} />}
               </button>
             </div>
@@ -246,7 +252,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Minta Fuenzer untuk menyimulasikan pertandingan, menganalisis tim, atau memprediksi hasil..."
+              placeholder={p.placeholder}
               className="flex-1 max-h-32 min-h-[40px] bg-transparent text-white py-2 outline-none resize-none overflow-y-auto scrollbar-custom text-sm w-full"
               rows={prompt.split('\n').length > 1 ? Math.min(prompt.split('\n').length, 4) : 1}
               disabled={isLoading}
@@ -259,7 +265,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
                 type="button"
                 onClick={toggleRecording}
                 className={`p-1.5 rounded-full transition-colors shrink-0 ${isRecording ? 'text-red-400 animate-pulse bg-red-400/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
-                title="Input Suara"
+                title={p.voiceInput}
               >
                 <Mic size={16} />
               </button>

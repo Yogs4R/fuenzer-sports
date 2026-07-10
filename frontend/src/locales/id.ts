@@ -124,6 +124,71 @@ export const id = {
       version: "Versi",
       serverStatus: "Status Server:",
       online: "Online"
+    },
+    playground: {
+      leftPanel: {
+        placeholder: "Minta Fuenzer untuk menyimulasikan pertandingan, menganalisis tim, atau memprediksi hasil...",
+        untitled: "Simulasi Tanpa Judul",
+        rename: "Ubah Nama",
+        clearChat: "Hapus Obrolan",
+        copied: "Tersalin!",
+        copyResponse: "Salin respons",
+        selectEngine: "Pilih Engine AI",
+        promptStyle: "Gaya Prompt",
+        readyToExplore: "Siap untuk mengeksplorasi?",
+        readyDesc: "Ajukan pertanyaan lanjutan atau sesuaikan skenario untuk melihat bagaimana simulasi merespons.",
+        you: "Anda",
+        ai: "Fuenzer AI",
+        voiceInput: "Input Suara"
+      },
+      rightPanel: {
+        groupStageComplete: "Babak Grup telah selesai! Gunakan mode 'From Scratch' untuk mengulang simulasi grup, atau beralih ke Knockout Bracket untuk menyimulasikan sisa turnamen.",
+        runningSim: "Menjalankan Simulasi Monte Carlo...",
+        playSim: "Jalankan Simulasi",
+        simBracket: "Menyimulasikan Bagan...",
+        simKnockout: "Simulasikan Knockout",
+        hideMetrics: "Sembunyikan Metrik",
+        showMetrics: "Tampilkan Metrik",
+        sort: "Urutkan:",
+        defaultSort: "Bawaan (Grup)",
+        highest1st: "Juara 1 Tertinggi",
+        lowest1st: "Juara 1 Terendah",
+        highestAdv: "Lolos Tertinggi",
+        lowestAdv: "Lolos Terendah",
+        searchTeam: "Cari tim...",
+        filter: "Filter",
+        showGroups: "Tampilkan Grup",
+        clearAll: "Hapus Semua",
+        selectAll: "Pilih Semua",
+        probOverview: "Ikhtisar Probabilitas",
+        loadingStadium: "Memuat data stadion...",
+        noGroupsMatch: "Tidak ada grup yang cocok dengan filter yang dipilih.",
+        groupStandings: "Group Standings",
+        knockoutBracket: "Knockout Bracket",
+        preTournament: "Pre-Tournament",
+        liveProgression: "Live Progression",
+        matchday: "Matchday"
+      },
+      bracket: {
+        winProb: "PROBABILITAS KEMENANGAN",
+        disclaimer: "PERINGATAN: Bagan ini mengasumsikan tim peringkat 3 terbaik dialokasikan secara greedy. Ini bukan pengundian manual FIFA World Cup yang resmi. Tim tuan rumah yang lolos akan menerima tambahan power rating +5.0.",
+        thirdPlace: "Perebutan Juara 3",
+        hypothetical: "PERINGATAN: Hasil simulasi murni hipotesis dan didasarkan pada perhitungan Monte Carlo.",
+        noData: "Tidak ada data bagan yang tersedia.",
+        runSimulation: "Jalankan simulasi babak grup 'From Scratch' terlebih dahulu.",
+        showMetrics: "Tampilkan Metrik",
+        hideMetrics: "Sembunyikan Metrik"
+      },
+      processing: {
+        step1: "Mengumpulkan data skuad terbaru...",
+        step2: "Menjalankan 10.000 iterasi Monte Carlo...",
+        step3: "Menghitung probabilitas pertandingan...",
+        step4: "Menghasilkan komentar AI...",
+        viewThoughtProcess: "Lihat proses pemikiran",
+        complete: "Pemrosesan Selesai",
+        processing: "Memproses"
+      }
     }
   }
 };
+

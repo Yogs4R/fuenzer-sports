@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle2, ChevronDown, ChevronRight } from 'lucide-react';
-
-const steps = [
-  "Ingesting latest squad data...",
-  "Running 10,000 Monte Carlo iterations...",
-  "Calculating match probabilities...",
-  "Generating AI commentary..."
-];
+import { useAppStore } from '../../store/useAppStore';
+import { en } from '../../locales/en';
+import { id } from '../../locales/id';
 
 interface ProcessingStateProps {
   isCompleted?: boolean;
 }
 
 const ProcessingState: React.FC<ProcessingStateProps> = ({ isCompleted = false }) => {
+  const { language } = useAppStore();
+  const t = language === 'id' ? id : en;
+  const p = t.components.playground.processing;
+  const steps = [p.step1, p.step2, p.step3, p.step4];
+
   const [currentStep, setCurrentStep] = useState(isCompleted ? steps.length : 0);
   const [isExpanded, setIsExpanded] = useState(!isCompleted);
 
@@ -41,7 +42,7 @@ const ProcessingState: React.FC<ProcessingStateProps> = ({ isCompleted = false }
         className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-400 rounded-full px-3 py-1.5 text-xs transition-colors mb-2"
       >
         <CheckCircle2 size={14} className="text-primary-cyan" />
-        <span>View thought process</span>
+        <span>{p.viewThoughtProcess}</span>
         <ChevronRight size={14} />
       </button>
     );
@@ -55,7 +56,7 @@ const ProcessingState: React.FC<ProcessingStateProps> = ({ isCompleted = false }
       >
         <div className="flex items-center gap-2">
           {isCompleted ? <CheckCircle2 className="w-4 h-4 text-primary-cyan" /> : <Loader2 className="w-4 h-4 animate-spin" />}
-          <span className="font-semibold text-[10px] md:text-xs">{isCompleted ? 'Processing Complete' : 'Processing'}</span>
+          <span className="font-semibold text-[10px] md:text-xs">{isCompleted ? p.complete : p.processing}</span>
         </div>
         {isCompleted && <ChevronDown size={14} className="text-gray-400" />}
       </div>

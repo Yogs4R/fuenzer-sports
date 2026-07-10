@@ -3,6 +3,8 @@ import { useAppStore } from '../../store/useAppStore';
 import { generateBracket } from '../../utils/bracketGenerator';
 import { calculateWinProbability, getHostAdvantage } from '../../utils/probability';
 import { motion, AnimatePresence } from 'framer-motion';
+import { en } from '../../locales/en';
+import { id } from '../../locales/id';
 
 const ROUNDS = ['R32', 'R16', 'QF', 'SF', 'FINAL'];
 const SIMULATION_ROUNDS = ['R32', 'R16', 'QF', 'SF', '3RD', 'FINAL'];
@@ -22,8 +24,12 @@ const BracketView: React.FC = () => {
     isSimulatingKnockout, 
     setIsSimulatingKnockout,
     bracketMatches: matches,
-    setBracketMatches: setMatches
+    setBracketMatches: setMatches,
+    language
   } = useAppStore();
+
+  const t = language === 'id' ? id : en;
+  const p = t.components.playground.bracket;
 
   const [showMetrics, setShowMetrics] = React.useState(false);
   const [selectedMetricsRound, setSelectedMetricsRound] = React.useState<string | null>(null);
@@ -160,8 +166,8 @@ const BracketView: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-500 min-h-[400px]">
         <svg className="w-16 h-16 mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-        <p className="text-lg">No bracket data available.</p>
-        <p className="text-sm mt-2">Run a "From Scratch" group stage simulation first.</p>
+        <p className="text-lg">{p.noData}</p>
+        <p className="text-sm mt-2">{p.runSimulation}</p>
       </div>
     );
   }
@@ -190,7 +196,7 @@ const BracketView: React.FC = () => {
             className="bg-[#0a1024] hover:bg-primary-cyan/20 text-primary-cyan border border-primary-cyan/50 px-3 py-1.5 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(76,215,246,0.2)] flex items-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-            {showMetrics ? 'Sembunyikan Metrik' : 'Tampilkan Metrik'}
+            {showMetrics ? p.hideMetrics : p.showMetrics}
           </button>
         </div>
       )}
@@ -206,7 +212,7 @@ const BracketView: React.FC = () => {
           >
             <div className="bg-primary-cyan/10 border-b border-primary-cyan/20 p-3 flex flex-col gap-2">
               <div className="flex justify-between items-center">
-                <h3 className="text-white text-xs font-bold uppercase tracking-widest">PROBABILITAS KEMENANGAN</h3>
+                <h3 className="text-white text-xs font-bold uppercase tracking-widest">{p.winProb}</h3>
               </div>
               <div className="flex gap-1 overflow-x-auto scrollbar-custom pb-1">
                 {availableRounds.map(round => (
@@ -291,7 +297,7 @@ const BracketView: React.FC = () => {
                     return (
                     <div key={match.id} className={`relative flex flex-col items-center ${isSecondHalfStart ? 'mt-[48px]' : ''}`}>
                       {match.round === '3RD' && (
-                        <div className="text-yellow-500 font-bold text-xs uppercase mb-2 tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">Perebutan Juara 3</div>
+                        <div className="text-yellow-500 font-bold text-xs uppercase mb-2 tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">{p.thirdPlace}</div>
                       )}
                       <motion.div 
                         layout
@@ -355,7 +361,8 @@ const BracketView: React.FC = () => {
       {/* Disclaimer - Hidden on mobile to save space */}
       <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none z-40 w-auto max-w-md">
         <div className="bg-[#080d1e] px-4 py-1.5 rounded-full border border-white/20 shadow-xl text-[10px] text-gray-400 text-center whitespace-normal leading-tight">
-          PERINGATAN: Hasil simulasi murni hipotesis dan didasarkan pada perhitungan Monte Carlo.
+          <p>{p.disclaimer}</p>
+          <p className="mt-1 text-primary-cyan">{p.hypothetical}</p>
         </div>
       </div>
     </div>

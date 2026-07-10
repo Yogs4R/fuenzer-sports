@@ -9,8 +9,14 @@ interface RightPanelProps {
   onToggleMenu?: () => void;
 }
 
+import { en } from '../../locales/en';
+import { id } from '../../locales/id';
+
 const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
-  const { simulationData, runSimulation, isLoading, liveStandings, selectedModel, selectedMode, isSimulatingKnockout } = useAppStore();
+  const { simulationData, runSimulation, isLoading, liveStandings, selectedModel, selectedMode, isSimulatingKnockout, language } = useAppStore();
+  const t = language === 'id' ? id : en;
+  const p = t.components.playground.rightPanel;
+
   const [activeTab, setActiveTab] = useState<'standings' | 'bracket'>('standings');
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,7 +68,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
   const handleSimulate = () => {
     if (!isLoading) {
       if (activeTab === 'standings' && selectedMode === 'Live Standings') {
-        setToastMessage("Babak Grup telah selesai! Gunakan mode 'From Scratch' untuk mengulang simulasi grup, atau beralih ke Knockout Bracket untuk menyimulasikan sisa turnamen.");
+        setToastMessage(p.groupStageComplete);
         setTimeout(() => setToastMessage(null), 5000);
         return;
       }
@@ -79,7 +85,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             <div className="w-3 h-3 rounded-full bg-primary-cyan animate-bounce" style={{ animationDelay: '150ms' }} />
             <div className="w-3 h-3 rounded-full bg-primary-cyan animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
-          <p className="text-primary-cyan font-semibold animate-pulse">Menjalankan Simulasi Monte Carlo...</p>
+          <p className="text-primary-cyan font-semibold animate-pulse">{p.runningSim}</p>
         </div>
       )}
 
@@ -100,7 +106,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
               activeTab === 'standings' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
             }`}
           >
-            Group Standings
+            {p.groupStandings}
             {activeTab === 'standings' && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-cyan shadow-[0_0_8px_rgba(76,215,246,0.8)]" />
             )}
@@ -111,7 +117,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
               activeTab === 'bracket' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
             }`}
           >
-            Knockout Bracket
+            {p.knockoutBracket}
             {activeTab === 'bracket' && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-cyan shadow-[0_0_8px_rgba(76,215,246,0.8)]" />
             )}
@@ -131,7 +137,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
           className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-cyan/10 hover:bg-primary-cyan/20 text-primary-cyan text-xs font-semibold rounded-lg border border-primary-cyan/30 transition-colors disabled:opacity-50 w-full sm:w-auto ml-auto"
         >
           <Play size={14} />
-          Jalankan Simulasi
+          {p.playSim}
         </button>
       </div>
 
@@ -142,11 +148,11 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             {/* Matchday Badge and Search */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-4">
               <div className="flex items-center gap-4">
-                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Live Progression</h2>
+                <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-widest">{p.liveProgression}</h2>
                 <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 bg-white/5 rounded-full border border-white/10 transition-all duration-300">
                   <span className={`w-2 h-2 rounded-full shrink-0 ${isLoading || currentMatchday < 3 ? 'bg-primary-cyan animate-pulse' : 'bg-green-500'}`}></span>
                   <span className="text-xs font-bold text-white uppercase tracking-wider whitespace-nowrap">
-                    {currentMatchday === 0 ? 'Pre-Tournament' : `Matchday ${currentMatchday}`}
+                    {currentMatchday === 0 ? p.preTournament : `${p.matchday} ${currentMatchday}`}
                   </span>
                 </div>
               </div>
@@ -157,7 +163,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                   <input 
                     type="text"
-                    placeholder="Cari tim..."
+                    placeholder={p.searchTeam}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="bg-[#0a1128] text-white text-xs pl-8 pr-4 py-2 rounded-lg border border-white/10 focus:border-primary-cyan/50 outline-none w-full sm:w-48 transition-colors"
@@ -170,7 +176,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                   className={`bg-[#0a1128] text-white text-xs px-3 py-2 rounded-lg border transition-colors flex items-center gap-2 ${showMetrics ? 'border-primary-cyan/50 bg-primary-cyan/5' : 'border-white/10 hover:bg-white/5'}`}
                 >
                   <Target size={14} className={showMetrics ? 'text-primary-cyan' : ''} />
-                  <span className="hidden sm:inline">{showMetrics ? 'Sembunyikan Metrik' : 'Tampilkan Metrik'}</span>
+                  <span className="hidden sm:inline">{showMetrics ? p.hideMetrics : p.showMetrics}</span>
                 </button>
                 
                 {/* Filter Dropdown */}
@@ -180,7 +186,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                     className={`bg-[#0a1128] text-white text-xs px-3 py-2 rounded-lg border transition-colors flex items-center gap-2 ${isFilterOpen || selectedFilters.length < filterOptions.length ? 'border-primary-cyan/50 bg-primary-cyan/5' : 'border-white/10 hover:bg-white/5'}`}
                   >
                     <Filter size={14} className={selectedFilters.length < filterOptions.length ? 'text-primary-cyan' : ''} />
-                    <span className="hidden sm:inline">Filter</span>
+                    <span className="hidden sm:inline">{p.filter}</span>
                   </button>
                   <AnimatePresence>
                     {isFilterOpen && (
@@ -191,12 +197,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                           className="absolute right-0 top-full mt-2 w-48 bg-[#0a1128] border border-white/10 rounded-xl shadow-xl z-50 p-2 max-h-64 overflow-y-auto scrollbar-custom"
                         >
                           <div className="flex items-center justify-between px-2 pb-2 mb-2 border-b border-white/10">
-                            <span className="text-xs font-bold text-gray-300">Tampilkan Grup</span>
+                            <span className="text-xs font-bold text-gray-300">{p.showGroups}</span>
                             <button 
                               onClick={() => setSelectedFilters(selectedFilters.length === filterOptions.length ? [] : [...filterOptions])}
                               className="text-[10px] text-primary-cyan hover:underline"
                             >
-                              {selectedFilters.length === filterOptions.length ? 'Hapus Semua' : 'Select All'}
+                              {selectedFilters.length === filterOptions.length ? p.clearAll : p.selectAll}
                             </button>
                           </div>
                           {filterOptions.map(opt => (
@@ -225,17 +231,17 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             {simulationData && showMetrics && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Ikhtisar Probabilitas</h3>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{p.probOverview}</h3>
                   <select 
                     value={metricSort}
                     onChange={(e) => setMetricSort(e.target.value as MetricSort)}
                     className="bg-[#0a1128] text-white text-xs px-2 py-1 rounded border border-white/10 outline-none cursor-pointer"
                   >
-                    <option value="default">Bawaan (Grup)</option>
-                    <option value="highest_1st">Juara 1 Tertinggi</option>
-                    <option value="lowest_1st">Juara 1 Terendah</option>
-                    <option value="highest_adv">Lolos Tertinggi</option>
-                    <option value="lowest_adv">Lolos Terendah</option>
+                    <option value="default">{p.defaultSort}</option>
+                    <option value="highest_1st">{p.highest1st}</option>
+                    <option value="lowest_1st">{p.lowest1st}</option>
+                    <option value="highest_adv">{p.highestAdv}</option>
+                    <option value="lowest_adv">{p.lowestAdv}</option>
                   </select>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -297,12 +303,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             {currentStandingsRaw.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 space-y-4">
                 <div className="w-8 h-8 border-2 border-primary-cyan border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-gray-400 text-sm animate-pulse">Loading stadium data...</p>
+                <p className="text-gray-400 text-sm animate-pulse">{p.loadingStadium}</p>
               </div>
             ) : currentStandings.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 space-y-4 border border-dashed border-white/10 rounded-xl bg-white/5">
                 <svg className="w-12 h-12 text-gray-500 opacity-50 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                <p className="text-gray-400 text-sm font-semibold">No groups match the selected filters.</p>
+                <p className="text-gray-400 text-sm font-semibold">{p.noGroupsMatch}</p>
               </div>
             ) : (
               <>

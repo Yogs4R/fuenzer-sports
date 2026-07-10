@@ -124,6 +124,71 @@ export const en = {
       version: "Version",
       serverStatus: "Server Status:",
       online: "Online"
+    },
+    playground: {
+      leftPanel: {
+        placeholder: "Ask Fuenzer to simulate matches, analyze teams, or predict outcomes...",
+        untitled: "Untitled Simulation",
+        rename: "Rename",
+        clearChat: "Clear Chat",
+        copied: "Copied!",
+        copyResponse: "Copy response",
+        selectEngine: "Select AI Engine",
+        promptStyle: "Prompt Style",
+        readyToExplore: "Ready to explore?",
+        readyDesc: "Ask a follow-up question or tweak the scenario to see how the simulation responds.",
+        you: "You",
+        ai: "Fuenzer AI",
+        voiceInput: "Voice Input"
+      },
+      rightPanel: {
+        groupStageComplete: "Group Stage is completed! Use 'From Scratch' mode to resimulate groups, or switch to the Knockout Bracket to simulate the rest of the tournament.",
+        runningSim: "Running Monte Carlo Simulations...",
+        playSim: "Play Simulation",
+        simBracket: "Simulating Bracket...",
+        simKnockout: "Simulate Knockout",
+        hideMetrics: "Hide Metrics",
+        showMetrics: "Show Metrics",
+        sort: "Sort:",
+        defaultSort: "Default (Group)",
+        highest1st: "Highest 1st Place",
+        lowest1st: "Lowest 1st Place",
+        highestAdv: "Highest Advance",
+        lowestAdv: "Lowest Advance",
+        searchTeam: "Search team...",
+        filter: "Filter",
+        showGroups: "Show Groups",
+        clearAll: "Clear All",
+        selectAll: "Select All",
+        probOverview: "Probability Overview",
+        loadingStadium: "Loading stadium data...",
+        noGroupsMatch: "No groups match the selected filters.",
+        groupStandings: "Group Standings",
+        knockoutBracket: "Knockout Bracket",
+        preTournament: "Pre-Tournament",
+        liveProgression: "Live Progression",
+        matchday: "Matchday"
+      },
+      bracket: {
+        winProb: "WIN PROBABILITIES",
+        disclaimer: "DISCLAIMER: This bracket assumes best 3rd-placed teams are allocated greedily. It is not an official FIFA World Cup manual draw. Qualifying host teams will receive a +5.0 power rating for home advantage.",
+        thirdPlace: "3rd Place Match",
+        hypothetical: "Simulation results are purely hypothetical and based on Monte Carlo calculations.",
+        noData: "No bracket data available.",
+        runSimulation: "Run a 'From Scratch' group stage simulation first.",
+        showMetrics: "Show Metrics",
+        hideMetrics: "Hide Metrics"
+      },
+      processing: {
+        step1: "Ingesting latest squad data...",
+        step2: "Running 10,000 Monte Carlo iterations...",
+        step3: "Calculating match probabilities...",
+        step4: "Generating AI commentary...",
+        viewThoughtProcess: "View thought process",
+        complete: "Processing Complete",
+        processing: "Processing"
+      }
     }
   }
 };
+
