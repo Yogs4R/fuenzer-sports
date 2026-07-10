@@ -43,8 +43,8 @@ export const id = {
       p2: "Fuenzer Sports memberi Anda lisensi sementara dan pribadi untuk menjalankan simulasi olahraga Monte Carlo untuk tujuan analisis dan hiburan. Semua output analitik, model logika simulasi, dan desain visual tetap menjadi milik Fuenzer Sports.",
       h2: "2. Penafian Simulasi",
       p3: "Semua prediksi turnamen, probabilitas klasemen, dan hasil pertandingan yang disimulasikan dihitung menggunakan pemodelan statistik acak (metode Monte Carlo). Fuenzer Sports tidak menjamin akurasi prediktif 100%. Output JANGAN digunakan sebagai nasihat keuangan, taruhan, atau investasi.",
-      h3: "3. Batas Penggunaan API",
-      p4: "Anda setuju untuk tidak mengeksploitasi, melakukan spam, scraping, atau serangan denial-of-service pada endpoint FastAPI backend kami. Kebijakan pembatasan laju (rate limiting) diberlakukan pada profil tamu dan anggota."
+      h3: "3. Penggunaan API & Analitik",
+      p4: "Anda setuju untuk tidak mengeksploitasi, melakukan spam, scraping, atau serangan denial-of-service pada endpoint FastAPI backend kami. Kebijakan pembatasan laju (rate limiting) diberlakukan pada profil tamu dan anggota. Dengan menggunakan layanan kami dan menerima cookie, Anda juga menyetujui pengumpulan data penggunaan secara anonim melalui Google Analytics untuk membantu kami menyempurnakan platform."
     },
     privacy: {
       title: "Kebijakan Privasi",
@@ -55,8 +55,8 @@ export const id = {
       guestFirst: "Guest-First",
       p2Part2: ". Ini berarti bahwa semua input simulasi pertandingan, preferensi, dan pengaturan ruang kerja Anda disimpan secara lokal di ",
       p2Part3: " perangkat Anda. Tidak ada data identifikasi pribadi atau log kueri pencarian yang diunggah atau disimpan di server kami kecuali Anda mendaftar untuk akun pengguna secara eksplisit.",
-      h2: "2. Cookie",
-      p3: "Seperti situs web lainnya, Fuenzer Sports menggunakan cookie sesi jika Anda memilih untuk mengautentikasi (Masuk). Cookie ini hanya digunakan untuk mengelola sesi login Anda dan mengamankan ruang kerja kustom Anda. Kami tidak menggunakan cookie pelacakan atau periklanan pihak ketiga.",
+      h2: "2. Cookie & Analitik",
+      p3: "Seperti situs web lainnya, Fuenzer Sports menggunakan cookie sesi jika Anda memilih untuk mengautentikasi (Masuk). Cookie ini hanya digunakan untuk mengelola sesi login Anda dan mengamankan ruang kerja kustom Anda. Kami juga menggunakan Google Analytics untuk memahami interaksi Anda guna meningkatkan pengalaman penggunaan, namun fitur ini hanya aktif apabila Anda memberikan persetujuan cookie. Kami tidak menggunakan cookie periklanan pihak ketiga.",
       h3: "3. Pembaruan Kebijakan",
       p4: "Kami berhak mengubah Kebijakan Privasi ini kapan saja. Setiap perubahan akan diperbarui di halaman ini dengan tanggal modifikasi yang diperbarui."
     }

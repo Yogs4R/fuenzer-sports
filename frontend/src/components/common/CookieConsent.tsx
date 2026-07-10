@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../../store/useAppStore';
 
 const CookieConsent: React.FC = () => {
-  const { cookieConsent, setCookieConsent, language } = useAppStore();
+  const { cookieConsent, setCookieConsent, language, setCurrentPage } = useAppStore();
 
   useEffect(() => {
     // We update gtag consent dynamically here using the global gtag function
@@ -33,6 +33,12 @@ const CookieConsent: React.FC = () => {
     setCookieConsent(false);
   };
 
+  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: any) => {
+    e.preventDefault();
+    window.history.pushState(null, '', path);
+    setCurrentPage(path);
+  };
+
   return (
     <AnimatePresence>
       {cookieConsent === null && (
@@ -41,33 +47,48 @@ const CookieConsent: React.FC = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', bounce: 0, duration: 0.6 }}
-          className="fixed bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-96 p-5 rounded-2xl border border-white/10 bg-black/60 backdrop-blur-xl z-50 shadow-2xl"
+          className="fixed bottom-0 left-0 right-0 w-full py-4 px-6 md:px-12 border-t border-white/5 bg-bg-0/85 backdrop-blur-md z-50 flex flex-col md:flex-row items-center justify-between gap-4"
         >
-          <div className="flex flex-col gap-4">
-            <div>
-              <h3 className="text-white font-semibold font-inter mb-1">
-                {language === 'id' ? 'Pengaturan Cookie' : 'Cookie Settings'}
-              </h3>
-              <p className="text-gray-400 text-sm font-inter leading-relaxed">
-                {language === 'id' 
-                  ? 'Kami menggunakan cookie Google Analytics untuk memahami bagaimana Anda berinteraksi dengan aplikasi kami guna meningkatkan pengalaman Anda. Apakah Anda mengizinkan?'
-                  : 'We use Google Analytics cookies to understand how you interact with our app and improve your experience. Do you accept?'}
-              </p>
-            </div>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={handleReject}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors font-inter"
-              >
-                {language === 'id' ? 'Tolak' : 'Reject'}
-              </button>
-              <button
-                onClick={handleAccept}
-                className="px-4 py-2 rounded-lg text-sm font-medium bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 transition-all font-inter"
-              >
-                {language === 'id' ? 'Terima' : 'Accept'}
-              </button>
-            </div>
+          <p className="text-gray-300 text-xs md:text-sm font-inter text-center md:text-left">
+            {language === 'id' ? (
+              <>
+                Situs web ini menggunakan cookie untuk memberikan pengalaman terbaik. Untuk informasi lebih lanjut, silakan baca{' '}
+                <a 
+                  href="/privacy" 
+                  onClick={(e) => handleNavigation(e, '/privacy')} 
+                  className="text-primary-cyan hover:underline font-semibold"
+                >
+                  Kebijakan Privasi
+                </a>{' '}
+                kami.
+              </>
+            ) : (
+              <>
+                This website uses cookies to provide the best experience. For more information, please read our{' '}
+                <a 
+                  href="/privacy" 
+                  onClick={(e) => handleNavigation(e, '/privacy')} 
+                  className="text-primary-cyan hover:underline font-semibold"
+                >
+                  Privacy Policy
+                </a>
+                .
+              </>
+            )}
+          </p>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={handleReject}
+              className="px-6 py-2 rounded-full border border-white/10 text-xs sm:text-sm font-semibold text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-inter"
+            >
+              {language === 'id' ? 'Tolak' : 'Reject'}
+            </button>
+            <button
+              onClick={handleAccept}
+              className="bg-primary-cyan text-bg-0 px-6 py-2 rounded-full text-xs sm:text-sm font-semibold hover:bg-cyan-300 transition-all font-inter shadow-[0_0_15px_rgba(76,215,246,0.2)]"
+            >
+              {language === 'id' ? 'Setuju' : 'Accept'}
+            </button>
           </div>
         </motion.div>
       )}

@@ -43,8 +43,8 @@ export const en = {
       p2: "Fuenzer Sports grants you a temporary, personal license to run Monte Carlo sports simulations for analysis and entertainment purposes. All analytical outputs, simulation logic models, and visual designs remain the property of Fuenzer Sports.",
       h2: "2. Simulation Disclaimer",
       p3: "All tournament predictions, standings probabilities, and simulated match outcomes are calculated using randomized statistical modeling (Monte Carlo method). Fuenzer Sports does not guarantee 100% predictive accuracy. Outputs should NOT be used as financial, betting, or investment advice.",
-      h3: "3. API Usage Limits",
-      p4: "You agree not to exploit, spam, scrape, or perform denial-of-service attacks on our backend FastAPI endpoints. Rate limiting policies are enforced on guest and member profiles."
+      h3: "3. API Usage & Analytics",
+      p4: "You agree not to exploit, spam, scrape, or perform denial-of-service attacks on our backend FastAPI endpoints. Rate limiting policies are enforced on guest and member profiles. By using our service and accepting cookies, you also agree to the collection of anonymized usage data via Google Analytics to help us improve the platform."
     },
     privacy: {
       title: "Privacy Policy",
@@ -55,8 +55,8 @@ export const en = {
       guestFirst: "Guest-First",
       p2Part2: " architecture. This means that all of your match simulation inputs, preferences, and workspace settings are saved locally on your device's ",
       p2Part3: ". No personal identification data or search query logs are uploaded or stored on our servers unless you explicitly sign up for a user account.",
-      h2: "2. Cookies",
-      p3: "Like any other website, Fuenzer Sports uses session cookies if you choose to authenticate (Sign In). These cookies are only used to manage your login session and secure your custom workspace. We do not use third-party tracking or advertising cookies.",
+      h2: "2. Cookies & Analytics",
+      p3: "Like any other website, Fuenzer Sports uses session cookies if you choose to authenticate (Sign In). These cookies are only used to manage your login session and secure your custom workspace. We also use Google Analytics to understand how you interact with our application to improve your experience, but this is only active if you explicitly grant cookie consent. We do not use third-party advertising cookies.",
       h3: "3. Policy Updates",
       p4: "We reserve the right to modify this Privacy Policy at any time. Any changes will be updated on this page with an updated modification date."
     }
