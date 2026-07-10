@@ -5,7 +5,7 @@ This MVP architecture is optimized for data computation performance and seamless
 ## Tech Stack
 - **Frontend:** React (Vite), TypeScript, Tailwind CSS, Zustand (with Persist Middleware for LocalStorage).
 - **Backend:** Python (FastAPI, Pydantic, NumPy) - Serves as the Monte Carlo simulation engine & AI Gateway.
-- **External APIs:** Football-Data.org API (for real-time fixtures, teams, and live scores) with a backend caching layer (in-memory/file-based) to bypass the 10/min rate limit.
+- **External APIs:** Football-Data.org API (currently not used; the system relies on local JSON datasets like `football_data_standings.json` for all tournament stages. A backend caching layer like in-memory or Redis will be implemented to bypass the 10/min rate limit when external API data integration is active).
 - **Database & Auth:** Firebase (Firestore & Google Auth) - Active during profile/login synchronization.
 - **AI Infrastructure:** AMD ROCm (Local/Fast) & Fireworks AI API (Pro).
 - **Deployment:** Cloudflare Pages (Frontend) & AMD Developer Cloud (Backend Docker).
