@@ -1,8 +1,51 @@
 import HeroSearchBox from '../components/search/HeroSearchBox';
 import BelowTheFold from '../components/layout/BelowTheFold';
 import { motion } from 'framer-motion';
+import { useSEO } from '../hooks/useSEO';
 
 const LandingPage: React.FC = () => {
+  useSEO({
+    canonical: 'https://sports.fuenzer.web.id/',
+    schema: [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Fuenzer Sports",
+        "alternateName": "Fuenzer Sports | AI-Driven Tournament Simulator",
+        "url": "https://sports.fuenzer.web.id",
+        "description": "Ask Anything. Simulate Everything. Run thousands of Monte Carlo simulations to predict World Cup 2026 outcomes.",
+        "inLanguage": "en"
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Fuenzer Sports",
+        "url": "https://sports.fuenzer.web.id",
+        "description": "AI-driven sports analytics simulation platform that runs thousands of mathematical Monte Carlo simulations in seconds.",
+        "applicationCategory": "SportsApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "inLanguage": "en",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Monte Carlo simulation of World Cup 2026",
+          "Natural language query processing",
+          "Live interactive standings and knockout brackets",
+          "Stateless AI architecture"
+        ],
+        "creator": {
+          "@type": "Organization",
+          "name": "Fuenzer Sports",
+          "url": "https://sports.fuenzer.web.id"
+        }
+      }
+    ]
+  });
+
   return (
     <div 
       className="min-h-screen overflow-hidden relative w-full pt-28 pb-20 flex flex-col items-center bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-[#0a1128] via-[#050814] to-[#050814]"

@@ -6,31 +6,24 @@ const CookieConsent: React.FC = () => {
   const { cookieConsent, setCookieConsent, language } = useAppStore();
 
   useEffect(() => {
-    if (cookieConsent === true) {
-      injectGoogleAnalytics();
+    // We update gtag consent dynamically here using the global gtag function
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      const gtag = (window as any).gtag;
+      if (cookieConsent === true) {
+        gtag('consent', 'update', {
+          'analytics_storage': 'granted',
+          'ad_storage': 'granted',
+          'personalization_storage': 'granted'
+        });
+      } else if (cookieConsent === false) {
+        gtag('consent', 'update', {
+          'analytics_storage': 'denied',
+          'ad_storage': 'denied',
+          'personalization_storage': 'denied'
+        });
+      }
     }
   }, [cookieConsent]);
-
-  const injectGoogleAnalytics = () => {
-    // Prevent multiple injections
-    if (document.getElementById('ga-script')) return;
-
-    const script = document.createElement('script');
-    script.id = 'ga-script';
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=G-W9KS5F0H1N`;
-    document.head.appendChild(script);
-
-    const inlineScript = document.createElement('script');
-    inlineScript.id = 'ga-inline-script';
-    inlineScript.innerHTML = `
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-W9KS5F0H1N');
-    `;
-    document.head.appendChild(inlineScript);
-  };
 
   const handleAccept = () => {
     setCookieConsent(true);
