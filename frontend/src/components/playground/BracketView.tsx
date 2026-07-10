@@ -26,6 +26,7 @@ const BracketView: React.FC = () => {
   } = useAppStore();
 
   const [showMetrics, setShowMetrics] = React.useState(false);
+  const [selectedMetricsRound, setSelectedMetricsRound] = React.useState<string | null>(null);
 
   useEffect(() => {
     const dataToUse = selectedMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
@@ -143,6 +144,16 @@ const BracketView: React.FC = () => {
     return () => window.removeEventListener('simulate-knockout', handleTriggerSim);
   });
 
+  const furthestRound = [...SIMULATION_ROUNDS].reverse().find(round => {
+    return matches.some(m => m.round === round && m.home && m.away);
+  });
+
+  useEffect(() => {
+    if (furthestRound) {
+      setSelectedMetricsRound(furthestRound);
+    }
+  }, [furthestRound]);
+
   const dataToUse = selectedMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
   
   if (!dataToUse || matches.length === 0) {
@@ -155,56 +166,88 @@ const BracketView: React.FC = () => {
     );
   }
 
-  // Find current active round for metrics
-  const activeRound = SIMULATION_ROUNDS.find(round => {
-    return matches.some(m => m.round === round && m.home && m.away && m.homeScore === undefined);
-  });
-  const activeRoundMatches = activeRound ? matches.filter(m => m.round === activeRound && m.home && m.away && m.homeScore === undefined) : [];
+  const metricsRoundMatches = selectedMetricsRound ? matches.filter(m => m.round === selectedMetricsRound && m.home && m.away) : [];
+  const availableRounds = SIMULATION_ROUNDS.filter(round => matches.some(m => m.round === round && m.home && m.away));
+
+  const getProbColor = (prob: number) => {
+    if (prob >= 60) return 'bg-green-500';
+    if (prob >= 40) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+  const getProbTextColor = (prob: number) => {
+    if (prob >= 60) return 'text-green-500';
+    if (prob >= 40) return 'text-yellow-500';
+    return 'text-red-500';
+  };
 
   return (
     <div className="relative w-full h-full flex flex-col bg-[#050814] overflow-hidden">
-      {/* Metrics Toggle Button */}
-      {activeRoundMatches.length > 0 && (
-        <button 
-          onClick={() => setShowMetrics(!showMetrics)}
-          className="absolute top-4 right-4 z-40 bg-primary-cyan/20 hover:bg-primary-cyan/30 text-primary-cyan border border-primary-cyan/50 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(76,215,246,0.2)] flex items-center gap-2"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-          {showMetrics ? 'Hide Metrics' : 'Show Metrics'}
-        </button>
+      {/* Top Action Bar */}
+      {availableRounds.length > 0 && (
+        <div className="flex justify-end p-2 border-b border-white/5 shrink-0 bg-[#050814] z-40 relative">
+          <button 
+            onClick={() => setShowMetrics(!showMetrics)}
+            className="bg-[#0a1024] hover:bg-primary-cyan/20 text-primary-cyan border border-primary-cyan/50 px-3 py-1.5 rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(76,215,246,0.2)] flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+            {showMetrics ? 'Hide Metrics' : 'Show Metrics'}
+          </button>
+        </div>
       )}
 
       {/* Floating Metrics Box */}
       <AnimatePresence>
-        {showMetrics && activeRoundMatches.length > 0 && (
+        {showMetrics && availableRounds.length > 0 && (
           <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="absolute top-14 right-4 z-50 w-64 md:w-72 max-h-[70vh] bg-[#0a1024]/95 backdrop-blur-md border border-primary-cyan/30 rounded-xl shadow-2xl flex flex-col overflow-hidden"
+            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+            className="absolute top-12 left-2 right-2 md:left-auto md:right-4 md:w-80 max-h-[calc(100%-4rem)] z-50 bg-[#0a1024]/95 backdrop-blur-xl border border-primary-cyan/30 rounded-xl shadow-2xl flex flex-col overflow-hidden"
           >
-            <div className="bg-primary-cyan/10 border-b border-primary-cyan/20 p-3 flex justify-between items-center">
-              <h3 className="text-white text-xs font-bold uppercase tracking-widest">{ROUND_NAMES[activeRound || '']} Metrics</h3>
+            <div className="bg-primary-cyan/10 border-b border-primary-cyan/20 p-3 flex flex-col gap-2">
+              <div className="flex justify-between items-center">
+                <h3 className="text-white text-xs font-bold uppercase tracking-widest">Win Probabilities</h3>
+              </div>
+              <div className="flex gap-1 overflow-x-auto scrollbar-custom pb-1">
+                {availableRounds.map(round => (
+                  <button
+                    key={round}
+                    onClick={() => setSelectedMetricsRound(round)}
+                    className={`px-2 py-1 text-[10px] rounded whitespace-nowrap font-bold transition-colors ${selectedMetricsRound === round ? 'bg-primary-cyan text-[#0a1024]' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                  >
+                    {round}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className="overflow-y-auto scrollbar-custom p-3 flex flex-col gap-3">
-              {activeRoundMatches.map(m => {
+              {metricsRoundMatches.map(m => {
                 const probs = calculateWinProbability(m.home!.power_rating || 60, m.away!.power_rating || 60, m.home!.tla, m.away!.tla);
+                const homeProbNum = parseFloat(probs.homeWinProb);
+                const awayProbNum = parseFloat(probs.awayWinProb);
+                
                 return (
                   <div key={`metric-${m.id}`} className="bg-white/5 rounded p-2 text-xs">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-gray-300 font-semibold">{m.home!.tla}</span>
-                      <span className="text-primary-cyan font-mono">{probs.homeWinProb}%</span>
+                      <div className="flex items-center gap-2">
+                        {m.home!.crest && <img src={m.home!.crest} alt="" className="w-4 h-4 object-contain" />}
+                        <span className="text-gray-300 font-semibold">{m.home!.tla}</span>
+                      </div>
+                      <span className={`${getProbTextColor(homeProbNum)} font-mono font-bold`}>{probs.homeWinProb}%</span>
                     </div>
                     <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mb-2">
-                      <div className="bg-primary-cyan h-full" style={{ width: `${probs.homeWinProb}%` }} />
+                      <div className={`${getProbColor(homeProbNum)} h-full transition-all duration-500`} style={{ width: `${probs.homeWinProb}%` }} />
                     </div>
                     
                     <div className="flex justify-between items-center mb-1 mt-2">
-                      <span className="text-gray-300 font-semibold">{m.away!.tla}</span>
-                      <span className="text-pink-500 font-mono">{probs.awayWinProb}%</span>
+                      <div className="flex items-center gap-2">
+                        {m.away!.crest && <img src={m.away!.crest} alt="" className="w-4 h-4 object-contain" />}
+                        <span className="text-gray-300 font-semibold">{m.away!.tla}</span>
+                      </div>
+                      <span className={`${getProbTextColor(awayProbNum)} font-mono font-bold`}>{probs.awayWinProb}%</span>
                     </div>
                     <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
-                      <div className="bg-pink-500 h-full" style={{ width: `${probs.awayWinProb}%` }} />
+                      <div className={`${getProbColor(awayProbNum)} h-full transition-all duration-500`} style={{ width: `${probs.awayWinProb}%` }} />
                     </div>
                   </div>
                 );
@@ -216,7 +259,7 @@ const BracketView: React.FC = () => {
 
       {/* Bracket Container (Scrollable) */}
       <div className="flex-1 overflow-auto p-4 md:p-8 scrollbar-custom">
-        <div className="flex gap-12 md:gap-16 min-w-max pb-16 pt-8">
+        <div className="flex gap-12 md:gap-16 min-w-max pb-16 pt-4">
           {ROUNDS.map((round, rIndex) => {
             const roundMatches = matches.filter(m => m.round === round);
             // If it's the FINAL round, also include the 3RD place match
@@ -309,9 +352,9 @@ const BracketView: React.FC = () => {
         </div>
       </div>
       
-      {/* Disclaimer */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none z-50">
-        <div className="bg-[#080d1e] px-4 py-1.5 rounded-full border border-white/20 shadow-xl text-[10px] text-gray-400 text-center whitespace-nowrap">
+      {/* Disclaimer - Hidden on mobile to save space */}
+      <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none z-40 w-auto max-w-md">
+        <div className="bg-[#080d1e] px-4 py-1.5 rounded-full border border-white/20 shadow-xl text-[10px] text-gray-400 text-center whitespace-normal leading-tight">
           Simulation results are purely hypothetical and based on Monte Carlo calculations.
         </div>
       </div>
