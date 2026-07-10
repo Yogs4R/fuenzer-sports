@@ -73,7 +73,7 @@ function App() {
       <main className="w-full grow flex flex-col">
         {renderPage()}
       </main>
-      {currentPage !== '/playground' && <Footer />}
+      {currentPage !== '/playground' && currentPage !== '/signin' && currentPage !== '/signup' && <Footer />}
       <ErrorToast />
     </div>
   );

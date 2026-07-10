@@ -135,6 +135,42 @@ interface AppState {
   fetchSimulationCount: () => Promise<void>;
 }
 
+const getFriendlyAuthErrorMessage = (error: any, lang: Language): string => {
+  const code = error?.code || '';
+  const isId = lang === 'id';
+  
+  switch (code) {
+    case 'auth/popup-closed-by-user':
+      return isId 
+        ? 'Popup masuk ditutup sebelum selesai. Silakan coba lagi.' 
+        : 'The sign-in popup was closed before completion. Please try again.';
+    case 'auth/cancelled-popup-request':
+      return isId 
+        ? 'Permintaan masuk dibatalkan. Silakan coba lagi.' 
+        : 'The sign-in request was cancelled. Please try again.';
+    case 'auth/network-request-failed':
+      return isId 
+        ? 'Terjadi kesalahan jaringan. Silakan periksa koneksi internet Anda dan coba lagi.' 
+        : 'A network error occurred. Please check your internet connection and try again.';
+    case 'auth/internal-error':
+      return isId 
+        ? 'Terjadi kesalahan sistem internal. Silakan coba beberapa saat lagi.' 
+        : 'An internal system error occurred. Please try again later.';
+    case 'auth/operation-not-allowed':
+      return isId 
+        ? 'Metode masuk Google saat ini dinonaktifkan. Silakan hubungi layanan bantuan.' 
+        : 'Google sign-in is currently disabled. Please contact support.';
+    case 'auth/popup-blocked':
+      return isId 
+        ? 'Popup masuk diblokir oleh browser Anda. Silakan izinkan popup untuk situs ini.' 
+        : 'The sign-in popup was blocked by your browser. Please allow popups for this site.';
+    default:
+      return isId 
+        ? 'Terjadi kesalahan yang tidak terduga saat masuk. Silakan coba lagi.' 
+        : 'An unexpected error occurred during authentication. Please try again.';
+  }
+};
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -177,7 +213,7 @@ export const useAppStore = create<AppState>()(
           set({ user: appUser });
           await get().syncSessionsToFirestore();
         } catch (err: any) {
-          set({ error: err.message || 'Failed to sign in' });
+          set({ error: getFriendlyAuthErrorMessage(err, get().language) });
         } finally {
           set({ isAuthLoading: false });
         }
@@ -188,7 +224,7 @@ export const useAppStore = create<AppState>()(
           await signOut(auth);
           set({ user: null });
         } catch (err: any) {
-          set({ error: err.message || 'Failed to sign out' });
+          set({ error: getFriendlyAuthErrorMessage(err, get().language) });
         }
       },
 
@@ -206,7 +242,7 @@ export const useAppStore = create<AppState>()(
           if (auth.currentUser) await deleteUser(auth.currentUser);
           set({ user: null, savedSessions: [] });
         } catch (err: any) {
-          set({ error: err.message || 'Failed to delete account' });
+          set({ error: getFriendlyAuthErrorMessage(err, get().language) });
         } finally {
           set({ isAuthLoading: false });
         }

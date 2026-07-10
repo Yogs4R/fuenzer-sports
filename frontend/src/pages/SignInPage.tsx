@@ -10,7 +10,7 @@ const SignInPage = () => {
     window.history.pushState(null, '', '/');
   };
 
-  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, path: any) => {
+  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, path: any) => {
     e.preventDefault();
     window.history.pushState(null, '', path);
     setCurrentPage(path);
@@ -22,30 +22,11 @@ const SignInPage = () => {
         <h2 className="text-2xl font-bold tracking-tight mb-6 text-white text-center">
           Sign In
         </h2>
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Email</label>
-            <input type="email" placeholder="you@example.com" className="w-full px-4 py-2.5 rounded-xl bg-bg-0 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-primary-cyan/50 text-sm" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Password</label>
-            <input type="password" placeholder="••••••••" className="w-full px-4 py-2.5 rounded-xl bg-bg-0 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-primary-cyan/50 text-sm" />
-          </div>
-          <button type="submit" className="w-full bg-primary-cyan text-bg-0 py-3 rounded-xl font-bold hover:bg-cyan-300 transition-colors shadow-lg shadow-primary-cyan/10 text-sm mt-2">
-            Sign In
-          </button>
-        </form>
-
-        <div className="mt-6 flex items-center justify-center space-x-2">
-          <div className="h-px bg-white/10 w-full"></div>
-          <span className="text-xs text-gray-500 uppercase tracking-widest">OR</span>
-          <div className="h-px bg-white/10 w-full"></div>
-        </div>
-
+        
         <button 
           onClick={handleGoogleSignIn}
           disabled={isAuthLoading}
-          className="mt-6 w-full flex items-center justify-center gap-3 bg-white text-gray-900 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors text-sm disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-3 bg-white text-gray-900 py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors text-sm disabled:opacity-50"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -58,12 +39,13 @@ const SignInPage = () => {
 
         <div className="mt-6 text-center">
           <button 
-            onClick={(e) => handleNavigation(e as any, '/')}
+            onClick={(e) => handleNavigation(e, '/')}
             className="text-sm text-gray-400 hover:text-white transition-colors"
           >
             Continue as Guest
           </button>
         </div>
+        
         <p className="mt-6 text-center text-sm text-gray-500">
           Don't have an account?{' '}
           <a href="/signup" onClick={(e) => handleNavigation(e, '/signup')} className="text-primary-cyan hover:underline">
