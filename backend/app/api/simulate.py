@@ -113,7 +113,8 @@ def run_simulation(request: SimulationRequest = None):
                 selected_model=model,
                 competition=competition,
                 mode=mode,
-                style=style
+                style=style,
+                generate_title=request.generate_title
             )
         except Exception as e:
             from fastapi import HTTPException

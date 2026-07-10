@@ -25,7 +25,7 @@ export const id = {
   pages: {
     history: {
       title: "History",
-      subtitle: "Ini adalah halaman template untuk riwayat simulasi. Riwayat turnamen dan kueri simulasi Anda akan ditampilkan di sini.",
+      subtitle: "Akses simulasi turnamen dan sesi obrolan Anda sebelumnya di sini. Semua data riwayat Anda disimpan secara lokal untuk akses cepat.",
       empty: "Belum ada riwayat simulasi. Coba jalankan simulasi turnamen!"
     },
     standings: {
@@ -127,7 +127,7 @@ export const id = {
     },
     playground: {
       leftPanel: {
-        placeholder: "Minta Fuenzer untuk menyimulasikan pertandingan, menganalisis tim, atau memprediksi hasil...",
+        placeholder: "Tanya apa saja tentang olahraga...",
         untitled: "Simulasi Tanpa Judul",
         rename: "Ubah Nama",
         clearChat: "Hapus Obrolan",
@@ -171,7 +171,6 @@ export const id = {
       },
       bracket: {
         winProb: "PROBABILITAS KEMENANGAN",
-        disclaimer: "PERINGATAN: Bagan ini mengasumsikan tim peringkat 3 terbaik dialokasikan secara greedy. Ini bukan pengundian manual FIFA World Cup yang resmi. Tim tuan rumah yang lolos akan menerima tambahan power rating +5.0.",
         thirdPlace: "Perebutan Juara 3",
         hypothetical: "PERINGATAN: Hasil simulasi murni hipotesis dan didasarkan pada perhitungan Monte Carlo.",
         noData: "Tidak ada data bagan yang tersedia.",

@@ -23,6 +23,9 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
     selectedMode,
     selectedStyle, setSelectedStyle,
     simulationTitle,
+    currentSessionId,
+    startNewSession,
+    updateCurrentSession,
     language
   } = useAppStore();
   
@@ -33,13 +36,8 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<'model' | 'style' | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [simId, setSimId] = useState('SIM-....');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const isFirstRender = useRef(true);
-
-  useEffect(() => {
-    setSimId(`SIM-${Math.floor(1000 + Math.random() * 9000)}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`);
-  }, []);
 
   useEffect(() => {
     if (chatContainerRef.current) {
@@ -100,9 +98,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
   const handleClearChat = () => {
-    // clearSimulationData will be added to store
-    // For now, let's just use window.location.reload() or we can add it later
-    useAppStore.setState({ chatHistory: [], simulationData: null, mockStep: 0 });
+    startNewSession();
     setIsMenuOpen(false);
   };
 
@@ -135,21 +131,26 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
                   type="text" 
                   value={simulationTitle} 
                   onChange={(e) => useAppStore.setState({ simulationTitle: e.target.value })} 
-                  onBlur={() => setIsEditingTitle(false)}
-                  onKeyDown={(e) => e.key === 'Enter' && setIsEditingTitle(false)}
+                  onBlur={() => { setIsEditingTitle(false); updateCurrentSession(); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      setIsEditingTitle(false);
+                      updateCurrentSession();
+                    }
+                  }}
                   autoFocus
-                  className="text-sm font-bold text-white bg-white/10 px-2 py-0.5 rounded outline-none border border-primary-cyan/50 w-full max-w-[160px]"
+                  className="text-sm font-bold text-white bg-white/10 px-2 py-0.5 rounded outline-none border border-primary-cyan/50 w-full max-w-xs md:max-w-md"
                 />
               ) : (
                 <>
-                  <h2 className="text-white font-bold text-lg md:text-xl truncate mr-2">{simulationTitle || p.untitled}</h2>
+                  <h2 className="text-white font-bold text-lg md:text-xl truncate mr-2 max-w-[200px] md:max-w-[400px]">{simulationTitle || p.untitled}</h2>
                   <button onClick={() => setIsEditingTitle(true)} className="text-gray-400 hover:text-white transition-colors">
                     <Edit2 size={12} />
                   </button>
                 </>
               )}
             </div>
-            <p className="text-[10px] text-gray-500 font-mono">ID: {simId} • {selectedCompetition}</p>
+            <p className="text-[10px] text-gray-500 font-mono">ID: {currentSessionId} • {selectedCompetition}</p>
           </div>
         </div>
         

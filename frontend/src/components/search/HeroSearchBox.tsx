@@ -24,7 +24,8 @@ const HeroSearchBox: React.FC = () => {
     selectedCompetition, setSelectedCompetition,
     selectedModel, setSelectedModel,
     selectedMode, setSelectedMode,
-    selectedStyle, setSelectedStyle
+    selectedStyle, setSelectedStyle,
+    startNewSession
   } = useAppStore();
   
   const t = language === 'id' ? id : en;
@@ -98,6 +99,7 @@ const HeroSearchBox: React.FC = () => {
 
   const handleSimulate = () => {
     if (isSubmitActive && !isLoading) {
+      startNewSession();
       runSimulation(displayQuery, selectedModel, selectedMode);
     }
   };

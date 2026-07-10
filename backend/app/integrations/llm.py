@@ -97,7 +97,8 @@ def generate_narrative(
     selected_model: str,
     competition: str,
     mode: str,
-    style: str
+    style: str,
+    generate_title: bool = False
 ) -> str:
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
@@ -130,8 +131,7 @@ Rules:
    - If "Coach Style", speak like a strict but wise football manager. Use tactical terms (pressing, low block, transitions) and focus on teamwork and discipline.
    - If "Football Analyst Style", speak like a data scientist on Sky Sports. Use statistics, probabilities, objective reasoning, and calm, professional tone.
 5. Keep the response concise, engaging, and directly answer the prompt. Do not output raw JSON.
-6. TITLE GENERATION: You MUST output a short, catchy title (max 5 words) on the very first line of your response in this exact format: `TITLE: [Your Title Here]`.
-7. EXCELLENT MARKDOWN FORMATTING REQUIRED:
+6. EXCELLENT MARKDOWN FORMATTING REQUIRED:
    - Use **bold** for Team Names and Key Metrics.
    - Use proper bullet points (`- `) or numbered lists.
    - Use Markdown Tables `| Col | Col |` ONLY when displaying structured data like standings or comparisons, and ensure they are well-formatted.
@@ -139,6 +139,9 @@ Rules:
    - Do NOT use HTML tags. Use standard markdown.
    - Use headings (`###`) if the response requires sections.
 """
+    
+    if generate_title:
+        system_prompt += "\n8. TITLE GENERATION: You MUST output a short, catchy title (3-6 words) on the very first line of your response in this exact format: `TITLE: [Your Title Here]`.\n"
 
     messages = [{"role": "system", "content": system_prompt}]
     

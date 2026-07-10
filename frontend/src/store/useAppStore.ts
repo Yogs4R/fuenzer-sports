@@ -42,12 +42,26 @@ export interface ChatMessage {
   isStreaming?: boolean;
 }
 
+export interface HistorySession {
+  id: string;
+  title: string;
+  date: string;
+  simulationData: SimulationResponse | null;
+  chatHistory: ChatMessage[];
+  bracketMatches: MatchNode[];
+  competition: string;
+  model: string;
+  mode: string;
+}
+
 interface AppState {
   currentPage: Page;
   language: Language;
   showNotifications: boolean;
   
   // Simulation State
+  currentSessionId: string | null;
+  savedSessions: HistorySession[];
   simulationData: SimulationResponse | null;
   simulationTitle: string;
   chatHistory: ChatMessage[];
@@ -86,6 +100,10 @@ interface AppState {
   setIsSimulatingKnockout: (val: boolean) => void;
   
   // Simulation Actions
+  startNewSession: () => void;
+  updateCurrentSession: () => void;
+  loadSession: (id: string) => void;
+  deleteSession: (id: string) => void;
   runSimulation: (prompt: string, model: string, mode: string) => Promise<void>;
   reRunSimulation: () => Promise<void>;
   clearSimulationData: () => void;
@@ -104,6 +122,8 @@ export const useAppStore = create<AppState>()(
       language: 'en',
       showNotifications: false,
       
+      currentSessionId: null,
+      savedSessions: [],
       simulationData: null,
       simulationTitle: 'World Cup Simulation',
       chatHistory: [],
@@ -132,14 +152,87 @@ export const useAppStore = create<AppState>()(
       setSelectedMode: (mode) => set({ selectedMode: mode }),
       setSelectedStyle: (style) => set({ selectedStyle: style }),
       setIsSimulatingKnockout: (val) => set({ isSimulatingKnockout: val }),
-      setBracketMatches: (matches) => set({ bracketMatches: matches }),
+      setBracketMatches: (matches) => {
+        set({ bracketMatches: matches });
+        get().updateCurrentSession();
+      },
       
+      startNewSession: () => {
+        const newId = `SIM-${Math.floor(1000 + Math.random() * 9000)}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`;
+        set({
+          currentSessionId: newId,
+          simulationData: null,
+          simulationTitle: 'World Cup Simulation',
+          chatHistory: [],
+          mockStep: 0,
+          error: null,
+          bracketMatches: []
+        });
+      },
+      
+      updateCurrentSession: () => {
+        const state = get();
+        if (!state.currentSessionId || state.chatHistory.length === 0) return;
+        
+        const newSession: HistorySession = {
+          id: state.currentSessionId,
+          title: state.simulationTitle,
+          date: new Date().toISOString(),
+          simulationData: state.simulationData,
+          chatHistory: state.chatHistory,
+          bracketMatches: state.bracketMatches,
+          competition: state.selectedCompetition,
+          model: state.selectedModel,
+          mode: state.selectedMode
+        };
+        
+        set((prev) => {
+          const exists = prev.savedSessions.some(s => s.id === state.currentSessionId);
+          if (exists) {
+            return { savedSessions: prev.savedSessions.map(s => s.id === state.currentSessionId ? newSession : s) };
+          } else {
+            return { savedSessions: [newSession, ...prev.savedSessions] };
+          }
+        });
+      },
+
+      loadSession: (id: string) => {
+        const session = get().savedSessions.find(s => s.id === id);
+        if (session) {
+          set({
+            currentSessionId: session.id,
+            simulationTitle: session.title,
+            simulationData: session.simulationData,
+            chatHistory: session.chatHistory,
+            bracketMatches: session.bracketMatches,
+            selectedCompetition: session.competition,
+            selectedModel: session.model,
+            selectedMode: session.mode,
+            error: null
+          });
+        }
+      },
+
+      deleteSession: (id: string) => {
+        set((state) => ({
+          savedSessions: state.savedSessions.filter(s => s.id !== id),
+          ...(state.currentSessionId === id ? {
+            currentSessionId: null,
+            simulationData: null,
+            simulationTitle: 'World Cup Simulation',
+            chatHistory: [],
+            bracketMatches: []
+          } : {})
+        }));
+      },
+
       clearSimulationData: () => set({ 
         simulationData: null, 
         simulationTitle: 'World Cup Simulation',
         chatHistory: [],
         mockStep: 0,
-        error: null 
+        error: null,
+        bracketMatches: []
       }),
       clearError: () => set({ error: null }),
 
@@ -207,7 +300,8 @@ export const useAppStore = create<AppState>()(
             competition: state.selectedCompetition,
             mode: mode,
             style: state.selectedStyle,
-            chat_history: state.chatHistory.slice(-5)
+            chat_history: state.chatHistory.slice(-5),
+            generate_title: state.chatHistory.length === 1 // length is 1 because prompt is already appended
           };
           
           const response = await fetch('http://localhost:8000/api/simulate', {
@@ -234,6 +328,7 @@ export const useAppStore = create<AppState>()(
                 simulationData: currentState.simulationData, // Restore it
                 simulationTitle: currentState.simulationTitle
              }));
+             get().updateCurrentSession();
              return;
           }
           
@@ -281,6 +376,7 @@ export const useAppStore = create<AppState>()(
             simulationData: data,
             bracketMatches: [],
           }));
+          get().updateCurrentSession();
           
         } catch (error: any) {
            console.error("Simulation error:", error);
@@ -305,9 +401,12 @@ export const useAppStore = create<AppState>()(
       name: 'fuenzer-storage', // Key used in localStorage
       partialize: (state) => ({ 
         language: state.language,
+        savedSessions: state.savedSessions,
+        currentSessionId: state.currentSessionId,
         simulationData: state.simulationData,
         simulationTitle: state.simulationTitle,
         chatHistory: state.chatHistory,
+        bracketMatches: state.bracketMatches,
         mockStep: state.mockStep
       }),
     }

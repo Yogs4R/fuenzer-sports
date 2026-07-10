@@ -55,3 +55,4 @@ class SimulationRequest(BaseModel):
     mode: str = "Live Standings"
     style: str = "Commentator Style"
     chat_history: List[ChatMessage] = []
+    generate_title: bool = False

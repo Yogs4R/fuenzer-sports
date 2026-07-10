@@ -345,14 +345,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
               </>
             )}
             
-            {/* Disclaimer */}
-            {activeTab === 'standings' && (
-              <div className="mt-8 text-center">
-                <p className="text-gray-500 text-[10px] italic">
-                  Simulation results are purely hypothetical and based on Monte Carlo calculations.
-                </p>
-              </div>
-            )}
+
           </>
         ) : (
           <BracketView />

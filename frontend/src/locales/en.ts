@@ -25,7 +25,7 @@ export const en = {
   pages: {
     history: {
       title: "History",
-      subtitle: "This is a template page for simulation history. Your past tournament runs and simulation queries will be shown here.",
+      subtitle: "Access your past tournament simulations and chat sessions here. All your historical data is saved locally for quick access.",
       empty: "No simulation history available yet. Try running a tournament simulation!"
     },
     standings: {
@@ -127,7 +127,7 @@ export const en = {
     },
     playground: {
       leftPanel: {
-        placeholder: "Ask Fuenzer to simulate matches, analyze teams, or predict outcomes...",
+        placeholder: "Ask anything about sports...",
         untitled: "Untitled Simulation",
         rename: "Rename",
         clearChat: "Clear Chat",
@@ -171,7 +171,6 @@ export const en = {
       },
       bracket: {
         winProb: "WIN PROBABILITIES",
-        disclaimer: "DISCLAIMER: This bracket assumes best 3rd-placed teams are allocated greedily. It is not an official FIFA World Cup manual draw. Qualifying host teams will receive a +5.0 power rating for home advantage.",
         thirdPlace: "3rd Place Match",
         hypothetical: "Simulation results are purely hypothetical and based on Monte Carlo calculations.",
         noData: "No bracket data available.",
