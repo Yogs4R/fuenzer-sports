@@ -62,7 +62,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
   const handleSimulate = () => {
     if (!isLoading) {
       if (activeTab === 'standings' && selectedMode === 'Live Standings') {
-        setToastMessage("Group Stage is completed! Use 'From Scratch' mode to resimulate groups, or switch to the Knockout Bracket to simulate the rest of the tournament.");
+        setToastMessage("Babak Grup telah selesai! Gunakan mode 'From Scratch' untuk mengulang simulasi grup, atau beralih ke Knockout Bracket untuk menyimulasikan sisa turnamen.");
         setTimeout(() => setToastMessage(null), 5000);
         return;
       }
@@ -79,7 +79,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             <div className="w-3 h-3 rounded-full bg-primary-cyan animate-bounce" style={{ animationDelay: '150ms' }} />
             <div className="w-3 h-3 rounded-full bg-primary-cyan animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
-          <p className="text-primary-cyan font-semibold animate-pulse">Running Monte Carlo Simulations...</p>
+          <p className="text-primary-cyan font-semibold animate-pulse">Menjalankan Simulasi Monte Carlo...</p>
         </div>
       )}
 
@@ -131,7 +131,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
           className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-cyan/10 hover:bg-primary-cyan/20 text-primary-cyan text-xs font-semibold rounded-lg border border-primary-cyan/30 transition-colors disabled:opacity-50 w-full sm:w-auto ml-auto"
         >
           <Play size={14} />
-          Play Simulation
+          Jalankan Simulasi
         </button>
       </div>
 
@@ -157,7 +157,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                   <input 
                     type="text"
-                    placeholder="Search team..."
+                    placeholder="Cari tim..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="bg-[#0a1128] text-white text-xs pl-8 pr-4 py-2 rounded-lg border border-white/10 focus:border-primary-cyan/50 outline-none w-full sm:w-48 transition-colors"
@@ -170,7 +170,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                   className={`bg-[#0a1128] text-white text-xs px-3 py-2 rounded-lg border transition-colors flex items-center gap-2 ${showMetrics ? 'border-primary-cyan/50 bg-primary-cyan/5' : 'border-white/10 hover:bg-white/5'}`}
                 >
                   <Target size={14} className={showMetrics ? 'text-primary-cyan' : ''} />
-                  <span className="hidden sm:inline">{showMetrics ? 'Hide Metrics' : 'Show Metrics'}</span>
+                  <span className="hidden sm:inline">{showMetrics ? 'Sembunyikan Metrik' : 'Tampilkan Metrik'}</span>
                 </button>
                 
                 {/* Filter Dropdown */}
@@ -191,12 +191,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                           className="absolute right-0 top-full mt-2 w-48 bg-[#0a1128] border border-white/10 rounded-xl shadow-xl z-50 p-2 max-h-64 overflow-y-auto scrollbar-custom"
                         >
                           <div className="flex items-center justify-between px-2 pb-2 mb-2 border-b border-white/10">
-                            <span className="text-xs font-bold text-gray-300">Show Groups</span>
+                            <span className="text-xs font-bold text-gray-300">Tampilkan Grup</span>
                             <button 
                               onClick={() => setSelectedFilters(selectedFilters.length === filterOptions.length ? [] : [...filterOptions])}
                               className="text-[10px] text-primary-cyan hover:underline"
                             >
-                              {selectedFilters.length === filterOptions.length ? 'Clear All' : 'Select All'}
+                              {selectedFilters.length === filterOptions.length ? 'Hapus Semua' : 'Select All'}
                             </button>
                           </div>
                           {filterOptions.map(opt => (
@@ -225,17 +225,17 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             {simulationData && showMetrics && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Probability Overview</h3>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Ikhtisar Probabilitas</h3>
                   <select 
                     value={metricSort}
                     onChange={(e) => setMetricSort(e.target.value as MetricSort)}
                     className="bg-[#0a1128] text-white text-xs px-2 py-1 rounded border border-white/10 outline-none cursor-pointer"
                   >
-                    <option value="default">Default Sort</option>
-                    <option value="highest_1st">Highest 1st Place %</option>
-                    <option value="lowest_1st">Lowest 1st Place %</option>
-                    <option value="highest_adv">Highest Advancing %</option>
-                    <option value="lowest_adv">Lowest Advancing %</option>
+                    <option value="default">Bawaan (Grup)</option>
+                    <option value="highest_1st">Juara 1 Tertinggi</option>
+                    <option value="lowest_1st">Juara 1 Terendah</option>
+                    <option value="highest_adv">Lolos Tertinggi</option>
+                    <option value="lowest_adv">Lolos Terendah</option>
                   </select>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
