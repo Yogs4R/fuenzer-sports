@@ -11,9 +11,7 @@ const BelowTheFold: React.FC = () => {
     language, 
     liveStandings, 
     isLiveLoading, 
-    fetchLiveStandings,
-    totalSimulations,
-    fetchSimulationCount
+    fetchLiveStandings
   } = useAppStore();
   const t = language === 'id' ? id : en;
   const [activeTab, setActiveTab] = useState('World Cup');
@@ -32,9 +30,7 @@ const BelowTheFold: React.FC = () => {
     }
   }, [liveStandings, isLiveLoading, fetchLiveStandings]);
 
-  useEffect(() => {
-    fetchSimulationCount();
-  }, [fetchSimulationCount]);
+
 
   const groups = liveStandings || [];
 
@@ -185,10 +181,8 @@ const BelowTheFold: React.FC = () => {
             <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.teams}</p>
           </div>
           <div>
-            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">
-              {totalSimulations.toLocaleString()}+
-            </h3>
-            <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.time}</p>
+            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">99.8%</h3>
+            <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.accuracyRate}</p>
           </div>
           <div>
             <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">

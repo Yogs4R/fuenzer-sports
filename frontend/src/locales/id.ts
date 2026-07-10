@@ -76,7 +76,7 @@ export const id = {
       stats: {
         iterations: "Iterasi Monte Carlo",
         teams: "Tim Disimulasikan",
-        time: "Total Simulasi Dijalankan",
+        accuracyRate: "Akurasi Engine",
         accuracy: "Kecepatan Prediksi AI",
         accuracyValue: "Instan"
       },

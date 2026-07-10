@@ -76,7 +76,7 @@ export const en = {
       stats: {
         iterations: "Monte Carlo Iterations",
         teams: "Teams Simulated",
-        time: "Total Simulations Run",
+        accuracyRate: "Engine Accuracy",
         accuracy: "AI Prediction Speed",
         accuracyValue: "Instant"
       },

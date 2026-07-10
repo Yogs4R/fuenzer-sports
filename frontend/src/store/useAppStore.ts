@@ -88,8 +88,7 @@ interface AppState {
   isLiveLoading: boolean;
   hasFetchedLive: boolean;
 
-  // Counter
-  totalSimulations: number;
+
 
   // Global Settings
   selectedCompetition: string;
@@ -136,7 +135,7 @@ interface AppState {
   
   // Live Data Actions
   fetchLiveStandings: () => Promise<void>;
-  fetchSimulationCount: () => Promise<void>;
+
 }
 
 const getFriendlyAuthErrorMessage = (error: any, lang: Language): string => {
@@ -196,7 +195,7 @@ export const useAppStore = create<AppState>()(
       liveStandings: null,
       isLiveLoading: false,
       hasFetchedLive: false,
-      totalSimulations: 12450,
+
       
       cookieConsent: null,
       
@@ -429,17 +428,6 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      fetchSimulationCount: async () => {
-        try {
-          const response = await fetch('http://localhost:8000/api/simulate/count');
-          if (response.ok) {
-            const data = await response.json();
-            set({ totalSimulations: data.count });
-          }
-        } catch (error) {
-          // Fallback to locally tracked state
-        }
-      },
       
       runSimulation: async (prompt: string, model: string, mode: string) => {
         const currentState = get();
@@ -448,7 +436,6 @@ export const useAppStore = create<AppState>()(
         set((state) => ({ 
           isLoading: true, 
           error: null,
-          totalSimulations: state.totalSimulations + 1,
           chatHistory: prompt.trim() ? [...state.chatHistory, { role: 'user', content: prompt }] : state.chatHistory,
           currentPage: '/playground',
           simulationData: null
