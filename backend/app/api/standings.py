@@ -3,6 +3,7 @@ import json
 from fastapi import APIRouter
 from typing import List
 from app.models.simulation import GroupStandings, TeamStats
+from app.integrations.mock_data import get_mock_wc_teams
 
 router = APIRouter()
 
@@ -22,6 +23,10 @@ def get_live_standings():
         with open(live_standings_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
             
+        # Pre-fetch power ratings from Elo
+        mock_data = get_mock_wc_teams()
+        power_ratings = {t["tla"]: t["power_rating"] for t in mock_data["teams"]}
+            
         for group_data in data.get("standings", []):
             group_name = group_data.get("group", "Unknown Group")
             teams_list = []
@@ -38,6 +43,7 @@ def get_live_standings():
                     tla=tla,
                     name=raw_name,
                     crest=crest,
+                    power_rating=power_ratings.get(tla, 60.0),
                     points=t_data.get("points", 0),
                     goals_for=t_data.get("goalsFor", 0),
                     goals_against=t_data.get("goalsAgainst", 0),

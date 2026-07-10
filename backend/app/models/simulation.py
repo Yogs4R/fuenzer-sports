@@ -13,6 +13,7 @@ class TeamStats(BaseModel):
     tla: str
     name: str
     crest: str
+    power_rating: float = 60.0
     points: int = 0
     goals_for: int = 0
     goals_against: int = 0

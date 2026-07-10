@@ -185,6 +185,7 @@ class MonteCarloEngine:
                     tla=team_info["tla"],
                     name=team_info.get("name", team_info["tla"]),
                     crest=team_info.get("crest", ""),
+                    power_rating=team_info.get("power_rating", 60),
                     points=int(group_points[0, g, rank_idx]),
                     goals_for=t_gf,
                     goals_against=t_ga,
