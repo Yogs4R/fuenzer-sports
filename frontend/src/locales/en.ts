@@ -167,7 +167,13 @@ export const en = {
         knockoutBracket: "Knockout Bracket",
         preTournament: "Pre-Tournament",
         liveProgression: "Live Progression",
-        matchday: "Matchday"
+        matchday: "Matchday",
+        shareSim: "Share",
+        shareVia: "Share via...",
+        copyImage: "Copy Image",
+        downloadPng: "Download PNG",
+        copyText: "Copy Text Summary",
+        shareSuccess: "Copied to clipboard!"
       },
       bracket: {
         winProb: "WIN PROBABILITIES",

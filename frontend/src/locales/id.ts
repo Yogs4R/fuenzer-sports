@@ -167,7 +167,13 @@ export const id = {
         knockoutBracket: "Knockout Bracket",
         preTournament: "Pre-Tournament",
         liveProgression: "Live Progression",
-        matchday: "Matchday"
+        matchday: "Matchday",
+        shareSim: "Bagikan",
+        shareVia: "Bagikan ke...",
+        copyImage: "Salin Gambar",
+        downloadPng: "Unduh PNG",
+        copyText: "Salin Teks Ringkasan",
+        shareSuccess: "Berhasil disalin ke papan klip!"
       },
       bracket: {
         winProb: "PROBABILITAS KEMENANGAN",

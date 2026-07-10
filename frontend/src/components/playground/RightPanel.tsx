@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import StandingsTable from './StandingsTable';
 import BracketView from './BracketView';
-import { Play, Menu, Info, Trophy, Target, Shield, Search, Filter } from 'lucide-react';
+import { Play, Menu, Info, Trophy, Target, Shield, Search, Filter, Share2, Download, Copy, Check, Type } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import * as htmlToImage from 'html-to-image';
 
 interface RightPanelProps {
   onToggleMenu?: () => void;
@@ -65,6 +66,88 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  // Share Feature State
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [copiedType, setCopiedType] = useState<string | null>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const triggerCopySuccess = (type: string) => {
+    setCopiedType(type);
+    setToastMessage(p.shareSuccess || 'Copied to clipboard!');
+    setTimeout(() => {
+      setCopiedType(null);
+      setToastMessage(null);
+    }, 3000);
+  };
+
+  const handleCopyImage = async () => {
+    if (!contentRef.current) return;
+    try {
+      setIsSharing(true);
+      const dataUrl = await htmlToImage.toPng(contentRef.current, { backgroundColor: '#050814' });
+      const blob = await (await fetch(dataUrl)).blob();
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      triggerCopySuccess('image');
+      setIsShareOpen(false);
+    } catch (err) {
+      console.error('Failed to copy image', err);
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleDownloadImage = async () => {
+    if (!contentRef.current) return;
+    try {
+      setIsSharing(true);
+      const dataUrl = await htmlToImage.toPng(contentRef.current, { backgroundColor: '#050814' });
+      const link = document.createElement('a');
+      link.download = `fuenzer-simulation-${Date.now()}.png`;
+      link.href = dataUrl;
+      link.click();
+      setIsShareOpen(false);
+    } catch (err) {
+      console.error('Failed to download image', err);
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleShareText = async () => {
+    try {
+      let text = `🏆 Fuenzer Sports Simulation Results\n\n`;
+      if (activeTab === 'standings') {
+         text += `Top Group Standings:\n`;
+         currentStandings.slice(0, 2).forEach(g => {
+           text += `${g.group_name}:\n`;
+           g.teams.slice(0, 2).forEach((t, i) => {
+             const prob = simulationData?.probabilities[t.tla]?.qualify;
+             const probStr = prob !== undefined ? ` (Adv: ${prob}%)` : '';
+             text += `${i+1}. ${t.name}${probStr}\n`;
+           });
+           text += '\n';
+         });
+      } else {
+         text += `Knockout Bracket Highlights:\nCheck the full simulation at sports.fuenzer.web.id!`;
+      }
+      text += `\nSimulated by Monte Carlo AI.\n🌐 sports.fuenzer.web.id`;
+
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Fuenzer Sports Simulation',
+          text: text,
+        });
+      } else {
+        await navigator.clipboard.writeText(text);
+        triggerCopySuccess('text');
+      }
+      setIsShareOpen(false);
+    } catch (err) {
+      console.error('Failed to share text', err);
+    }
+  };
+
   const handleSimulate = () => {
     if (!isLoading) {
       if (activeTab === 'standings' && selectedMode === 'Live Standings') {
@@ -91,58 +174,132 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
 
       {/* Tabs Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 md:px-6 py-4 border-b border-white/10 bg-[#080d1e] gap-4 sm:gap-0">
-        <div className="flex items-center space-x-3 md:space-x-6 overflow-x-auto scrollbar-custom pb-1 sm:pb-0">
-          {onToggleMenu && (
-            <button 
-              onClick={onToggleMenu}
-              className="md:hidden text-gray-400 hover:text-white p-1.5 shrink-0 bg-white/5 rounded-lg border border-white/10"
+        <div className="flex items-center space-x-3 md:space-x-6 overflow-x-auto scrollbar-custom pb-1 sm:pb-0 w-full sm:w-auto justify-between sm:justify-start">
+          <div className="flex items-center space-x-3 md:space-x-6">
+            {onToggleMenu && (
+              <button 
+                onClick={onToggleMenu}
+                className="md:hidden text-gray-400 hover:text-white p-1.5 shrink-0 bg-white/5 rounded-lg border border-white/10"
+              >
+                <Menu size={18} />
+              </button>
+            )}
+            <button
+              onClick={() => setActiveTab('standings')}
+              className={`pb-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
+                activeTab === 'standings' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+              }`}
             >
-              <Menu size={18} />
+              {p.groupStandings}
+              {activeTab === 'standings' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-cyan shadow-[0_0_8px_rgba(76,215,246,0.8)]" />
+              )}
             </button>
-          )}
-          <button
-            onClick={() => setActiveTab('standings')}
-            className={`pb-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
-              activeTab === 'standings' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
-            }`}
-          >
-            {p.groupStandings}
-            {activeTab === 'standings' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-cyan shadow-[0_0_8px_rgba(76,215,246,0.8)]" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('bracket')}
-            className={`pb-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
-              activeTab === 'bracket' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
-            }`}
-          >
-            {p.knockoutBracket}
-            {activeTab === 'bracket' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-cyan shadow-[0_0_8px_rgba(76,215,246,0.8)]" />
-            )}
-          </button>
+            <button
+              onClick={() => setActiveTab('bracket')}
+              className={`pb-2 text-sm font-semibold transition-colors relative whitespace-nowrap ${
+                activeTab === 'bracket' ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              {p.knockoutBracket}
+              {activeTab === 'bracket' && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-cyan shadow-[0_0_8px_rgba(76,215,246,0.8)]" />
+              )}
+            </button>
+          </div>
+          
+          {/* Mobile Share Button (Inline with tabs) */}
+          <div className="sm:hidden relative ml-auto flex items-center">
+             <button
+               onClick={() => setIsShareOpen(!isShareOpen)}
+               className="p-1.5 text-gray-400 hover:text-white transition-colors bg-white/5 rounded-lg border border-white/10"
+             >
+               <Share2 size={18} />
+             </button>
+          </div>
         </div>
         
-        {/* Simulate / Restart Trigger Button */}
-        <button 
-          onClick={() => {
-            if (activeTab === 'standings') {
-              handleSimulate();
-            } else {
-              window.dispatchEvent(new Event('simulate-knockout'));
-            }
-          }}
-          disabled={isLoading || isSimulatingKnockout}
-          className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-cyan/10 hover:bg-primary-cyan/20 text-primary-cyan text-xs font-semibold rounded-lg border border-primary-cyan/30 transition-colors disabled:opacity-50 w-full sm:w-auto ml-auto"
-        >
-          <Play size={14} />
-          {p.playSim}
-        </button>
+        {/* Actions Container */}
+        <div className="flex flex-row items-center gap-2 sm:ml-auto w-full sm:w-auto justify-end">
+          {/* Simulate / Restart Trigger Button */}
+          <button 
+            onClick={() => {
+              if (activeTab === 'standings') {
+                handleSimulate();
+              } else {
+                window.dispatchEvent(new Event('simulate-knockout'));
+              }
+            }}
+            disabled={isLoading || isSimulatingKnockout}
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary-cyan/10 hover:bg-primary-cyan/20 text-primary-cyan text-xs font-semibold rounded-lg border border-primary-cyan/30 transition-colors disabled:opacity-50 w-full sm:w-auto"
+          >
+            <Play size={14} />
+            {p.playSim}
+          </button>
+          
+          {/* Desktop Share Button */}
+          <div className="hidden sm:block relative">
+            <button
+               onClick={() => setIsShareOpen(!isShareOpen)}
+               className="p-1.5 text-gray-400 hover:text-primary-cyan transition-colors bg-white/5 rounded-lg border border-white/10 flex items-center justify-center w-[34px] h-[34px]"
+               title={p.shareSim || "Share"}
+             >
+               <Share2 size={16} />
+             </button>
+          </div>
+        </div>
       </div>
 
+      {/* Share Popover */}
+      <AnimatePresence>
+        {isShareOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-16 right-4 sm:right-6 z-60 bg-[#0c1227] border border-white/10 rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.8)] w-56 overflow-hidden"
+          >
+            <div className="p-2 space-y-1">
+              {typeof navigator.share !== 'undefined' && (
+                <button
+                  onClick={handleShareText}
+                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white rounded-lg transition-colors text-left"
+                >
+                  <Share2 size={16} />
+                  {p.shareVia || "Share via..."}
+                </button>
+              )}
+              <button
+                onClick={handleCopyImage}
+                disabled={isSharing}
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white rounded-lg transition-colors text-left disabled:opacity-50"
+              >
+                {copiedType === 'image' ? <Check size={16} className="text-green-400" /> : <Copy size={16} />}
+                {p.copyImage || "Copy Image"}
+              </button>
+              <button
+                onClick={handleDownloadImage}
+                disabled={isSharing}
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white rounded-lg transition-colors text-left disabled:opacity-50"
+              >
+                <Download size={16} />
+                {p.downloadPng || "Download PNG"}
+              </button>
+              <button
+                onClick={handleShareText}
+                disabled={isSharing}
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white rounded-lg transition-colors text-left disabled:opacity-50"
+              >
+                {copiedType === 'text' ? <Check size={16} className="text-green-400" /> : <Type size={16} />}
+                {p.copyText || "Copy Text Summary"}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto scrollbar-custom p-4 md:p-6 space-y-6 relative">
+      <div ref={contentRef} className="flex-1 overflow-y-auto scrollbar-custom p-4 md:p-6 space-y-6 relative bg-[#050814]">
         {activeTab === 'standings' ? (
           <>
             {/* Matchday Badge and Search */}
