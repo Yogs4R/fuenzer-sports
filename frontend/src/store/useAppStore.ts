@@ -300,7 +300,13 @@ export const useAppStore = create<AppState>()(
       },
       
       startNewSession: () => {
-        const newId = `SIM-${Math.floor(1000 + Math.random() * 9000)}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`;
+        const getRandomInt = (min: number, max: number) => {
+          const range = max - min + 1;
+          const array = new Uint32Array(1);
+          window.crypto.getRandomValues(array);
+          return min + (array[0] % range);
+        };
+        const newId = `SIM-${getRandomInt(1000, 9999)}${String.fromCharCode(getRandomInt(65, 90))}`;
         set({
           currentSessionId: newId,
           simulationData: null,
