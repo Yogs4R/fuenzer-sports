@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { generateBracket } from '../../utils/bracketGenerator';
-import { motion } from 'framer-motion';
+import { calculateWinProbability, getHostAdvantage } from '../../utils/probability';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ROUNDS = ['R32', 'R16', 'QF', 'SF', 'FINAL'];
 const SIMULATION_ROUNDS = ['R32', 'R16', 'QF', 'SF', '3RD', 'FINAL'];
@@ -24,6 +25,8 @@ const BracketView: React.FC = () => {
     setBracketMatches: setMatches
   } = useAppStore();
 
+  const [showMetrics, setShowMetrics] = React.useState(false);
+
   useEffect(() => {
     const dataToUse = selectedMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
     if (dataToUse && dataToUse.length > 0) {
@@ -33,9 +36,12 @@ const BracketView: React.FC = () => {
     }
   }, [simulationData, liveStandings, selectedMode]);
 
-  const simulateMatch = (homePower: number, awayPower: number) => {
-    const lamHome = Math.max(0.1, 1.2 + (homePower - awayPower) * 0.05);
-    const lamAway = Math.max(0.1, 1.0 + (awayPower - homePower) * 0.05);
+  const simulateMatch = (homePower: number, awayPower: number, homeTla: string, awayTla: string) => {
+    const finalHome = homePower + getHostAdvantage(homeTla);
+    const finalAway = awayPower + getHostAdvantage(awayTla);
+
+    const lamHome = Math.max(0.1, 1.2 + (finalHome - finalAway) * 0.05);
+    const lamAway = Math.max(0.1, 1.0 + (finalAway - finalHome) * 0.05);
     
     const samplePoisson = (lambda: number) => {
       let L = Math.exp(-lambda), k = 0, p = 1;
@@ -77,7 +83,7 @@ const BracketView: React.FC = () => {
           const homePower = match.home.power_rating || 60;
           const awayPower = match.away.power_rating || 60;
           
-          const { homeGoals, awayGoals } = simulateMatch(homePower, awayPower);
+          const { homeGoals, awayGoals } = simulateMatch(homePower, awayPower, match.home.tla, match.away.tla);
           
           match.homeScore = homeGoals;
           match.awayScore = awayGoals;
@@ -149,8 +155,65 @@ const BracketView: React.FC = () => {
     );
   }
 
+  // Find current active round for metrics
+  const activeRound = SIMULATION_ROUNDS.find(round => {
+    return matches.some(m => m.round === round && m.home && m.away && m.homeScore === undefined);
+  });
+  const activeRoundMatches = activeRound ? matches.filter(m => m.round === activeRound && m.home && m.away && m.homeScore === undefined) : [];
+
   return (
-    <div className="relative w-full h-full flex flex-col bg-[#050814]">
+    <div className="relative w-full h-full flex flex-col bg-[#050814] overflow-hidden">
+      {/* Metrics Toggle Button */}
+      {activeRoundMatches.length > 0 && (
+        <button 
+          onClick={() => setShowMetrics(!showMetrics)}
+          className="absolute top-4 right-4 z-40 bg-primary-cyan/20 hover:bg-primary-cyan/30 text-primary-cyan border border-primary-cyan/50 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all shadow-[0_0_10px_rgba(76,215,246,0.2)] flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+          {showMetrics ? 'Hide Metrics' : 'Show Metrics'}
+        </button>
+      )}
+
+      {/* Floating Metrics Box */}
+      <AnimatePresence>
+        {showMetrics && activeRoundMatches.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="absolute top-14 right-4 z-50 w-64 md:w-72 max-h-[70vh] bg-[#0a1024]/95 backdrop-blur-md border border-primary-cyan/30 rounded-xl shadow-2xl flex flex-col overflow-hidden"
+          >
+            <div className="bg-primary-cyan/10 border-b border-primary-cyan/20 p-3 flex justify-between items-center">
+              <h3 className="text-white text-xs font-bold uppercase tracking-widest">{ROUND_NAMES[activeRound || '']} Metrics</h3>
+            </div>
+            <div className="overflow-y-auto scrollbar-custom p-3 flex flex-col gap-3">
+              {activeRoundMatches.map(m => {
+                const probs = calculateWinProbability(m.home!.power_rating || 60, m.away!.power_rating || 60, m.home!.tla, m.away!.tla);
+                return (
+                  <div key={`metric-${m.id}`} className="bg-white/5 rounded p-2 text-xs">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-gray-300 font-semibold">{m.home!.tla}</span>
+                      <span className="text-primary-cyan font-mono">{probs.homeWinProb}%</span>
+                    </div>
+                    <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mb-2">
+                      <div className="bg-primary-cyan h-full" style={{ width: `${probs.homeWinProb}%` }} />
+                    </div>
+                    
+                    <div className="flex justify-between items-center mb-1 mt-2">
+                      <span className="text-gray-300 font-semibold">{m.away!.tla}</span>
+                      <span className="text-pink-500 font-mono">{probs.awayWinProb}%</span>
+                    </div>
+                    <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                      <div className="bg-pink-500 h-full" style={{ width: `${probs.awayWinProb}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Bracket Container (Scrollable) */}
       <div className="flex-1 overflow-auto p-4 md:p-8 scrollbar-custom">
         <div className="flex gap-12 md:gap-16 min-w-max pb-16 pt-8">
