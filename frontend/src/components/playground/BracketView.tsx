@@ -163,7 +163,7 @@ const BracketView: React.FC = () => {
             }
 
             const matchSpacing = rIndex === 0 ? 'mt-0' : (rIndex === 1 ? 'mt-[46px]' : (rIndex === 2 ? 'mt-[138px]' : (rIndex === 3 ? 'mt-[322px]' : 'mt-[714px]')));
-            const matchGap = rIndex === 0 ? 'gap-4' : (rIndex === 1 ? 'gap-[108px]' : (rIndex === 2 ? 'gap-[292px]' : (rIndex === 3 ? 'gap-[660px]' : 'gap-0')));
+            const matchGap = rIndex === 0 ? 'gap-4' : (rIndex === 1 ? 'gap-[108px]' : (rIndex === 2 ? 'gap-[292px]' : (rIndex === 3 ? 'gap-[660px]' : 'gap-[80px]')));
 
             return (
               <div key={round} className="flex flex-col relative" style={{ minWidth: '220px' }}>
@@ -173,7 +173,7 @@ const BracketView: React.FC = () => {
                 </div>
                 
                 {round === 'FINAL' && (
-                  <div className="absolute top-[320px] left-1/2 -translate-x-1/2 flex justify-center z-0">
+                  <div className="absolute top-[620px] left-1/2 -translate-x-1/2 flex justify-center z-0">
                     <div className="text-yellow-400 text-6xl drop-shadow-[0_0_15px_rgba(250,204,21,0.5)] opacity-80">🏆</div>
                   </div>
                 )}

@@ -85,7 +85,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
 
       {/* Tabs Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 md:px-6 py-4 border-b border-white/10 bg-[#080d1e] gap-4 sm:gap-0">
-        <div className="flex items-center space-x-3 md:space-x-6 overflow-x-auto scrollbar-hide pb-1 sm:pb-0">
+        <div className="flex items-center space-x-3 md:space-x-6 overflow-x-auto scrollbar-custom pb-1 sm:pb-0">
           {onToggleMenu && (
             <button 
               onClick={onToggleMenu}
@@ -136,7 +136,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 md:p-6 space-y-6 relative">
+      <div className="flex-1 overflow-y-auto scrollbar-custom p-4 md:p-6 space-y-6 relative">
         {activeTab === 'standings' ? (
           <>
             {/* Matchday Badge and Search */}
@@ -188,7 +188,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                         <div className="fixed inset-0 z-40" onClick={() => setIsFilterOpen(false)}></div>
                         <motion.div 
                           initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
-                          className="absolute right-0 top-full mt-2 w-48 bg-[#0a1128] border border-white/10 rounded-xl shadow-xl z-50 p-2 max-h-64 overflow-y-auto scrollbar-hide"
+                          className="absolute right-0 top-full mt-2 w-48 bg-[#0a1128] border border-white/10 rounded-xl shadow-xl z-50 p-2 max-h-64 overflow-y-auto scrollbar-custom"
                         >
                           <div className="flex items-center justify-between px-2 pb-2 mb-2 border-b border-white/10">
                             <span className="text-xs font-bold text-gray-300">Show Groups</span>

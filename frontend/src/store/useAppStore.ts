@@ -257,7 +257,7 @@ export const useAppStore = create<AppState>()(
                    })
                 };
                 set({ simulationData: intermediateMock as any });
-               await new Promise(r => setTimeout(r, 600)); 
+               await new Promise(r => setTimeout(r, 1666)); 
             }
           }
           

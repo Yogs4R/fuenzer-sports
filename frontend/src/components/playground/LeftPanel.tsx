@@ -19,6 +19,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
     setChatStreamingComplete,
     selectedCompetition,
     selectedModel, setSelectedModel,
+    selectedMode,
     selectedStyle, setSelectedStyle,
     simulationTitle
   } = useAppStore();
@@ -49,7 +50,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (prompt.trim() && !isLoading) {
-      runSimulation(prompt.trim(), selectedModel, 'standings');
+      runSimulation(prompt.trim(), selectedModel, selectedMode);
       setPrompt('');
     }
   };
@@ -174,7 +175,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
       </div>
 
       {/* Chat History */}
-      <div ref={chatContainerRef} className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-6">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto scrollbar-custom p-4 space-y-6">
         {chatHistory.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center px-6 opacity-60">
             <Sparkles size={32} className="text-primary-cyan mb-4" />
@@ -250,7 +251,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Ask a follow-up question..."
-              className="flex-1 max-h-32 min-h-[40px] bg-transparent text-white py-2 outline-none resize-none overflow-y-auto scrollbar-hide text-sm w-full"
+              className="flex-1 max-h-32 min-h-[40px] bg-transparent text-white py-2 outline-none resize-none overflow-y-auto scrollbar-custom text-sm w-full"
               rows={prompt.split('\n').length > 1 ? Math.min(prompt.split('\n').length, 4) : 1}
               disabled={isLoading}
             />
