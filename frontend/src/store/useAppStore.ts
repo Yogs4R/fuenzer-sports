@@ -220,6 +220,7 @@ export const useAppStore = create<AppState>()(
           
           if (mode === 'Live Standings') {
             data.sample_standings = get().liveStandings || []; // Retain original group standings
+            data.probabilities = get().simulationData?.probabilities || {}; // Retain existing or empty probabilities
           }
           
           // Remove loading screen immediately so animation can be seen
@@ -230,24 +231,32 @@ export const useAppStore = create<AppState>()(
           
           if (mode === 'From Scratch') {
             for (let md = 1; md <= 3; md++) {
-               const intermediateMock = {
-                  ...nextMock,
-                  sample_standings: nextMock.sample_standings.map(group => ({
-                     ...group,
-                     teams: group.teams.map(team => ({
-                        ...team,
-                        matches_played: md,
-                        points: Math.round((team.points / 3) * md),
-                        won: Math.round((team.won / 3) * md),
-                        draw: Math.round((team.draw / 3) * md),
-                        lost: Math.round((team.lost / 3) * md),
-                        goals_for: Math.round((team.goals_for / 3) * md),
-                        goals_against: Math.round((team.goals_against / 3) * md),
-                        goal_difference: Math.round((team.goal_difference / 3) * md),
-                     }))
-                  }))
-               };
-               set({ simulationData: intermediateMock as any });
+                const intermediateMock = {
+                   ...nextMock,
+                   sample_standings: nextMock.sample_standings.map(group => {
+                      const updatedTeams = group.teams.map(team => ({
+                         ...team,
+                         matches_played: md,
+                         points: Math.round((team.points / 3) * md),
+                         won: Math.round((team.won / 3) * md),
+                         draw: Math.round((team.draw / 3) * md),
+                         lost: Math.round((team.lost / 3) * md),
+                         goals_for: Math.round((team.goals_for / 3) * md),
+                         goals_against: Math.round((team.goals_against / 3) * md),
+                         goal_difference: Math.round((team.goal_difference / 3) * md),
+                      }));
+                      updatedTeams.sort((a, b) => {
+                         if (b.points !== a.points) return b.points - a.points;
+                         if (b.goal_difference !== a.goal_difference) return b.goal_difference - a.goal_difference;
+                         return b.goals_for - a.goals_for;
+                      });
+                      return {
+                         ...group,
+                         teams: updatedTeams
+                      };
+                   })
+                };
+                set({ simulationData: intermediateMock as any });
                await new Promise(r => setTimeout(r, 600)); 
             }
           }

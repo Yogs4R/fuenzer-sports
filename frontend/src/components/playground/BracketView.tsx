@@ -162,8 +162,8 @@ const BracketView: React.FC = () => {
               if (thirdPlaceMatch) roundMatches.push(thirdPlaceMatch);
             }
 
-            const matchSpacing = rIndex === 0 ? 'mt-0' : (rIndex === 1 ? 'mt-12' : (rIndex === 2 ? 'mt-36' : (rIndex === 3 ? 'mt-[220px]' : 'mt-[400px]')));
-            const matchGap = rIndex === 0 ? 'gap-4' : (rIndex === 1 ? 'gap-12' : (rIndex === 2 ? 'gap-[104px]' : (rIndex === 3 ? 'gap-[280px]' : 'gap-[150px]')));
+            const matchSpacing = rIndex === 0 ? 'mt-0' : (rIndex === 1 ? 'mt-[46px]' : (rIndex === 2 ? 'mt-[138px]' : (rIndex === 3 ? 'mt-[322px]' : 'mt-[714px]')));
+            const matchGap = rIndex === 0 ? 'gap-4' : (rIndex === 1 ? 'gap-[108px]' : (rIndex === 2 ? 'gap-[292px]' : (rIndex === 3 ? 'gap-[660px]' : 'gap-0')));
 
             return (
               <div key={round} className="flex flex-col relative" style={{ minWidth: '220px' }}>
@@ -183,7 +183,7 @@ const BracketView: React.FC = () => {
                   {roundMatches.map((match, mIndex) => {
                     const isSecondHalfStart = roundMatches.length > 1 && mIndex === roundMatches.length / 2 && round !== 'FINAL';
                     return (
-                    <div key={match.id} className={`relative flex flex-col items-center ${isSecondHalfStart ? 'mt-12' : ''}`}>
+                    <div key={match.id} className={`relative flex flex-col items-center ${isSecondHalfStart ? 'mt-[48px]' : ''}`}>
                       {match.round === '3RD' && (
                         <div className="text-yellow-500 font-bold text-xs uppercase mb-2 tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">3rd Place Match</div>
                       )}
@@ -227,13 +227,13 @@ const BracketView: React.FC = () => {
                       {/* Vertical Connection Line for Home/Away Pairs */}
                       {match.nextMatchId && rIndex < ROUNDS.length - 1 && mIndex % 2 === 0 && (
                         <div className={`absolute left-[calc(100%+24px)] md:left-[calc(100%+32px)] top-1/2 w-0.5 border-l-2 border-white/20 z-0
-                          ${rIndex === 0 ? 'h-[92px]' : (rIndex === 1 ? 'h-[184px]' : (rIndex === 2 ? 'h-[368px]' : 'h-[736px]'))}
+                          ${rIndex === 0 ? 'h-[92px]' : (rIndex === 1 ? 'h-[184px]' : (rIndex === 2 ? 'h-[368px]' : 'h-[784px]'))}
                         `}></div>
                       )}
                       {/* Horizontal line entering next match */}
                       {match.nextMatchId && rIndex < ROUNDS.length - 1 && mIndex % 2 === 0 && (
                         <div className={`absolute left-[calc(100%+24px)] md:left-[calc(100%+32px)] top-[calc(50%+46px)] 
-                          ${rIndex === 1 ? 'top-[calc(50%+92px)]' : (rIndex === 2 ? 'top-[calc(50%+184px)]' : (rIndex === 3 ? 'top-[calc(50%+368px)]' : ''))}
+                          ${rIndex === 1 ? 'top-[calc(50%+92px)]' : (rIndex === 2 ? 'top-[calc(50%+184px)]' : (rIndex === 3 ? 'top-[calc(50%+392px)]' : ''))}
                           w-6 md:w-8 border-t-2 border-white/20 z-0`}></div>
                       )}
                     </div>
