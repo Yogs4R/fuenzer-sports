@@ -4,6 +4,7 @@ import { generateBracket } from '../../utils/bracketGenerator';
 import { motion } from 'framer-motion';
 
 const ROUNDS = ['R32', 'R16', 'QF', 'SF', 'FINAL'];
+const SIMULATION_ROUNDS = ['R32', 'R16', 'QF', 'SF', '3RD', 'FINAL'];
 const ROUND_NAMES: Record<string, string> = {
   'R32': 'Round of 32',
   'R16': 'Round of 16',
@@ -26,7 +27,6 @@ const BracketView: React.FC = () => {
   useEffect(() => {
     const dataToUse = selectedMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
     if (dataToUse && dataToUse.length > 0) {
-      // Only generate if matches are empty or we want to reset
       if (matches.length === 0 || matches[0]?.homeScore === undefined) {
           setMatches(generateBracket(dataToUse));
       }
@@ -37,7 +37,6 @@ const BracketView: React.FC = () => {
     const lamHome = Math.max(0.1, 1.2 + (homePower - awayPower) * 0.03);
     const lamAway = Math.max(0.1, 1.0 + (awayPower - homePower) * 0.03);
     
-    // Simple poisson sampling
     const samplePoisson = (lambda: number) => {
       let L = Math.exp(-lambda), k = 0, p = 1;
       do { k++; p *= Math.random(); } while (p > L);
@@ -47,7 +46,6 @@ const BracketView: React.FC = () => {
     let homeGoals = samplePoisson(lamHome);
     let awayGoals = samplePoisson(lamAway);
 
-    // If draw in knockout, flip coin for penalties (simplified)
     if (homeGoals === awayGoals) {
       if (Math.random() > 0.5) homeGoals++; else awayGoals++;
     }
@@ -59,9 +57,17 @@ const BracketView: React.FC = () => {
     if (isSimulatingKnockout || matches.length === 0) return;
     setIsSimulatingKnockout(true);
 
+    const dataToUse = selectedMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
+    
     let currentMatches = [...matches];
+    // Re-simulate logic: wipe and reset if already played
+    if (currentMatches[0]?.homeScore !== undefined) {
+       currentMatches = generateBracket(dataToUse || []);
+       setMatches(currentMatches);
+       await new Promise(r => setTimeout(r, 100)); 
+    }
 
-    for (const round of ROUNDS) {
+    for (const round of SIMULATION_ROUNDS) {
       const roundMatches = currentMatches.filter(m => m.round === round);
       let updated = false;
 
@@ -219,13 +225,13 @@ const BracketView: React.FC = () => {
                       {/* Vertical Connection Line for Home/Away Pairs */}
                       {match.nextMatchId && rIndex < ROUNDS.length - 1 && mIndex % 2 === 0 && (
                         <div className={`absolute left-[calc(100%+24px)] md:left-[calc(100%+32px)] top-1/2 w-0.5 border-l-2 border-white/20 z-0
-                          ${rIndex === 0 ? 'h-[92px]' : (rIndex === 1 ? 'h-[156px]' : (rIndex === 2 ? 'h-[280px]' : 'h-[500px]'))}
+                          ${rIndex === 0 ? 'h-[92px]' : (rIndex === 1 ? 'h-[184px]' : (rIndex === 2 ? 'h-[368px]' : 'h-[736px]'))}
                         `}></div>
                       )}
                       {/* Horizontal line entering next match */}
                       {match.nextMatchId && rIndex < ROUNDS.length - 1 && mIndex % 2 === 0 && (
                         <div className={`absolute left-[calc(100%+24px)] md:left-[calc(100%+32px)] top-[calc(50%+46px)] 
-                          ${rIndex === 1 ? 'top-[calc(50%+78px)]' : (rIndex === 2 ? 'top-[calc(50%+140px)]' : (rIndex === 3 ? 'top-[calc(50%+250px)]' : ''))}
+                          ${rIndex === 1 ? 'top-[calc(50%+92px)]' : (rIndex === 2 ? 'top-[calc(50%+184px)]' : (rIndex === 3 ? 'top-[calc(50%+368px)]' : ''))}
                           w-6 md:w-8 border-t-2 border-white/20 z-0`}></div>
                       )}
                     </div>
@@ -238,8 +244,8 @@ const BracketView: React.FC = () => {
       </div>
       
       {/* Disclaimer */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none">
-        <div className="bg-black/60 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 text-[10px] text-gray-400 text-center whitespace-nowrap">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none z-50">
+        <div className="bg-[#080d1e] px-4 py-1.5 rounded-full border border-white/20 shadow-xl text-[10px] text-gray-400 text-center whitespace-nowrap">
           Simulation results are purely hypothetical and based on Monte Carlo calculations.
         </div>
       </div>

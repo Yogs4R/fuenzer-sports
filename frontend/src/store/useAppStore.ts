@@ -218,6 +218,13 @@ export const useAppStore = create<AppState>()(
           
           const data: SimulationResponse = await response.json();
           
+          if (mode === 'Live Standings') {
+            data.sample_standings = get().liveStandings || []; // Retain original group standings
+          }
+          
+          // Remove loading screen immediately so animation can be seen
+          set({ isLoading: false }); 
+          
           // Progressive Matchday Animation
           const nextMock = data;
           
@@ -250,7 +257,6 @@ export const useAppStore = create<AppState>()(
             simulationTitle: data.title || state.simulationTitle,
             simulationData: data,
             bracketMatches: [],
-            isLoading: false
           }));
           
         } catch (error: any) {

@@ -62,7 +62,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
   const handleSimulate = () => {
     if (!isLoading) {
       if (activeTab === 'standings' && selectedMode === 'Live Standings') {
-        setToastMessage("Fase Grup telah selesai! Gunakan mode 'From Scratch' untuk mensimulasikan ulang grup, atau pindah ke tab Knockout Bracket untuk simulasi sisa turnamen.");
+        setToastMessage("Group Stage is completed! Use 'From Scratch' mode to resimulate groups, or switch to the Knockout Bracket to simulate the rest of the tournament.");
         setTimeout(() => setToastMessage(null), 5000);
         return;
       }
@@ -164,6 +164,15 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                   />
                 </div>
                 
+                {/* Toggle Metrics */}
+                <button
+                  onClick={() => setShowMetrics(!showMetrics)}
+                  className={`bg-[#0a1128] text-white text-xs px-3 py-2 rounded-lg border transition-colors flex items-center gap-2 ${showMetrics ? 'border-primary-cyan/50 bg-primary-cyan/5' : 'border-white/10 hover:bg-white/5'}`}
+                >
+                  <Target size={14} className={showMetrics ? 'text-primary-cyan' : ''} />
+                  <span className="hidden sm:inline">{showMetrics ? 'Hide Metrics' : 'Show Metrics'}</span>
+                </button>
+                
                 {/* Filter Dropdown */}
                 <div className="relative">
                   <button 
@@ -172,13 +181,6 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                   >
                     <Filter size={14} className={selectedFilters.length < filterOptions.length ? 'text-primary-cyan' : ''} />
                     <span className="hidden sm:inline">Filter</span>
-                  </button>
-                  <button
-                    onClick={() => setShowMetrics(!showMetrics)}
-                    className={`bg-[#0a1128] text-white text-xs px-3 py-2 rounded-lg border transition-colors flex items-center gap-2 ${showMetrics ? 'border-primary-cyan/50 bg-primary-cyan/5' : 'border-white/10 hover:bg-white/5'}`}
-                  >
-                    <Target size={14} className={showMetrics ? 'text-primary-cyan' : ''} />
-                    <span className="hidden sm:inline">{showMetrics ? 'Hide Metrics' : 'Show Metrics'}</span>
                   </button>
                   <AnimatePresence>
                     {isFilterOpen && (
