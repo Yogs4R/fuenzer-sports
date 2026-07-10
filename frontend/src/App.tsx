@@ -3,6 +3,7 @@ import { useAppStore } from './store/useAppStore';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import ErrorToast from './components/layout/ErrorToast';
+import CookieConsent from './components/common/CookieConsent';
 import LandingPage from './pages/LandingPage';
 import Playground from './pages/Playground';
 import StandingsPage from './pages/StandingsPage';
@@ -75,6 +76,7 @@ function App() {
       </main>
       {currentPage !== '/playground' && currentPage !== '/signin' && currentPage !== '/signup' && <Footer />}
       <ErrorToast />
+      <CookieConsent />
     </div>
   );
 }

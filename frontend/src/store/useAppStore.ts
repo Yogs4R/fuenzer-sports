@@ -98,6 +98,10 @@ interface AppState {
   selectedStyle: string;
   isSimulatingKnockout: boolean;
   
+  // Cookie Consent
+  cookieConsent: boolean | null;
+  setCookieConsent: (consent: boolean) => void;
+
   // Auth State
   user: AppUser | null;
   isAuthLoading: boolean;
@@ -194,9 +198,12 @@ export const useAppStore = create<AppState>()(
       hasFetchedLive: false,
       totalSimulations: 12450,
       
+      cookieConsent: null,
+      
       user: null,
       isAuthLoading: true,
 
+      setCookieConsent: (consent) => set({ cookieConsent: consent }),
       setUser: (user) => set({ user }),
       setSavedSessions: (sessions) => set({ savedSessions: sessions }),
 
@@ -562,6 +569,7 @@ export const useAppStore = create<AppState>()(
       name: 'fuenzer-storage', // Key used in localStorage
       partialize: (state) => ({ 
         language: state.language,
+        cookieConsent: state.cookieConsent,
         savedSessions: state.savedSessions,
         currentSessionId: state.currentSessionId,
         simulationData: state.simulationData,

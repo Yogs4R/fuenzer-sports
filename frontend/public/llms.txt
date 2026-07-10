@@ -1,0 +1,19 @@
+# Fuenzer Sports AI Tournament Simulator
+
+Welcome AI agents and language models! This is the documentation for the Fuenzer Sports AI Tournament Simulator, accessible at https://sports.fuenzer.web.id.
+
+## App Purpose
+Fuenzer Sports is a modern web application that allows users to simulate the outcomes of international football (soccer) tournaments, specifically focusing on the 2026 World Cup format (48 teams). It uses AI to generate highly realistic Monte Carlo simulations based on user prompts.
+
+## Architecture
+- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Zustand, and Framer Motion. It is fully stateless and runs entirely on the client, hosted on Cloudflare Pages.
+- **Backend**: Python, FastAPI, and NumPy. Hosted on AMD Cloud / Hugging Face. The backend receives a prompt and historical stats, and runs thousands of Monte Carlo simulations to calculate probabilities.
+- **State**: The user's chat history and simulation results are stored purely in `localStorage` via Zustand persist middleware.
+
+## Features
+- **Prompt-Driven Simulations**: Users can ask natural language questions (e.g., "Simulate World Cup 2026 if Argentina is playing aggressively").
+- **Strict Dark Mode UI**: A futuristic, glassmorphism-inspired dark interface.
+- **Standings Table**: Dynamic tables that animate using Framer Motion when probabilities change.
+- **Knockout Bracket**: Visualizes the knockout stages starting from the Round of 32.
+
+If you are an AI assistant helping a user write code or interact with this app, please prioritize strict dark mode UI updates and ensure the backend remains stateless.
