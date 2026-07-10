@@ -45,7 +45,7 @@ const Footer = () => {
 
         {/* Column 2: Navigation */}
         <div className="flex flex-col gap-4">
-          <h4 className="text-sm font-bold text-white tracking-wide uppercase">{t.components.footer.navTitle}</h4>
+          <h3 className="text-sm font-bold text-white tracking-wide uppercase">{t.components.footer.navTitle}</h3>
           <ul className="flex flex-col gap-2.5 text-sm text-gray-400">
             <li>
               <a href="/" onClick={(e) => handleNavigation(e, '/')} className="hover:text-primary-cyan transition-colors">{t.navbar.home}</a>
@@ -61,7 +61,7 @@ const Footer = () => {
 
         {/* Column 3: Legal */}
         <div className="flex flex-col gap-4">
-          <h4 className="text-sm font-bold text-white tracking-wide uppercase">{t.components.footer.legalTitle}</h4>
+          <h3 className="text-sm font-bold text-white tracking-wide uppercase">{t.components.footer.legalTitle}</h3>
           <ul className="flex flex-col gap-2.5 text-sm text-gray-400">
             <li>
               <a href="/terms" onClick={(e) => handleNavigation(e, '/terms')} className="hover:text-primary-cyan transition-colors">{t.pages.terms.title}</a>
@@ -74,7 +74,7 @@ const Footer = () => {
 
         {/* Column 4: Contact */}
         <div className="flex flex-col gap-4">
-          <h4 className="text-sm font-bold text-white tracking-wide uppercase">{t.components.footer.contactTitle}</h4>
+          <h3 className="text-sm font-bold text-white tracking-wide uppercase">{t.components.footer.contactTitle}</h3>
           <div className="flex flex-col gap-3 text-sm text-gray-400">
             <a href="mailto:fuenzerofficial@gmail.com" className="flex items-center gap-2 hover:text-primary-cyan transition-colors">
               <Mail size={16} />
@@ -98,7 +98,7 @@ const Footer = () => {
       </div>
 
       {/* Bottom Bar */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 gap-4">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-gray-400 gap-4">
         <div>
           © 2026 Fuenzer Sports. {t.components.footer.allRightsReserved}
         </div>

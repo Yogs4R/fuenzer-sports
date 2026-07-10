@@ -286,6 +286,7 @@ const HeroSearchBox: React.FC = () => {
           <div className="flex items-center gap-2 shrink-0 ml-auto md:ml-0">
             <button 
               onClick={toggleRecording}
+              aria-label={isRecording ? "Stop voice recording" : "Start voice recording"}
               className={`w-10 h-10 flex items-center justify-center rounded-full transition-all ${isRecording ? 'text-red-400 bg-red-400/10 animate-pulse' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
             >
               <Mic size={20} />
@@ -293,6 +294,7 @@ const HeroSearchBox: React.FC = () => {
             <button 
               disabled={!isSubmitActive || isLoading}
               onClick={handleSimulate}
+              aria-label="Run simulation"
               className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${isSubmitActive && !isLoading ? 'bg-primary-cyan text-bg-0 hover:bg-cyan-300 shadow-[0_0_20px_rgba(76,215,246,0.3)] hover:shadow-[0_0_30px_rgba(76,215,246,0.5)] cursor-pointer' : 'bg-white/10 text-gray-500 cursor-not-allowed'}`}
             >
               {isLoading ? <Loader2 size={24} className="animate-spin text-primary-cyan" /> : <ArrowUp size={24} strokeWidth={2.5} />}

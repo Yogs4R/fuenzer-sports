@@ -115,7 +115,7 @@ const BelowTheFold: React.FC = () => {
         }
       `}} />
       <div className="w-full bg-bg-0 border-y border-white/5 py-8 mb-20 shadow-lg overflow-hidden relative animate-marquee-container">
-        <div className="max-w-6xl mx-auto px-4 mb-8 text-center text-xs font-semibold text-gray-500 uppercase tracking-widest">
+        <div className="max-w-6xl mx-auto px-4 mb-8 text-center text-xs font-semibold text-gray-400 uppercase tracking-widest">
           {t.components.belowTheFold.supportedBy}
         </div>
         <div className="flex overflow-hidden w-full select-none">
@@ -173,21 +173,21 @@ const BelowTheFold: React.FC = () => {
       <motion.div {...scrollRevealProps} className="w-full bg-bg-0 border-y border-white/5 py-12 mb-32 shadow-lg">
         <div className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center px-4">
           <div>
-            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">10,000+</h3>
+            <div className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">10,000+</div>
             <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.iterations}</p>
           </div>
           <div>
-            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">48</h3>
+            <div className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">48</div>
             <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.teams}</p>
           </div>
           <div>
-            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">99.8%</h3>
+            <div className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">99.8%</div>
             <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.accuracyRate}</p>
           </div>
           <div>
-            <h3 className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">
+            <div className="text-4xl md:text-5xl font-bold font-mono text-white mb-2">
               {t.components.belowTheFold.stats.accuracyValue}
-            </h3>
+            </div>
             <p className="text-xs md:text-sm text-gray-400">{t.components.belowTheFold.stats.accuracy}</p>
           </div>
         </div>

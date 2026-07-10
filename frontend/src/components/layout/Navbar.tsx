@@ -194,6 +194,7 @@ const Navbar: React.FC = () => {
             {/* Mobile Menu Toggle Button (hamburger / cross) */}
             <button 
               onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? "Close menu" : "Open menu"}
               className="lg:hidden text-gray-400 hover:text-white transition-colors p-1"
             >
               {isOpen ? <X size={20} className="sm:w-6 sm:h-6" /> : <Menu size={20} className="sm:w-6 sm:h-6" />}
