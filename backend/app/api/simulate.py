@@ -3,7 +3,7 @@ from fastapi import APIRouter
 from app.models.simulation import SimulationRequest, SimulationResponse
 from app.integrations.mock_data import get_mock_wc_teams
 from app.services.simulation import MonteCarloEngine
-from app.integrations.llm import generate_narrative
+from app.integrations.llm import generate_narrative, route_prompt
 
 router = APIRouter()
 
@@ -81,6 +81,20 @@ def run_simulation(request: SimulationRequest = None):
             boost = custom_weights.get(tla, 0.0) + custom_weights.get(name, 0.0)
             if boost != 0:
                 team["power_rating"] += boost
+                
+    # Route the prompt if provided
+    if prompt:
+        route_result = route_prompt(prompt, model, chat_history, competition)
+        if route_result["route"] in ["GENERAL_SPORTS", "OUT_OF_CONTEXT"]:
+            return SimulationResponse(
+                iterations=0,
+                execution_time_ms=0.0,
+                probabilities={},
+                sample_standings=[],
+                title="Fuenzer AI Chat",
+                ai_narrative=route_result["response"],
+                is_general_chat=True
+            )
                 
     # Initialize Engine
     engine = MonteCarloEngine(teams_data=teams, n_iterations=iterations)

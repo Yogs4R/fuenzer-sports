@@ -39,6 +39,7 @@ class SimulationResponse(BaseModel):
     sample_standings: List[GroupStandings]
     title: str = "World Cup Simulation"
     ai_narrative: str = None
+    is_general_chat: bool = False
 
 class ChatMessage(BaseModel):
     role: str

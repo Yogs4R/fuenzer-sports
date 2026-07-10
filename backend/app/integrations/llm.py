@@ -22,6 +22,74 @@ def get_model_name(selected_model: str, prompt: str) -> str:
             return pro_model
         return fast_model
 
+def route_prompt(prompt: str, selected_model: str, chat_history: List[Any], competition: str) -> dict:
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        return {"route": "SIMULATE", "response": ""}
+        
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+    
+    model_name = get_model_name(selected_model, prompt)
+    
+    system_prompt = f"""You are a sports AI assistant for the {competition}.
+Your task is to CLASSIFY the user's prompt and respond accordingly.
+
+Categories:
+1. SIMULATE: If the user asks to simulate matches, generate a tournament, update standings, predict a score, or asks 'who will win' the group/tournament.
+2. GENERAL_SPORTS: If the user asks general questions about football/soccer rules (e.g., offside, referee, yellow cards), history of the tournament, or general facts.
+3. OUT_OF_CONTEXT: If the user asks about topics COMPLETELY UNRELATED to sports (e.g., cooking, programming, math, daily life).
+
+Instructions for output:
+- If SIMULATE: output EXACTLY and ONLY the word: SIMULATE
+- If GENERAL_SPORTS: output the word GENERAL_SPORTS followed by a newline, and then provide a helpful and concise answer to their sports question.
+- If OUT_OF_CONTEXT: output the word OUT_OF_CONTEXT followed by a newline, and then politely refuse to answer and briefly explain that you can only discuss football and sports.
+
+Example 1:
+User: Simulate group A
+Assistant: SIMULATE
+
+Example 2:
+User: Apa itu offside?
+Assistant: GENERAL_SPORTS
+Offside adalah aturan dalam sepak bola di mana pemain penyerang...
+
+Example 3:
+User: Cara masak nasi goreng?
+Assistant: OUT_OF_CONTEXT
+Maaf, saya adalah asisten sepak bola. Saya tidak bisa memberikan tutorial memasak. Mari kita bahas seputar sepak bola!
+
+MULTILINGUAL SUPPORT: Your response text MUST be in the exact same language that the user used.
+"""
+
+    messages = [{"role": "system", "content": system_prompt}]
+    for msg in chat_history[-3:]: # smaller history for classification
+        role = "user" if msg.role == "user" else "assistant"
+        messages.append({"role": role, "content": msg.content})
+    messages.append({"role": "user", "content": prompt})
+    
+    try:
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+            timeout=10.0
+        )
+        content = response.choices[0].message.content.strip()
+        
+        if content.startswith("SIMULATE"):
+            return {"route": "SIMULATE", "response": ""}
+        elif content.startswith("OUT_OF_CONTEXT"):
+            return {"route": "OUT_OF_CONTEXT", "response": content.replace("OUT_OF_CONTEXT", "").strip()}
+        elif content.startswith("GENERAL_SPORTS"):
+            return {"route": "GENERAL_SPORTS", "response": content.replace("GENERAL_SPORTS", "").strip()}
+        else:
+            # Fallback to SIMULATE if the LLM didn't follow formatting
+            return {"route": "SIMULATE", "response": ""}
+    except Exception:
+        return {"route": "SIMULATE", "response": ""}
+
 def generate_narrative(
     prompt: str,
     chat_history: List[Any],

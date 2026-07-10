@@ -33,6 +33,7 @@ export interface SimulationResponse {
   sample_standings: GroupStandings[];
   title?: string;
   ai_narrative?: string;
+  is_general_chat?: boolean;
 }
 
 export interface ChatMessage {
@@ -224,6 +225,16 @@ export const useAppStore = create<AppState>()(
           if (mode === 'Live Standings') {
             data.sample_standings = get().liveStandings || []; // Retain original group standings
             data.probabilities = cachedProbabilities; // Retain existing or empty probabilities
+          }
+          
+          if (data.is_general_chat) {
+             set((state) => ({
+                isLoading: false,
+                chatHistory: prompt.trim() ? [...state.chatHistory, { role: 'ai', content: data.ai_narrative || "Done.", isStreaming: false }] : state.chatHistory,
+                simulationData: currentState.simulationData, // Restore it
+                simulationTitle: currentState.simulationTitle
+             }));
+             return;
           }
           
           // Remove loading screen immediately so animation can be seen
