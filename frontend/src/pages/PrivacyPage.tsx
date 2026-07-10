@@ -1,8 +1,10 @@
 import { useAppStore } from '../store/useAppStore';
 import { id } from '../locales/id';
 import { en } from '../locales/en';
+import { useSEO } from '../hooks/useSEO';
 
 const PrivacyPage = () => {
+  useSEO({ title: 'Fuenzer Sports | Privacy Policy' });
   const { language } = useAppStore();
   const t = language === 'id' ? id : en;
 

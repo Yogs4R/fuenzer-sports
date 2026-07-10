@@ -12,6 +12,7 @@ import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
+import NotFoundPage from './pages/NotFoundPage';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './config/firebase';
 
@@ -64,7 +65,7 @@ function App() {
       case '/terms':
         return <TermsPage />;
       default:
-        return <LandingPage />;
+        return <NotFoundPage />;
     }
   };
 

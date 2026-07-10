@@ -4,8 +4,10 @@ import { id } from '../locales/id';
 import { en } from '../locales/en';
 import { Trash2, MessageSquare, Clock, Trophy, Target, ChevronLeft, ChevronRight, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSEO } from '../hooks/useSEO';
 
 const HistoryPage = () => {
+  useSEO({ title: 'Fuenzer Sports | History' });
   const { language, savedSessions, deleteSession, loadSession, setCurrentPage } = useAppStore();
   const t = language === 'id' ? id : en;
   

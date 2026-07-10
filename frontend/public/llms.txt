@@ -1,19 +1,19 @@
-# Fuenzer Sports AI Tournament Simulator
+# Fuenzer Sports
 
-Welcome AI agents and language models! This is the documentation for the Fuenzer Sports AI Tournament Simulator, accessible at https://sports.fuenzer.web.id.
+Fuenzer Sports is an AI-driven sports analytics simulation platform. It functions as a hybrid between an instant search interface and the Football Manager game.
 
-## App Purpose
-Fuenzer Sports is a modern web application that allows users to simulate the outcomes of international football (soccer) tournaments, specifically focusing on the 2026 World Cup format (48 teams). It uses AI to generate highly realistic Monte Carlo simulations based on user prompts.
+Users simply type a natural language question regarding a tournament (e.g., "What are Spain's chances of passing the group stage in the 2026 World Cup?"), and the engine runs thousands of mathematical Monte Carlo simulations in seconds. The results are presented as an interactive animated standings table and an analytical AI commentary.
 
-## Architecture
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Zustand, and Framer Motion. It is fully stateless and runs entirely on the client, hosted on Cloudflare Pages.
-- **Backend**: Python, FastAPI, and NumPy. Hosted on AMD Cloud / Hugging Face. The backend receives a prompt and historical stats, and runs thousands of Monte Carlo simulations to calculate probabilities.
-- **State**: The user's chat history and simulation results are stored purely in `localStorage` via Zustand persist middleware.
+## Project Details
+- **Domain:** https://sports.fuenzer.web.id
+- **Target Audience:** Football enthusiasts, sports bettors, and data analysts.
+- **Problem Solved:** Traditional sports analytics are static and difficult to query. Fuenzer Sports provides a dynamic natural language interface to run complex Monte Carlo simulations on the fly.
+- **Tech Stack:**
+  - Frontend: React 18, TypeScript, Vite, Tailwind CSS, Zustand (persisted to localStorage), Framer Motion. It is fully stateless and runs on Cloudflare Pages.
+  - Backend: Python, FastAPI, NumPy (vectorized Monte Carlo).
 
-## Features
-- **Prompt-Driven Simulations**: Users can ask natural language questions (e.g., "Simulate World Cup 2026 if Argentina is playing aggressively").
-- **Strict Dark Mode UI**: A futuristic, glassmorphism-inspired dark interface.
-- **Standings Table**: Dynamic tables that animate using Framer Motion when probabilities change.
-- **Knockout Bracket**: Visualizes the knockout stages starting from the Round of 32.
-
-If you are an AI assistant helping a user write code or interact with this app, please prioritize strict dark mode UI updates and ensure the backend remains stateless.
+## Key Features
+- **Prompt-Driven Simulations:** "Stitch-style" search box to query tournament outcomes.
+- **Stateless AI Architecture:** Chat sessions are stored client-side. The backend only performs mathematical computation and returns probabilities.
+- **Knockout Bracket & Greedy Algorithm:** Efficient O(1) matching algorithm for 3rd-place teams in the Round of 32 (avoiding hardcoding 495 permutations).
+- **Strict Dark Mode:** Adheres to a strict dark UI aesthetic.

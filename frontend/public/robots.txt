@@ -1,4 +1,11 @@
 User-agent: *
-Allow: /
+Allow: /$
+Allow: /terms$
+Allow: /privacy$
+Allow: /signin$
+Allow: /signup$
+Disallow: /playground
+Disallow: /history
+Disallow: /standings
 
 Sitemap: https://sports.fuenzer.web.id/sitemap.xml

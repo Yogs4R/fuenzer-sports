@@ -3,8 +3,10 @@ import { useAppStore } from '../store/useAppStore';
 import { id } from '../locales/id';
 import { en } from '../locales/en';
 import { Loader2 } from 'lucide-react';
+import { useSEO } from '../hooks/useSEO';
 
 const StandingsPage = () => {
+  useSEO({ title: 'Fuenzer Sports | Live Standings' });
   const { 
     language, 
     liveStandings, 

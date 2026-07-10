@@ -1,7 +1,9 @@
 import React from 'react';
 import { useAppStore } from '../store/useAppStore';
+import { useSEO } from '../hooks/useSEO';
 
 const SignInPage = () => {
+  useSEO({ title: 'Fuenzer Sports | Sign In' });
   const { setCurrentPage, signInWithGoogle, isAuthLoading } = useAppStore();
 
   const handleGoogleSignIn = async () => {

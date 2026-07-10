@@ -3,9 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../store/useAppStore';
 import LeftPanel from '../components/playground/LeftPanel';
 import RightPanel from '../components/playground/RightPanel';
+import { useSEO } from '../hooks/useSEO';
 
 
 const Playground: React.FC = () => {
+  useSEO({ title: 'Fuenzer Sports | Playground' });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(true);
 
 
