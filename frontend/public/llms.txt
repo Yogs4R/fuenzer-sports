@@ -2,18 +2,32 @@
 
 Fuenzer Sports is an AI-driven sports analytics simulation platform. It functions as a hybrid between an instant search interface and the Football Manager game.
 
-Users simply type a natural language question regarding a tournament (e.g., "What are Spain's chances of passing the group stage in the 2026 World Cup?"), and the engine runs thousands of mathematical Monte Carlo simulations in seconds. The results are presented as an interactive animated standings table and an analytical AI commentary.
+Users simply type a natural language question regarding a tournament (e.g., "What are Spain's chances of passing the group stage in the 2026 World Cup?"), and the engine runs thousands of mathematical Monte Carlo simulations in seconds.
+
+## Main Navigation
+
+- [Home](https://sports.fuenzer.web.id/) - Run instant sports analytics and tournament simulations.
+- [Terms of Service](https://sports.fuenzer.web.id/terms) - Read the terms of service governing this tournament simulator.
+- [Privacy Policy](https://sports.fuenzer.web.id/privacy) - Learn about our privacy policy and analytics data handling.
+
+## Crawler & SEO Resources
+
+- [Sitemap](https://sports.fuenzer.web.id/sitemap.xml) - XML sitemap of indexable routes.
+- [Robots](https://sports.fuenzer.web.id/robots.txt) - Search engine crawler directives.
+
+## Tech Stack & Architecture
+
+- **Frontend:** React 18, TypeScript, Zustand (persisted to localStorage), Framer Motion. Fully stateless UI hosted on Cloudflare Pages.
+- **Backend:** Python, FastAPI, NumPy (vectorized Monte Carlo). Fully stateless compute hosted on Hugging Face Spaces.
+- **Core Engine:** Prompt-driven World Cup 2026 group stage simulation with Round of 32 greedy matching algorithm.
+- **Strict Dark Mode:** Adheres to a strict dark UI aesthetic.
 
 ## Project Details
 - **Domain:** https://sports.fuenzer.web.id
 - **Target Audience:** Football enthusiasts, sports bettors, and data analysts.
 - **Problem Solved:** Traditional sports analytics are static and difficult to query. Fuenzer Sports provides a dynamic natural language interface to run complex Monte Carlo simulations on the fly.
-- **Tech Stack:**
-  - Frontend: React 18, TypeScript, Vite, Tailwind CSS, Zustand (persisted to localStorage), Framer Motion. It is fully stateless and runs on Cloudflare Pages.
-  - Backend: Python, FastAPI, NumPy (vectorized Monte Carlo).
 
 ## Key Features
 - **Prompt-Driven Simulations:** "Stitch-style" search box to query tournament outcomes.
 - **Stateless AI Architecture:** Chat sessions are stored client-side. The backend only performs mathematical computation and returns probabilities.
 - **Knockout Bracket & Greedy Algorithm:** Efficient O(1) matching algorithm for 3rd-place teams in the Round of 32 (avoiding hardcoding 495 permutations).
-- **Strict Dark Mode:** Adheres to a strict dark UI aesthetic.
