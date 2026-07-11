@@ -5,6 +5,9 @@ import { en } from '../../locales/en';
 import { Search, Zap, BarChart3, ChevronRight, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+// You can replace this YouTube Video ID with your actual demo video ID once uploaded
+const DEMO_YOUTUBE_ID = 'dQw4w9WgXcQ'; 
+
 const BelowTheFold: React.FC = () => {
   const { 
     setCurrentPage, 
@@ -16,6 +19,7 @@ const BelowTheFold: React.FC = () => {
   const t = language === 'id' ? id : en;
   const [activeTab, setActiveTab] = useState('World Cup');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   const scrollRevealProps = {
     initial: { opacity: 0, y: 40 },
@@ -160,13 +164,31 @@ const BelowTheFold: React.FC = () => {
       {/* Video/GIF Demo Placeholder */}
       <motion.div {...scrollRevealProps} className="w-full max-w-5xl mx-auto mb-20 px-4 relative">
         <div className="aspect-video w-full rounded-2xl bg-bg-1 border border-white/10 flex items-center justify-center shadow-2xl relative overflow-hidden z-10">
-          <div className="absolute inset-0 bg-linear-to-tr from-bg-0/80 to-transparent z-10"></div>
-          <div className="text-center z-20">
-            <div className="w-16 h-16 rounded-full bg-primary-cyan/20 flex items-center justify-center mx-auto mb-4 border border-primary-cyan/30 backdrop-blur-sm cursor-pointer hover:bg-primary-cyan/30 transition-all">
-              <div className="w-0 h-0 border-t-8 border-t-transparent border-l-12 border-l-primary-cyan border-b-8 border-b-transparent ml-1"></div>
-            </div>
-            <span className="text-gray-300 font-medium tracking-wide">{t.components.belowTheFold.watchDemo}</span>
-          </div>
+          {isVideoPlaying ? (
+            <iframe 
+              width="100%" 
+              height="100%" 
+              src={`https://www.youtube.com/embed/${DEMO_YOUTUBE_ID}?autoplay=1&rel=0`}
+              title="Fuenzer Sports Demo Video" 
+              frameBorder="0" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              allowFullScreen
+              className="w-full h-full rounded-2xl"
+            ></iframe>
+          ) : (
+            <>
+              <div className="absolute inset-0 bg-linear-to-tr from-bg-0/80 to-transparent z-10"></div>
+              <div className="text-center z-20">
+                <button 
+                  onClick={() => setIsVideoPlaying(true)}
+                  className="w-16 h-16 rounded-full bg-primary-cyan/20 flex items-center justify-center mx-auto mb-4 border border-primary-cyan/30 backdrop-blur-sm cursor-pointer hover:bg-primary-cyan/30 hover:scale-105 transition-all focus:outline-none"
+                >
+                  <div className="w-0 h-0 border-t-8 border-t-transparent border-l-12 border-l-primary-cyan border-b-8 border-b-transparent ml-1"></div>
+                </button>
+                <p className="text-gray-300 font-medium tracking-wide">{t.components.belowTheFold.watchDemo}</p>
+              </div>
+            </>
+          )}
         </div>
       </motion.div>
 
