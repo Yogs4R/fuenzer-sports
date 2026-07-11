@@ -86,7 +86,7 @@ At the core of Fuenzer Sports is a suite of mathematical models and algorithms t
 
 ---
 
-## 5. Infrastruktur AMD & AI Stack
+## 5. Infrastructure AMD & AI Stack
 
 To run thousands of simulations and handle complex language models with low latency, Fuenzer Sports is architected to utilize high-performance compute engines:
 

@@ -87,4 +87,33 @@ This document contains the list of ideas and feature priorities resulting from t
   - *Timeline & Buttons*: On mobile viewports, the step-by-step controls in the action bar will collapse the secondary button (`Skip to End`) into an icon-only button (`>>` or `⏩`) to conserve space.
   - *Roster Editor*: Use a swipeable accordion or tabbed interface per group on mobile to prevent excessive vertical scrolling.
 
+---
+
+## 6. Multimodal Image Integration (Gemma / Minimax Vision Tool)
+**Goal:** Leverage Google Gemma's multimodal capabilities (PaliGemma / Gemma 2 VLM) to allow users to upload images (tactical lineups, formation whiteboards, or news screenshots) and automatically translate them into simulation parameters.
+
+**Agentic Tool Architecture:**
+- Rather than forcing the main text-based Agent router to process raw images, the image is passed to a dedicated **Vision Tool** called `analyze_uploaded_image(image_base64, user_instruction)`.
+- The AI Agent invokes this tool whenever the user uploads an image. 
+- **Tool Logic (Gemma VLM on AMD GPU / Minimax Fireworks Serverless):**
+  - Parses the image context based on the user's chat input.
+  - Detects relevant sports entities (teams, players).
+  - Understands the event context (e.g., "Injury detected for Mbappe", "Lineup adjustment to 4-3-3 for Japan").
+  - Returns a structured JSON payload:
+    ```json
+    {
+      "detected_team": "France",
+      "event": "injury",
+      "description": "Kylian Mbappe nasal fracture",
+      "suggested_power_modifier": -0.15
+    }
+    ```
+- **Agent Action:** The primary AI Agent receives the JSON response from the vision tool, verifies the context with the user, and automatically calls the `run_monte_carlo` simulator with the new power modifiers.
+
+**UX Flow:**
+- Chat input bar in the left panel features an attachment icon (`📎`).
+- User uploads an image and types *"What if this happens?"* or *"Apply this tactic to Germany"*.
+- The screen displays a loading spinner: *"Gemma is analyzing image..."* followed by the AI Agent showing the extracted details and applying the changes.
+
+
 
