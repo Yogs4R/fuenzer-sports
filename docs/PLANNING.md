@@ -66,17 +66,25 @@ This document contains the list of ideas and feature priorities resulting from t
 **Goal:** Empower users with direct manual control to edit teams, groups, and structures (e.g., adding/removing teams or groups) via an intuitive visual interface without having to rely solely on natural-language AI prompts.
 
 **UX & Layout Details (Sally):**
-- **Trigger:** Add a "Modify Structure" or "Edit Roster" button in `RightPanel.tsx` next to the simulator controls when in Custom Tournament mode.
-- **The Roster Modal:** Opens a full-screen or slide-over drawer showing groups as editable cards:
+- **Pre-Playground Builder Page (`/custom-builder`):**
+  - Add a dedicated page/stepper (or popup modal) accessible directly from the landing page when "Custom Tournament" is selected.
+  - This acts as the *Roster Creator* before entering the playground: choose number of groups, number of teams per group, edit team names/power ratings, and validate.
+- **Trigger in Playground:** Inside the Playground (`RightPanel.tsx`), add a "Modify Structure" or "Edit Roster" button next to the simulator controls when in Custom Tournament mode to reopen the CRUD interface.
+- **The Roster Modal/Page:** Displays groups as editable cards:
   - *Team Actions*: Delete icon next to each team row; text inputs to edit names/base ratings directly.
   - *Group Actions*: An "Add Group" card at the end of the group list; a "Delete Group" trash icon on each group card header.
-- **Strict Validation Feedback:** At the bottom of the modal, a real-time warning panel:
+- **Strict Validation Feedback:** At the bottom, a real-time warning panel:
   - If the configuration is invalid (e.g., odd number of teams, unequal group sizes, or total teams not matching standard formats like 8/16/24/32), the "Save & Re-simulate" button is disabled and a clear instruction is shown (e.g., *"Groups must have equal size (4 teams per group)"*).
 
 **Developer Implementation & Mobile Spacing (Amelia):**
 - **Zustand Roster Store:** Implement simple CRUD actions in the frontend state: `addTeam()`, `removeTeam()`, `updateTeamRating()`, `deleteGroup()`.
 - **Validation Engine:** Write a pure utility function `validateRosterConfig(groups)` that runs on every keystroke to check for tournament rule compliance before saving.
+- **Monte Carlo Engine & Match Scaling (NumPy Refactor Details):**
+  - *Dynamic Match Calculation*: If a group has $K$ teams, the number of matches is mathematically calculated as $K(K - 1) / 2$. The engine automatically scales the number of generated matches per group dynamically (e.g. $K=3 \implies 3$ matches; $K=4 \implies 6$ matches; $K=5 \implies 10$ matches).
+  - *Symmetrical Group Constraint*: To leverage high-speed vectorized matrix math on GPUs/ROCm without dimension shape crashes during NumPy reshapes, all groups in the custom tournament must be **symmetrical** (i.e. all groups must contain the same number of teams, e.g. all 3-team groups or all 5-team groups).
+  - *Generic Tie-Breakers*: Ensure that for custom sizes (where $K \neq 4$), the engine skips World Cup-specific 3rd-place calculations and defaults to qualifying the top 2 teams per group directly.
 - **Mobile Spacing Optimization:**
   - *Timeline & Buttons*: On mobile viewports, the step-by-step controls in the action bar will collapse the secondary button (`Skip to End`) into an icon-only button (`>>` or `⏩`) to conserve space.
   - *Roster Editor*: Use a swipeable accordion or tabbed interface per group on mobile to prevent excessive vertical scrolling.
+
 
