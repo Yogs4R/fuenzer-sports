@@ -36,3 +36,27 @@ This document contains the list of ideas and feature priorities resulting from t
 - Refactor the backend architecture so that the LLM (Fireworks AI) is natively registered with specific functions (Tools).
 - The LLM will autonomously decide (*Reasoning*) when to call `run_monte_carlo()`, `fetch_live_api()`, or `ask_user_for_clarification()` based on user intent.
 - This creates a reactive, flexible, and truly intelligent backend orchestration layer.
+
+---
+
+## 4. Step-by-Step Interactive Simulation (Backlog / Future Idea)
+**Goal:** Maintain both **"Direct Mode"** (One-click jump to final results) and **"Interactive Mode"** (Step-by-step simulation with player intervention windows) to satisfy both speed-oriented analysts and immersion-oriented fans.
+
+**UX & Layout Details:**
+- **Initial Setup (Dropdown in `HeroSearchBox.tsx`):**
+  - Add a **"Simulation Mode"** toggle or dropdown in `HeroSearchBox.tsx` (next to the Competition/Mode selection) with two options:
+    - *Direct (Instan)*: Runs the entire tournament instantly.
+    - *Interactive (Bertahap)*: Pauses between stages to allow user edits and AI chat interactions.
+- **Playground Controls (Action Bar in `RightPanel.tsx`):**
+  - If **Direct Mode** is active: The button remains a single `Play Simulation` button that triggers everything at once.
+  - If **Interactive Mode** is active: The Action Bar adapts into a dual-button interface:
+    - **Primary Button (`Play Matchday X`):** Advances the tournament by exactly one step (e.g. Matchday 1 -> Matchday 2 -> Matchday 3 -> Round of 16 -> Quarters -> Semis -> Final).
+    - **Secondary Button (`Fast Forward / Skip to End`):** Bypasses the stepping mode and simulates all remaining stages instantly (user convenience exit).
+- **Matchday/Stage Timeline:**
+  - Render a visual horizontal timeline/stepper in `RightPanel.tsx` showing completed stages vs. pending stages so the user has immediate spatial awareness of the tournament's progress.
+
+**Architectural Implications:**
+- **Stateful Ground Truths:** The backend Monte Carlo engine needs to treat past simulated matchdays as "ground truth" (fixed scores/points) rather than predicting them again.
+- **Progressive Stochasticity:** When at Matchday 2, the engine still runs 10,000 simulations for the *remaining* future matches to update probabilities (like % chances of qualifying), but locks in the actual results of Matchday 1.
+- **Client State Tracking:** The frontend (Zustand) must explicitly track the `current_stage` to render the timeline UI and instruct the AI Agent on the tournament's current chronological context.
+
