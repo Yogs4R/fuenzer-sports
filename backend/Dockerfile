@@ -16,7 +16,8 @@ RUN adduser --disabled-password --gecos '' --uid 1001 appuser
 
 # Install python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel jaraco.context \
+    && pip install --no-cache-dir --upgrade -r requirements.txt
 
 # Copy project and set ownership
 COPY . .
