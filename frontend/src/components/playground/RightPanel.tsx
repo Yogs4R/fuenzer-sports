@@ -90,11 +90,43 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
     }, 3000);
   };
 
+  const getShareTarget = (): HTMLElement | null => {
+    if (!contentRef.current) return null;
+    if (activeTab === 'bracket') {
+      const bracketInner = contentRef.current.querySelector('.min-w-max');
+      if (bracketInner) return bracketInner as HTMLElement;
+    }
+    return contentRef.current;
+  };
+
+  const generateShareImage = async (target: HTMLElement): Promise<string> => {
+    // Add extra padding to styling if it's the bracket view for a nicer look
+    const isBracket = activeTab === 'bracket';
+    
+    // We compute the total scroll dimensions
+    const width = target.scrollWidth;
+    const height = target.scrollHeight;
+
+    return await htmlToImage.toPng(target, {
+      backgroundColor: '#050814',
+      cacheBust: true,
+      width: width,
+      height: height,
+      style: {
+        overflow: 'visible',
+        width: `${width}px`,
+        height: `${height}px`,
+        padding: isBracket ? '32px' : '16px',
+      }
+    });
+  };
+
   const handleCopyImage = async () => {
-    if (!contentRef.current) return;
+    const target = getShareTarget();
+    if (!target) return;
     try {
       setIsSharing(true);
-      const dataUrl = await htmlToImage.toPng(contentRef.current, { backgroundColor: '#050814' });
+      const dataUrl = await generateShareImage(target);
       const blob = await (await fetch(dataUrl)).blob();
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
       triggerCopySuccess('image');
@@ -107,10 +139,11 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
   };
 
   const handleDownloadImage = async () => {
-    if (!contentRef.current) return;
+    const target = getShareTarget();
+    if (!target) return;
     try {
       setIsSharing(true);
-      const dataUrl = await htmlToImage.toPng(contentRef.current, { backgroundColor: '#050814' });
+      const dataUrl = await generateShareImage(target);
       const link = document.createElement('a');
       link.download = `fuenzer-simulation-${Date.now()}.png`;
       link.href = dataUrl;
@@ -443,7 +476,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                                {teamCode.slice(0, 3)}
                              </div>
                           ) : (
-                             crest && <img src={crest} alt={teamCode} className="w-8 h-8 object-contain drop-shadow-md" />
+                             crest && <img src={crest} alt={teamCode} crossOrigin="anonymous" className="w-8 h-8 object-contain drop-shadow-md" />
                           )}
                           <h3 className="text-white font-black text-xl tracking-tight">{teamCode}</h3>
                         </div>

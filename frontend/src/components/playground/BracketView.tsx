@@ -240,7 +240,7 @@ const BracketView: React.FC = () => {
                   <div key={`metric-${m.id}`} className="bg-white/5 rounded p-2 text-xs">
                     <div className="flex justify-between items-center mb-1">
                       <div className="flex items-center gap-2">
-                        {m.home!.crest && <img src={m.home!.crest} alt="" className="w-4 h-4 object-contain" />}
+                        {m.home!.crest && <img src={m.home!.crest} alt="" crossOrigin="anonymous" className="w-4 h-4 object-contain" />}
                         <span className="text-gray-300 font-semibold">{m.home!.tla}</span>
                       </div>
                       <span className={`${getProbTextColor(homeProbNum)} font-mono font-bold`}>{probs.homeWinProb}%</span>
@@ -251,7 +251,7 @@ const BracketView: React.FC = () => {
                     
                     <div className="flex justify-between items-center mb-1 mt-2">
                       <div className="flex items-center gap-2">
-                        {m.away!.crest && <img src={m.away!.crest} alt="" className="w-4 h-4 object-contain" />}
+                        {m.away!.crest && <img src={m.away!.crest} alt="" crossOrigin="anonymous" className="w-4 h-4 object-contain" />}
                         <span className="text-gray-300 font-semibold">{m.away!.tla}</span>
                       </div>
                       <span className={`${getProbTextColor(awayProbNum)} font-mono font-bold`}>{probs.awayWinProb}%</span>
@@ -318,7 +318,7 @@ const BracketView: React.FC = () => {
                                  {match.home.tla.slice(0, 3)}
                                </div>
                             ) : match.home?.crest ? (
-                              <img src={match.home.crest} alt="" className="w-5 h-5 object-contain" />
+                              <img src={match.home.crest} alt="" crossOrigin="anonymous" className="w-5 h-5 object-contain" />
                             ) : (
                               <div className="w-5 h-5 bg-white/10 rounded-full" />
                             )}
@@ -334,7 +334,7 @@ const BracketView: React.FC = () => {
                                  {match.away.tla.slice(0, 3)}
                                </div>
                             ) : match.away?.crest ? (
-                              <img src={match.away.crest} alt="" className="w-5 h-5 object-contain" />
+                              <img src={match.away.crest} alt="" crossOrigin="anonymous" className="w-5 h-5 object-contain" />
                             ) : (
                               <div className="w-5 h-5 bg-white/10 rounded-full" />
                             )}

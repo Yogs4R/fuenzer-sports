@@ -97,7 +97,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, qualifyCount = 2
                        {team.tla.slice(0, 3)}
                      </div>
                   ) : (
-                     <img src={team.crest} alt={team.name} className="w-6 h-6 object-contain shrink-0" onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${team.tla}&background=random&color=fff&rounded=true&font-size=0.4` }} />
+                     <img src={team.crest} alt={team.name} crossOrigin="anonymous" className="w-6 h-6 object-contain shrink-0" onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${team.tla}&background=random&color=fff&rounded=true&font-size=0.4` }} />
                   )}
                   
                   {editingTeamId === team.id ? (
