@@ -29,7 +29,7 @@ This document contains the list of ideas and feature priorities resulting from t
 
 ---
 
-## 3. Agentic Tool Calling (Priority: MEDIUM-HIGH)
+## 3. Agentic Tool Calling (Priority: MEDIUM-HIGH) (DONE)
 **Goal:** Upgrade backend architecture from simple *If-Else Routing* to a *True Autonomous AI Agent* (Level 7+).
 
 **Implementation Details:**

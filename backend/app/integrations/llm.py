@@ -22,11 +22,11 @@ def get_model_name(selected_model: str, prompt: str) -> str:
             return pro_model
         return fast_model
 
-def route_prompt(prompt: str, selected_model: str, chat_history: List[Any], competition: str) -> dict:
+def orchestrate_agent(prompt: str, teams: List[Dict[str, Any]], selected_model: str, chat_history: List[Any], competition: str) -> dict:
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        return {"route": "SIMULATE", "response": ""}
-        
+        return {"action": "simulate", "modifiers": []}
+
     client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=api_key,
@@ -34,38 +34,112 @@ def route_prompt(prompt: str, selected_model: str, chat_history: List[Any], comp
     
     model_name = get_model_name(selected_model, prompt)
     
-    system_prompt = f"""You are a sports AI assistant for the {competition}.
-Your task is to CLASSIFY the user's prompt and respond accordingly.
+    tools = [
+        {
+            "type": "function",
+            "function": {
+                "name": "run_simulation",
+                "description": "Call this to simulate matches, generate standings, or process a what-if scenario for the World Cup or an already existing custom tournament. Pass any temporary power rating boosts/nerfs here.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "modifiers": {
+                            "type": "array",
+                            "description": "List of teams receiving a power rating boost/nerf (-10 to -20 for injury/red card, +10 to +15 for home advantage). Leave empty if no specific changes.",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "tla": {"type": "string", "description": "The 3-letter acronym or name of the team."},
+                                    "boost": {"type": "number", "description": "The power rating modifier."},
+                                    "reason": {"type": "string", "description": "Reason for the modifier."}
+                                },
+                                "required": ["tla", "boost"]
+                            }
+                        }
+                    },
+                    "required": ["modifiers"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "ask_clarification",
+                "description": "Call this ONLY when a user proposes a what-if scenario involving a player or entity you do NOT recognize or cannot map to a team.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "unknown_entity": {"type": "string", "description": "The name of the unrecognized player/entity."}
+                    },
+                    "required": ["unknown_entity"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "general_chat",
+                "description": "Call this for general questions about football/soccer rules, history, or completely off-topic chat. Do not call this for simulating matches.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "response_message": {"type": "string", "description": "Your polite and helpful response to the user. MUST be in the same language as the user's prompt."}
+                    },
+                    "required": ["response_message"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "create_custom_tournament",
+                "description": "Call this ONLY when the competition mode is 'Custom' and the user asks to generate or create a new tournament structure with fictional/real teams.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "teams": {
+                            "type": "array",
+                            "description": "Array of team objects. Total teams must be a power of 2 or allow groups leading to a power of 2 (e.g. 4, 8, 16, 32).",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "integer", "description": "Unique integer ID."},
+                                    "tla": {"type": "string", "description": "3-letter acronym for the team."},
+                                    "name": {"type": "string", "description": "Full team name."},
+                                    "power_rating": {"type": "number", "description": "Estimated strength 0-100."},
+                                    "is_host": {"type": "integer", "description": "1 if host, else 0."},
+                                    "market_value": {"type": "integer", "description": "Estimated market value in millions."}
+                                },
+                                "required": ["id", "tla", "name", "power_rating", "is_host", "market_value"]
+                            }
+                        }
+                    },
+                    "required": ["teams"]
+                }
+            }
+        }
+    ]
+    
+    # Context regarding known teams so LLM knows what TLAs to use
+    teams_context = [{"tla": t["tla"], "name": t["name"]} for t in teams] if teams else "No teams currently loaded."
+    
+    system_prompt = f"""You are the master AI orchestrator for the {competition}.
+Your task is to analyze the user's prompt and call the appropriate tool.
 
-Categories:
-1. SIMULATE: If the user asks to simulate matches, generate a tournament, update standings, predict a score, or asks 'who will win' the group/tournament.
-2. GENERAL_SPORTS: If the user asks general questions about football/soccer rules (e.g., offside, referee, yellow cards), history of the tournament, or general facts.
-3. OUT_OF_CONTEXT: If the user asks about topics COMPLETELY UNRELATED to sports (e.g., cooking, programming, math, daily life).
+CONTEXT (Current Teams in Tournament):
+{teams_context}
 
-Instructions for output:
-- If SIMULATE: output EXACTLY and ONLY the word: SIMULATE
-- If GENERAL_SPORTS: output the word GENERAL_SPORTS followed by a newline, and then provide a helpful and concise answer to their sports question.
-- If OUT_OF_CONTEXT: output the word OUT_OF_CONTEXT followed by a newline, and then politely refuse to answer and briefly explain that you can only discuss football and sports.
-
-Example 1:
-User: Simulate group A
-Assistant: SIMULATE
-
-Example 2:
-User: Apa itu offside?
-Assistant: GENERAL_SPORTS
-Offside adalah aturan dalam sepak bola di mana pemain penyerang...
-
-Example 3:
-User: Cara masak nasi goreng?
-Assistant: OUT_OF_CONTEXT
-Maaf, saya adalah asisten sepak bola. Saya tidak bisa memberikan tutorial memasak. Mari kita bahas seputar sepak bola!
-
-MULTILINGUAL SUPPORT: Your response text MUST be in the exact same language that the user used.
+RULES:
+1. Always call EXACTLY ONE tool.
+2. If the user asks a what-if scenario (e.g., "What if Asep is injured?"), decide if you know the entity:
+   - If yes: Call `run_simulation` and pass the modifier in the `modifiers` array.
+   - If no: Call `ask_clarification`.
+3. If the user asks a general question (e.g., "What is offside?") or something unrelated, call `general_chat`.
+4. If `competition == 'Custom'` AND the user asks to create/generate a tournament, call `create_custom_tournament` and provide the teams.
 """
-
+    
     messages = [{"role": "system", "content": system_prompt}]
-    for msg in chat_history[-3:]: # smaller history for classification
+    for msg in chat_history[-3:]:
         role = "user" if msg.role == "user" else "assistant"
         messages.append({"role": role, "content": msg.content})
     messages.append({"role": "user", "content": prompt})
@@ -74,21 +148,27 @@ MULTILINGUAL SUPPORT: Your response text MUST be in the exact same language that
         response = client.chat.completions.create(
             model=model_name,
             messages=messages,
-            timeout=10.0
+            tools=tools,
+            tool_choice="required",
+            timeout=15.0
         )
-        content = response.choices[0].message.content.strip()
         
-        if content.startswith("SIMULATE"):
-            return {"route": "SIMULATE", "response": ""}
-        elif content.startswith("OUT_OF_CONTEXT"):
-            return {"route": "OUT_OF_CONTEXT", "response": content.replace("OUT_OF_CONTEXT", "").strip()}
-        elif content.startswith("GENERAL_SPORTS"):
-            return {"route": "GENERAL_SPORTS", "response": content.replace("GENERAL_SPORTS", "").strip()}
+        tool_call = response.choices[0].message.tool_calls[0]
+        tool_name = tool_call.function.name
+        args = json.loads(tool_call.function.arguments)
+        
+        if tool_name == "create_custom_tournament":
+            return {"action": "create_custom", "teams": args.get("teams", [])}
+        elif tool_name == "ask_clarification":
+            return {"action": "clarify", "unknown_entity": args.get("unknown_entity", "")}
+        elif tool_name == "general_chat":
+            return {"action": "chat", "response": args.get("response_message", "")}
         else:
-            # Fallback to SIMULATE if the LLM didn't follow formatting
-            return {"route": "SIMULATE", "response": ""}
-    except Exception:
-        return {"route": "SIMULATE", "response": ""}
+            return {"action": "simulate", "modifiers": args.get("modifiers", [])}
+            
+    except Exception as e:
+        print("Orchestrator error:", e)
+        return {"action": "simulate", "modifiers": []}
 
 def generate_narrative(
     prompt: str,
@@ -161,121 +241,3 @@ Rules:
         return response.choices[0].message.content
     except Exception as e:
         raise RuntimeError(f"LLM API Error: {str(e)}")
-
-def generate_custom_tournament_structure(prompt: str, selected_model: str) -> List[Dict[str, Any]]:
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        raise RuntimeError("Missing OPENROUTER_API_KEY")
-
-    client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=api_key,
-    )
-    
-    model_name = get_model_name(selected_model, prompt)
-    
-    system_prompt = """You are an AI Tournament Director.
-The user wants to create a custom sports tournament. Your job is to extract or generate the teams and output them in valid JSON format.
-
-RULES:
-1. Generate an array of team objects.
-2. Group size logic: Distribute the teams evenly into groups. 
-3. IMPORTANT CONSTRAINT: The tournament structure MUST allow a power of 2 teams (4, 8, 16, 32) to advance from the groups for the knockout stage.
-4. Output EXACTLY raw JSON. Do not include markdown code blocks like ```json ... ```. Just output the array.
-
-Schema for each team object:
-{
-  "id": integer (unique),
-  "tla": string (3 letter acronym),
-  "name": string,
-  "power_rating": float (0-100, estimate their strength based on real life or prompt),
-  "is_host": integer (0 or 1),
-  "market_value": integer (estimate in millions)
-}
-"""
-
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": prompt}
-    ]
-
-    try:
-        response = client.chat.completions.create(
-            model=model_name,
-            messages=messages,
-            timeout=20.0
-        )
-        content = response.choices[0].message.content.strip()
-        # Clean up markdown code blocks if LLM still includes them
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-            
-        teams_data = json.loads(content.strip())
-        return teams_data
-    except Exception as e:
-        raise RuntimeError(f"Failed to generate custom tournament: {str(e)}")
-
-def analyze_what_if_scenario(prompt: str, teams: List[Dict[str, Any]], selected_model: str) -> dict:
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        return {"needs_clarification": False, "modifiers": []}
-
-    client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=api_key,
-    )
-    
-    model_name = get_model_name(selected_model, prompt)
-    
-    teams_context = [{"tla": t["tla"], "name": t["name"]} for t in teams]
-    
-    system_prompt = f"""You are a What-If Scenario Analyzer for a sports simulation engine.
-The user might ask hypothetical questions (e.g., "What if Asep is injured?", "What if Japan gets a red card?", "What if Indonesia has home advantage?").
-Your task is to identify any teams that should receive a temporary power rating boost or nerf based on the prompt.
-
-RULES:
-1. If the prompt does NOT imply any specific power change to a specific team, output exactly:
-{{"needs_clarification": false, "modifiers": []}}
-2. If the prompt implies a change (e.g. injury, red card, boost), determine WHICH team is affected.
-3. If the prompt mentions a player (e.g. "Asep") or an entity that you CANNOT confidently map to one of the teams in the provided context (or your general knowledge), you MUST ask for clarification. Output exactly:
-{{"needs_clarification": true, "unknown_entity": "Player/Entity Name"}}
-4. If you DO know the team (or if the user provided clarification in a System Note), output exactly:
-{{"needs_clarification": false, "modifiers": [{{"tla": "TEAM_TLA", "boost": VALUE, "reason": "reason"}}]}}
-5. Use this scale for `boost` VALUE:
-   - Key player injured/red card: -10 to -20
-   - Minor player injured/red card: -5
-   - Home advantage / host boost: +10
-   - Massive morale boost: +15
-6. Output MUST BE raw JSON format only. No markdown formatting like ```json.
-
-Available Teams Context:
-{json.dumps(teams_context)}
-"""
-
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": prompt}
-    ]
-
-    try:
-        response = client.chat.completions.create(
-            model=model_name,
-            messages=messages,
-            timeout=15.0
-        )
-        content = response.choices[0].message.content.strip()
-        if content.startswith("```json"):
-            content = content[7:]
-        if content.startswith("```"):
-            content = content[3:]
-        if content.endswith("```"):
-            content = content[:-3]
-            
-        return json.loads(content.strip())
-    except Exception as e:
-        print(f"Error analyzing what-if scenario: {e}")
-        return {"needs_clarification": False, "modifiers": []}
