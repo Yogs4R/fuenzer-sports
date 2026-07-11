@@ -41,6 +41,8 @@ class SimulationResponse(BaseModel):
     title: str = "World Cup Simulation"
     ai_narrative: str = None
     is_general_chat: bool = False
+    needs_clarification: bool = False
+    clarification_target: str = None
 
 class ChatMessage(BaseModel):
     role: str
@@ -57,3 +59,4 @@ class SimulationRequest(BaseModel):
     chat_history: List[ChatMessage] = []
     generate_title: bool = False
     custom_teams: List[Dict] = None
+    resolved_clarification: Dict[str, str] = None

@@ -26,7 +26,12 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
     currentSessionId,
     startNewSession,
     updateCurrentSession,
-    language
+    language,
+    needsClarification,
+    clarificationTarget,
+    resolveClarification,
+    liveStandings,
+    simulationData
   } = useAppStore();
   
   const t = language === 'id' ? id : en;
@@ -243,9 +248,50 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
             <ProcessingState />
           </div>
         )}
+        
+        {needsClarification && clarificationTarget && (
+          <div className="flex flex-col items-start w-full animate-in slide-in-from-bottom-2 fade-in duration-300">
+             <div className="max-w-[92%] bg-white/5 border border-primary-cyan/30 text-gray-200 rounded-2xl rounded-bl-none px-4 py-3 text-[10px] md:text-xs">
+                <p className="mb-3 text-white">
+                  I don't recognize <strong className="text-primary-cyan">{clarificationTarget}</strong>. Which team do they play for?
+                </p>
+                <div className="flex flex-col gap-2">
+                  <select 
+                    id="clarification-select"
+                    className="w-full bg-[#050814] border border-white/20 rounded-lg px-3 py-2 text-white outline-none focus:border-primary-cyan/50"
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Select Team...</option>
+                    {(selectedCompetition === 'Custom' ? simulationData?.sample_standings : liveStandings)?.map(group => (
+                       <optgroup key={group.group_name} label={group.group_name}>
+                         {group.teams.map(team => (
+                           <option key={team.id} value={team.tla}>{team.name} ({team.tla})</option>
+                         ))}
+                       </optgroup>
+                    ))}
+                  </select>
+                  <button 
+                    onClick={() => {
+                      const select = document.getElementById('clarification-select') as HTMLSelectElement;
+                      if (select.value) {
+                         resolveClarification(select.value);
+                      }
+                    }}
+                    className="w-full bg-primary-cyan text-[#050814] font-bold py-2 rounded-lg hover:bg-cyan-400 transition-colors"
+                  >
+                    Confirm
+                  </button>
+                </div>
+             </div>
+             <div className="flex items-center gap-2 mt-1 px-1 flex-row">
+              <span className="text-[10px] text-gray-500">{p.ai}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="p-4 bg-[#0a1128] border-t border-white/10">
+        {!needsClarification ? (
         <form onSubmit={handleSubmit} className="flex flex-col bg-[#050814] rounded-2xl border border-white/10 focus-within:border-primary-cyan/50 transition-colors p-2 px-3">
           
           <div className="flex items-start w-full">
@@ -328,6 +374,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
             </button>
           </div>
         </form>
+        ) : null}
       </div>
     </div>
   );

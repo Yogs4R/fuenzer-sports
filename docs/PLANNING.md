@@ -2,7 +2,7 @@
 
 This document contains the list of ideas and feature priorities resulting from the roundtable discussion (Agent & User) to improve the chances of winning the AMD Developer Hackathon Act 2 (Track 3: Unicorn / Open Innovation).
 
-## 1. Custom Tournament Builder (Priority: HIGH)
+## 1. Custom Tournament Builder (Priority: HIGH) (DONE)
 **Goal:** Expand product-market fit from a simple "World Cup Simulator" to a "Universal Tournament Simulator" for schools, campuses, eSports leagues, and local amateur tournaments.
 
 **UX & UI Details:**
@@ -17,7 +17,7 @@ This document contains the list of ideas and feature priorities resulting from t
 
 ---
 
-## 2. Dynamic What-If Scenarios & Human-in-the-Loop (Priority: HIGH)
+## 2. Dynamic What-If Scenarios & Human-in-the-Loop (Priority: HIGH) (DONE)
 **Goal:** Demonstrate the AI Agent's capability to modify environment states in real-time and handle LLM knowledge gaps elegantly without hallucinating.
 
 **Scenario "Retired Players / Debuting Players (e.g., Asep)":**

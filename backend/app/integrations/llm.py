@@ -218,3 +218,64 @@ Schema for each team object:
         return teams_data
     except Exception as e:
         raise RuntimeError(f"Failed to generate custom tournament: {str(e)}")
+
+def analyze_what_if_scenario(prompt: str, teams: List[Dict[str, Any]], selected_model: str) -> dict:
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        return {"needs_clarification": False, "modifiers": []}
+
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+    
+    model_name = get_model_name(selected_model, prompt)
+    
+    teams_context = [{"tla": t["tla"], "name": t["name"]} for t in teams]
+    
+    system_prompt = f"""You are a What-If Scenario Analyzer for a sports simulation engine.
+The user might ask hypothetical questions (e.g., "What if Asep is injured?", "What if Japan gets a red card?", "What if Indonesia has home advantage?").
+Your task is to identify any teams that should receive a temporary power rating boost or nerf based on the prompt.
+
+RULES:
+1. If the prompt does NOT imply any specific power change to a specific team, output exactly:
+{{"needs_clarification": false, "modifiers": []}}
+2. If the prompt implies a change (e.g. injury, red card, boost), determine WHICH team is affected.
+3. If the prompt mentions a player (e.g. "Asep") or an entity that you CANNOT confidently map to one of the teams in the provided context (or your general knowledge), you MUST ask for clarification. Output exactly:
+{{"needs_clarification": true, "unknown_entity": "Player/Entity Name"}}
+4. If you DO know the team (or if the user provided clarification in a System Note), output exactly:
+{{"needs_clarification": false, "modifiers": [{{"tla": "TEAM_TLA", "boost": VALUE, "reason": "reason"}}]}}
+5. Use this scale for `boost` VALUE:
+   - Key player injured/red card: -10 to -20
+   - Minor player injured/red card: -5
+   - Home advantage / host boost: +10
+   - Massive morale boost: +15
+6. Output MUST BE raw JSON format only. No markdown formatting like ```json.
+
+Available Teams Context:
+{json.dumps(teams_context)}
+"""
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": prompt}
+    ]
+
+    try:
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+            timeout=15.0
+        )
+        content = response.choices[0].message.content.strip()
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+            
+        return json.loads(content.strip())
+    except Exception as e:
+        print(f"Error analyzing what-if scenario: {e}")
+        return {"needs_clarification": False, "modifiers": []}

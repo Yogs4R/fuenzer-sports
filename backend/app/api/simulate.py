@@ -6,7 +6,7 @@ from slowapi.util import get_remote_address
 from app.models.simulation import SimulationRequest, SimulationResponse
 from app.integrations.mock_data import get_mock_wc_teams
 from app.services.simulation import MonteCarloEngine
-from app.integrations.llm import generate_narrative, route_prompt, generate_custom_tournament_structure
+from app.integrations.llm import generate_narrative, route_prompt, generate_custom_tournament_structure, analyze_what_if_scenario
 
 logger = logging.getLogger(__name__)
 limiter = Limiter(key_func=get_remote_address)
@@ -36,11 +36,13 @@ def run_simulation(request: Request, payload: SimulationRequest = None):
         style = payload.style
         chat_history = payload.chat_history
         
-    if competition == "Custom" and prompt:
+    teams = []
+    teams_per_group = 4
+    
+    if competition == "Custom" and payload and not payload.custom_teams:
         try:
             teams = generate_custom_tournament_structure(prompt, model)
             teams_per_group = 4 if len(teams) >= 4 else len(teams)
-            engine = MonteCarloEngine(teams_data=teams, n_iterations=iterations, teams_per_group=teams_per_group)
         except Exception as e:
             from fastapi import HTTPException
             logger.error("Failed to generate custom tournament: %s", e)
@@ -48,39 +50,61 @@ def run_simulation(request: Request, payload: SimulationRequest = None):
     elif payload and payload.custom_teams:
         teams = payload.custom_teams
         teams_per_group = 4 if len(teams) >= 4 else len(teams)
-        engine = MonteCarloEngine(teams_data=teams, n_iterations=iterations, teams_per_group=teams_per_group)
     else:
-        # Get base teams
         teams_dict = get_mock_wc_teams()
         teams = teams_dict.get("teams", [])
+
+    if custom_weights:
+        for team in teams:
+            tla = team["tla"]
+            name = team["name"]
+            boost = custom_weights.get(tla, 0.0) + custom_weights.get(name, 0.0)
+            if boost != 0:
+                team["power_rating"] += boost
+
+    # Route the prompt if provided
+    if prompt:
+        route_result = route_prompt(prompt, model, chat_history, competition)
+        if route_result["route"] in ["GENERAL_SPORTS", "OUT_OF_CONTEXT"]:
+            return SimulationResponse(
+                iterations=0,
+                execution_time_ms=0.0,
+                probabilities={},
+                sample_standings=[],
+                title="Fuenzer AI Chat",
+                ai_narrative=route_result["response"],
+                is_general_chat=True
+            )
+            
+        # We are simulating! Check for what-if scenarios
+        effective_prompt = prompt
+        if payload and payload.resolved_clarification:
+            target = payload.resolved_clarification.get("target")
+            team_val = payload.resolved_clarification.get("team")
+            effective_prompt += f"\n[System Note: The user confirmed that '{target}' plays for the team '{team_val}'.]"
         
-        # Apply custom weights if provided
-        # The weights might be keyed by TLA or Full Name, we will try to match both
-        if custom_weights:
-            for team in teams:
-                tla = team["tla"]
-                name = team["name"]
-                
-                boost = custom_weights.get(tla, 0.0) + custom_weights.get(name, 0.0)
-                if boost != 0:
-                    team["power_rating"] += boost
+        what_if_result = analyze_what_if_scenario(effective_prompt, teams, model)
+        if what_if_result.get("needs_clarification"):
+            return SimulationResponse(
+                iterations=0,
+                execution_time_ms=0.0,
+                probabilities={},
+                sample_standings=[],
+                needs_clarification=True,
+                clarification_target=what_if_result.get("unknown_entity")
+            )
+        
+        # Apply modifiers
+        modifiers = what_if_result.get("modifiers", [])
+        for mod in modifiers:
+            tla = mod.get("tla")
+            boost = mod.get("boost", 0)
+            for t in teams:
+                if t["tla"] == tla or t["name"] == tla:
+                    t["power_rating"] += boost
                     
-        # Route the prompt if provided
-        if prompt:
-            route_result = route_prompt(prompt, model, chat_history, competition)
-            if route_result["route"] in ["GENERAL_SPORTS", "OUT_OF_CONTEXT"]:
-                return SimulationResponse(
-                    iterations=0,
-                    execution_time_ms=0.0,
-                    probabilities={},
-                    sample_standings=[],
-                    title="Fuenzer AI Chat",
-                    ai_narrative=route_result["response"],
-                    is_general_chat=True
-                )
-                    
-        # Initialize Engine
-        engine = MonteCarloEngine(teams_data=teams, n_iterations=iterations)
+    # Initialize Engine
+    engine = MonteCarloEngine(teams_data=teams, n_iterations=iterations, teams_per_group=teams_per_group)
 
     
     # Run simulation

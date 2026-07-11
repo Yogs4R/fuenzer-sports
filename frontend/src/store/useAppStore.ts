@@ -47,6 +47,8 @@ export interface SimulationResponse {
   title?: string;
   ai_narrative?: string;
   is_general_chat?: boolean;
+  needs_clarification?: boolean;
+  clarification_target?: string;
 }
 
 export interface ChatMessage {
@@ -81,6 +83,11 @@ interface AppState {
   mockStep: number;
   isLoading: boolean;
   error: string | null;
+  
+  // HITL State
+  needsClarification: boolean;
+  clarificationTarget: string | null;
+  pendingPrompt: string | null;
 
   // Knockout State
   bracketMatches: MatchNode[];
@@ -131,6 +138,7 @@ interface AppState {
   loadSession: (id: string) => void;
   deleteSession: (id: string) => void;
   runSimulation: (prompt: string, model: string, mode: string) => Promise<void>;
+  resolveClarification: (teamTla: string) => Promise<void>;
   reRunSimulation: () => Promise<void>;
   clearSimulationData: () => void;
   setChatStreamingComplete: (index: number) => void;
@@ -193,6 +201,9 @@ export const useAppStore = create<AppState>()(
       chatHistory: [],
       mockStep: 0,
       isLoading: false,
+      needsClarification: false,
+      clarificationTarget: null,
+      pendingPrompt: null,
       isSimulatingKnockout: false,
       bracketMatches: [],
       error: null,
@@ -499,6 +510,17 @@ export const useAppStore = create<AppState>()(
             data.probabilities = cachedProbabilities; // Retain existing or empty probabilities
           }
           
+          if (data.needs_clarification) {
+             set(() => ({
+                isLoading: false,
+                needsClarification: true,
+                clarificationTarget: data.clarification_target || null,
+                pendingPrompt: prompt,
+                simulationData: currentState.simulationData
+             }));
+             return;
+          }
+          
           if (data.is_general_chat) {
              set((state) => ({
                 isLoading: false,
@@ -561,6 +583,96 @@ export const useAppStore = create<AppState>()(
            set({ 
              error: error.message || "Failed to connect to simulation server.",
              isLoading: false
+           });
+        }
+      },
+      
+      resolveClarification: async (teamTla: string) => {
+        const state = get();
+        if (!state.pendingPrompt || !state.clarificationTarget) return;
+
+        const prompt = state.pendingPrompt;
+        const target = state.clarificationTarget;
+        const model = state.selectedModel;
+        const mode = state.selectedMode;
+
+        set(() => ({ 
+          isLoading: true, 
+          needsClarification: false,
+          error: null,
+          currentPage: '/playground'
+        }));
+        
+        try {
+          let customTeams;
+          if (state.selectedCompetition === 'Custom' && state.simulationData) {
+            customTeams = state.simulationData.sample_standings.flatMap(group => group.teams.map(t => ({
+              ...t,
+              power_rating: t.power_rating || 60,
+              points: 0, goals_for: 0, goals_against: 0, goal_difference: 0, matches_played: 0, won: 0, draw: 0, lost: 0,
+              group: group.group_name
+            })));
+          } else if (mode === 'Live Standings' && state.liveStandings) {
+            customTeams = state.liveStandings.flatMap(group => group.teams.map(t => ({
+              ...t,
+              power_rating: t.power_rating || 60,
+              group: group.group_name
+            })));
+          }
+
+          const payload = {
+            iterations: 10000,
+            prompt: prompt,
+            model: model,
+            competition: state.selectedCompetition,
+            mode: mode,
+            style: state.selectedStyle,
+            chat_history: state.chatHistory.slice(-5),
+            generate_title: state.chatHistory.length === 1,
+            custom_teams: customTeams,
+            resolved_clarification: { target, team: teamTla }
+          };
+          
+          const response = await fetch(`${API_BASE_URL}/api/simulate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Simulation failed: ${response.statusText}`);
+          }
+          
+          const data: SimulationResponse = await response.json();
+          const actualMode = state.selectedCompetition === 'Custom' ? 'From Scratch' : mode;
+          if (actualMode === 'Live Standings') {
+            data.sample_standings = get().liveStandings || []; 
+            data.probabilities = state.simulationData?.probabilities || {}; 
+          }
+          
+          set({ isLoading: false }); 
+          
+          if (actualMode === 'From Scratch') {
+             // Skip animation for clarifications for better UX, just update data
+             set({ simulationData: data });
+          }
+          
+          set((state) => ({
+            chatHistory: prompt.trim() ? [...state.chatHistory, { role: 'ai', content: data.ai_narrative || "Done.", isStreaming: false }] : state.chatHistory,
+            simulationTitle: data.title || state.simulationTitle,
+            simulationData: data,
+            bracketMatches: [],
+            clarificationTarget: null,
+            pendingPrompt: null
+          }));
+          get().updateCurrentSession();
+          
+        } catch (error: any) {
+           console.error("Clarification error:", error);
+           set({ 
+             error: error.message || "Failed to connect to simulation server.",
+             isLoading: false,
+             needsClarification: true // revert
            });
         }
       },
