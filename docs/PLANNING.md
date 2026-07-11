@@ -60,3 +60,23 @@ This document contains the list of ideas and feature priorities resulting from t
 - **Progressive Stochasticity:** When at Matchday 2, the engine still runs 10,000 simulations for the *remaining* future matches to update probabilities (like % chances of qualifying), but locks in the actual results of Matchday 1.
 - **Client State Tracking:** The frontend (Zustand) must explicitly track the `current_stage` to render the timeline UI and instruct the AI Agent on the tournament's current chronological context.
 
+---
+
+## 5. Direct Roster & Tournament Editor (Backlog / Future Idea)
+**Goal:** Empower users with direct manual control to edit teams, groups, and structures (e.g., adding/removing teams or groups) via an intuitive visual interface without having to rely solely on natural-language AI prompts.
+
+**UX & Layout Details (Sally):**
+- **Trigger:** Add a "Modify Structure" or "Edit Roster" button in `RightPanel.tsx` next to the simulator controls when in Custom Tournament mode.
+- **The Roster Modal:** Opens a full-screen or slide-over drawer showing groups as editable cards:
+  - *Team Actions*: Delete icon next to each team row; text inputs to edit names/base ratings directly.
+  - *Group Actions*: An "Add Group" card at the end of the group list; a "Delete Group" trash icon on each group card header.
+- **Strict Validation Feedback:** At the bottom of the modal, a real-time warning panel:
+  - If the configuration is invalid (e.g., odd number of teams, unequal group sizes, or total teams not matching standard formats like 8/16/24/32), the "Save & Re-simulate" button is disabled and a clear instruction is shown (e.g., *"Groups must have equal size (4 teams per group)"*).
+
+**Developer Implementation & Mobile Spacing (Amelia):**
+- **Zustand Roster Store:** Implement simple CRUD actions in the frontend state: `addTeam()`, `removeTeam()`, `updateTeamRating()`, `deleteGroup()`.
+- **Validation Engine:** Write a pure utility function `validateRosterConfig(groups)` that runs on every keystroke to check for tournament rule compliance before saving.
+- **Mobile Spacing Optimization:**
+  - *Timeline & Buttons*: On mobile viewports, the step-by-step controls in the action bar will collapse the secondary button (`Skip to End`) into an icon-only button (`>>` or `⏩`) to conserve space.
+  - *Roster Editor*: Use a swipeable accordion or tabbed interface per group on mobile to prevent excessive vertical scrolling.
+
