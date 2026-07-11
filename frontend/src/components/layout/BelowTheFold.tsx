@@ -4,6 +4,7 @@ import { id } from '../../locales/id';
 import { en } from '../../locales/en';
 import { Search, Zap, BarChart3, ChevronRight, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
+import FlagImage from '../playground/FlagImage';
 
 // You can replace this YouTube Video ID with your actual demo video ID once uploaded
 const DEMO_YOUTUBE_ID = 'dQw4w9WgXcQ'; 
@@ -291,11 +292,7 @@ const BelowTheFold: React.FC = () => {
                           </td>
                           <td className="py-3 font-semibold text-white truncate max-w-[120px]">
                             <div className="flex items-center gap-2">
-                              <img 
-                                src={team.crest} 
-                                alt={`${team.name} Flag`} 
-                                className="w-5 h-4 object-contain rounded-[2px]"
-                              />
+                              <FlagImage tla={team.tla} name={team.name} className="w-5 h-4" />
                               <span>{team.name}</span>
                             </div>
                           </td>

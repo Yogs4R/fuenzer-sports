@@ -4,6 +4,7 @@ import { id } from '../locales/id';
 import { en } from '../locales/en';
 import { Loader2 } from 'lucide-react';
 import { useSEO } from '../hooks/useSEO';
+import FlagImage from '../components/playground/FlagImage';
 
 const StandingsPage = () => {
   useSEO({ title: 'Fuenzer Sports | Live Standings' });
@@ -152,11 +153,7 @@ const StandingsPage = () => {
                             </td>
                             <td className="py-3 font-semibold text-white truncate max-w-[150px]">
                               <div className="flex items-center gap-2">
-                                <img 
-                                  src={team.crest} 
-                                  alt={`${team.name} Flag`} 
-                                  className="w-5 h-4 object-contain rounded-[2px]"
-                                />
+                                <FlagImage tla={team.tla} name={team.name} className="w-5 h-4" />
                                 <span>{team.name}</span>
                               </div>
                             </td>
@@ -214,11 +211,7 @@ const StandingsPage = () => {
                         </td>
                         <td className="py-4 font-semibold text-white">
                           <div className="flex items-center gap-2">
-                            <img 
-                              src={team.crest} 
-                              alt={`${team.name} Flag`} 
-                              className="w-5 h-4 object-contain rounded-[2px]"
-                            />
+                            <FlagImage tla={team.tla} name={team.name} className="w-5 h-4" />
                             <span>{team.name}</span>
                           </div>
                         </td>

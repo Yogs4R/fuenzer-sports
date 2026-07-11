@@ -39,7 +39,8 @@ This document contains the list of ideas and feature priorities resulting from t
 
 ---
 
-## 4. Step-by-Step Interactive Simulation (Backlog / Future Idea)
+## 4. Step-by-Step Interactive Simulation (Deferred - Post-Hackathon)
+**Status:** Deferred to post-hackathon backlog to prioritize codebase stability and guarantee bug-free deployment.
 **Goal:** Maintain both **"Direct Mode"** (One-click jump to final results) and **"Interactive Mode"** (Step-by-step simulation with player intervention windows) to satisfy both speed-oriented analysts and immersion-oriented fans.
 
 **UX & Layout Details:**
@@ -62,7 +63,8 @@ This document contains the list of ideas and feature priorities resulting from t
 
 ---
 
-## 5. Direct Roster & Tournament Editor (Backlog / Future Idea)
+## 5. Direct Roster & Tournament Editor (Deferred - Post-Hackathon)
+**Status:** Deferred to post-hackathon backlog to prioritize stability.
 **Goal:** Empower users with direct manual control to edit teams, groups, and structures (e.g., adding/removing teams or groups) via an intuitive visual interface without having to rely solely on natural-language AI prompts.
 
 **UX & Layout Details (Sally):**
@@ -89,7 +91,8 @@ This document contains the list of ideas and feature priorities resulting from t
 
 ---
 
-## 6. Multimodal Image Integration (Gemma / Minimax Vision Tool)
+## 6. Multimodal Image Integration (Gemma / Minimax Vision Tool) (Deferred - Post-Hackathon)
+**Status:** Deferred to post-hackathon backlog to prioritize stability.
 **Goal:** Leverage Google Gemma's multimodal capabilities (PaliGemma / Gemma 2 VLM) to allow users to upload images (tactical lineups, formation whiteboards, or news screenshots) and automatically translate them into simulation parameters.
 
 **Agentic Tool Architecture:**

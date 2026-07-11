@@ -4,6 +4,7 @@ import StandingsTable from './StandingsTable';
 import BracketView from './BracketView';
 import { Play, Menu, Info, Trophy, Target, Shield, Search, Filter, Share2, Download, Copy, Check, Type } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import FlagImage from './FlagImage';
 import * as htmlToImage from 'html-to-image';
 
 interface RightPanelProps {
@@ -447,16 +448,14 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                   {Object.entries(simulationData.probabilities)
                     .map(([teamCode, metrics]) => {
                       let groupName = "";
-                      let crest = "";
                       for (const group of currentStandings) {
                         const t = group.teams.find(t => t.tla === teamCode);
                         if (t) {
                           groupName = group.group_name;
-                          crest = t.crest;
                           break;
                         }
                       }
-                      return { teamCode, metrics, groupName, crest };
+                      return { teamCode, metrics, groupName };
                     })
                     .filter(item => item.groupName !== "")
                     .sort((a, b) => {
@@ -466,7 +465,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                       if (metricSort === 'lowest_adv') return a.metrics['qualify'] - b.metrics['qualify'];
                       return 0; // Default sort
                     })
-                    .map(({ teamCode, metrics, groupName, crest }) => (
+                    .map(({ teamCode, metrics, groupName }) => (
                       <div key={teamCode} className="bg-linear-to-br from-white/10 to-white/5 border border-white/10 rounded-xl p-4 relative overflow-hidden group hover:border-primary-cyan/50 transition-colors">
                         <div className="absolute top-0 right-0 bg-white/10 px-2 py-1 text-[10px] text-gray-300 rounded-bl-lg font-bold uppercase tracking-wider backdrop-blur-sm z-10">{groupName}</div>
                         
@@ -476,7 +475,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                                {teamCode.slice(0, 3)}
                              </div>
                           ) : (
-                             crest && <img src={crest} alt={teamCode} crossOrigin="anonymous" className="w-8 h-8 object-contain drop-shadow-md" />
+                             <FlagImage tla={teamCode} name={teamCode} className="w-8 h-8" />
                           )}
                           <h3 className="text-white font-black text-xl tracking-tight">{teamCode}</h3>
                         </div>

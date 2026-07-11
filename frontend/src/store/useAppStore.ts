@@ -447,7 +447,6 @@ export const useAppStore = create<AppState>()(
       
       runSimulation: async (prompt: string, model: string, mode: string) => {
         const currentState = get();
-        const cachedProbabilities = currentState.simulationData?.probabilities || {};
         let customTeams;
         if (currentState.selectedCompetition === 'Custom' && currentState.simulationData) {
           customTeams = currentState.simulationData.sample_standings.flatMap(group => group.teams.map(t => ({
@@ -507,7 +506,6 @@ export const useAppStore = create<AppState>()(
           const actualMode = state.selectedCompetition === 'Custom' ? 'From Scratch' : mode;
           if (actualMode === 'Live Standings') {
             data.sample_standings = get().liveStandings || []; // Retain original group standings
-            data.probabilities = cachedProbabilities; // Retain existing or empty probabilities
           }
           
           if (data.needs_clarification) {
@@ -647,7 +645,6 @@ export const useAppStore = create<AppState>()(
           const actualMode = state.selectedCompetition === 'Custom' ? 'From Scratch' : mode;
           if (actualMode === 'Live Standings') {
             data.sample_standings = get().liveStandings || []; 
-            data.probabilities = state.simulationData?.probabilities || {}; 
           }
           
           set({ isLoading: false }); 

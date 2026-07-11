@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useAppStore, type TeamStats } from '../../store/useAppStore';
 import { ChevronUp, ChevronDown, Minus, Pencil, Check, X } from 'lucide-react';
+import FlagImage from './FlagImage';
 
 interface StandingsTableProps {
   teams: TeamStats[];
@@ -97,7 +98,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, qualifyCount = 2
                        {team.tla.slice(0, 3)}
                      </div>
                   ) : (
-                     <img src={team.crest} alt={team.name} crossOrigin="anonymous" className="w-6 h-6 object-contain shrink-0" onError={(e) => { e.currentTarget.src = `https://ui-avatars.com/api/?name=${team.tla}&background=random&color=fff&rounded=true&font-size=0.4` }} />
+                     <FlagImage tla={team.tla} name={team.name} className="w-6 h-6" />
                   )}
                   
                   {editingTeamId === team.id ? (
