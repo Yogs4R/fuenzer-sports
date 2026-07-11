@@ -1,11 +1,13 @@
 import os
 import json
+import logging
 from fastapi import APIRouter
 from typing import List
 from app.models.simulation import GroupStandings, TeamStats
 from app.integrations.mock_data import get_mock_wc_teams
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 @router.get("/standings/live", response_model=List[GroupStandings])
 def get_live_standings():
@@ -57,6 +59,6 @@ def get_live_standings():
                 
             result.append(GroupStandings(group_name=group_name, teams=teams_list))
     except Exception as e:
-        print(f"Error parsing live standings: {e}")
+        logger.error("Error parsing live standings: %s", e)
         
     return result

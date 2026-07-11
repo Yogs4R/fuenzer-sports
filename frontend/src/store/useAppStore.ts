@@ -1,5 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+
+// Backend API base URL — configurable per environment
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 import type { MatchNode } from '../utils/bracketGenerator';
 import { signInWithPopup, signOut, deleteUser } from 'firebase/auth';
 import { doc, getDocs, collection, writeBatch, deleteDoc, setDoc } from 'firebase/firestore';
@@ -416,7 +419,7 @@ export const useAppStore = create<AppState>()(
       fetchLiveStandings: async () => {
         set({ isLiveLoading: true, hasFetchedLive: true });
         try {
-          const response = await fetch('http://localhost:8000/api/standings/live');
+          const response = await fetch(`${API_BASE_URL}/api/standings/live`);
           if (response.ok) {
             const data: GroupStandings[] = await response.json();
             set({ liveStandings: data, isLiveLoading: false });
@@ -459,7 +462,7 @@ export const useAppStore = create<AppState>()(
             generate_title: state.chatHistory.length === 1 // length is 1 because prompt is already appended
           };
           
-          const response = await fetch('http://localhost:8000/api/simulate', {
+          const response = await fetch(`${API_BASE_URL}/api/simulate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

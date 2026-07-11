@@ -9,6 +9,8 @@ export default defineConfig({
     tailwindcss(),
   ],
   build: {
-    sourcemap: true,
+    // 'hidden' generates sourcemaps for internal error tracking but does NOT
+    // expose them publicly — source code cannot be read via browser DevTools
+    sourcemap: 'hidden',
   }
 })

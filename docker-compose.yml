@@ -1,10 +1,27 @@
 
+# =============================================================================
+# docker-compose.yml — LOCAL JUDGE / DEVELOPMENT USE ONLY
+#
+# This configuration is intended for judges who want to run the app locally.
+# For production deployment, the backend is hosted separately
+# (AMD Developer Cloud / HuggingFace Spaces).
+#
+# Quick setup:
+#   1. Copy backend/.env.example to backend/.env and fill in the API keys
+#   2. Copy frontend/.env.example to frontend/.env, fill in Firebase keys
+#      and set VITE_API_BASE_URL=http://localhost:8000
+#   3. Run: docker-compose up --build
+#   4. Open: http://localhost (frontend) and http://localhost:8000 (backend API)
+# =============================================================================
+
 services:
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     ports:
+      # Port 8000 is intentionally exposed for local judge testing.
+      # In production, the backend is NOT directly exposed to the internet.
       - "8000:8000"
     env_file:
       - path: ./backend/.env

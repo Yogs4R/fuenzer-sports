@@ -11,12 +11,19 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends gcc \
     && rm -rf /var/lib/apt/lists/*
 
+# Create non-root user for security (principle of least privilege)
+RUN adduser --disabled-password --gecos '' --uid 1001 appuser
+
 # Install python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project
+# Copy project and set ownership
 COPY . .
+RUN chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
 
 # Expose port
 EXPOSE 8000

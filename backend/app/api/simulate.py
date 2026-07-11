@@ -1,14 +1,20 @@
 import os
-from fastapi import APIRouter
+import logging
+from fastapi import APIRouter, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from app.models.simulation import SimulationRequest, SimulationResponse
 from app.integrations.mock_data import get_mock_wc_teams
 from app.services.simulation import MonteCarloEngine
 from app.integrations.llm import generate_narrative, route_prompt
 
+logger = logging.getLogger(__name__)
+limiter = Limiter(key_func=get_remote_address)
 router = APIRouter()
 
 @router.post("/simulate", response_model=SimulationResponse)
-def run_simulation(request: SimulationRequest = None):
+@limiter.limit("10/minute")
+def run_simulation(request_obj: Request, request: SimulationRequest = None):
     
     # Setup parameters
     iterations = 10000
@@ -81,7 +87,8 @@ def run_simulation(request: SimulationRequest = None):
             )
         except Exception as e:
             from fastapi import HTTPException
-            raise HTTPException(status_code=500, detail=str(e))
+            logger.error("LLM narrative generation failed: %s", e)
+            raise HTTPException(status_code=500, detail="Simulation service temporarily unavailable. Please try again.")
             
     response.ai_narrative = ai_narrative
     response.title = "World Cup Simulation"
