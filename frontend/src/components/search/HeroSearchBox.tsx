@@ -126,16 +126,54 @@ const HeroSearchBox: React.FC = () => {
         <div className="relative">
           <textarea
             value={displayQuery}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val.startsWith('/custom ')) {
+                setSelectedCompetition('Custom');
+                setQuery(val.substring(8));
+              } else if (val.startsWith('/world-cup ')) {
+                setSelectedCompetition('World Cup');
+                setQuery(val.substring(11));
+              } else {
+                setQuery(val);
+              }
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 handleSimulate();
               }
             }}
-            placeholder={t.components.hero.placeholder}
+            placeholder={selectedCompetition === 'Custom' ? (t.components.hero as any).placeholderCustom : t.components.hero.placeholder}
             className="w-full h-40 md:h-32 bg-transparent text-white placeholder-gray-500 p-6 pb-6 rounded-2xl resize-none focus:outline-none text-lg"
           />
+          
+          <AnimatePresence>
+             {displayQuery.startsWith('/') && !displayQuery.includes(' ') && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-12 left-6 bg-bg-0 border border-white/10 rounded-xl shadow-2xl p-2 z-50 flex flex-col gap-1 w-64"
+                >
+                   <div className="text-xs text-gray-400 px-2 pb-1 border-b border-white/5 mb-1">Commands</div>
+                   <button 
+                     onClick={() => { setSelectedCompetition('Custom'); setQuery(''); }}
+                     className="text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-primary-cyan rounded-lg transition-colors flex flex-col"
+                   >
+                      <span className="font-semibold text-white">/custom</span>
+                      <span className="text-xs text-gray-500">Create a custom tournament</span>
+                   </button>
+                   <button 
+                     onClick={() => { setSelectedCompetition('World Cup'); setQuery(''); }}
+                     className="text-left px-3 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-primary-cyan rounded-lg transition-colors flex flex-col"
+                   >
+                      <span className="font-semibold text-white">/world-cup</span>
+                      <span className="text-xs text-gray-500">World Cup 2026 simulation</span>
+                   </button>
+                </motion.div>
+             )}
+          </AnimatePresence>
         </div>
         
         <div className="flex flex-wrap items-center justify-between p-2 relative gap-y-3" ref={dropdownRef}>
@@ -195,6 +233,7 @@ const HeroSearchBox: React.FC = () => {
                   >
                     {[
                       { name: 'World Cup', soon: false },
+                      { name: 'Custom', soon: false },
                       { name: 'AFC', soon: true },
                       { name: 'AFCON', soon: true },
                       { name: 'UEFA', soon: true }
@@ -249,6 +288,7 @@ const HeroSearchBox: React.FC = () => {
             </div>
 
             {/* Mode Dropdown */}
+            {selectedCompetition !== 'Custom' && (
             <div className="relative">
               <button 
                 onClick={() => setActiveDropdown(activeDropdown === 'mode' ? null : 'mode')}
@@ -279,6 +319,7 @@ const HeroSearchBox: React.FC = () => {
                 )}
               </AnimatePresence>
             </div>
+            )}
 
           </div>
 

@@ -138,6 +138,7 @@ Rules:
    - Leave exactly 1 blank line between paragraphs to ensure readability.
    - Do NOT use HTML tags. Use standard markdown.
    - Use headings (`###`) if the response requires sections.
+7. If competition is "Custom", DO NOT mention or use "Goal Difference" (GD). It is irrelevant for custom esports/tournaments. Discuss only Points (Pts) and Win/Draw/Loss records.
 """
     
     if generate_title:
@@ -160,3 +161,60 @@ Rules:
         return response.choices[0].message.content
     except Exception as e:
         raise RuntimeError(f"LLM API Error: {str(e)}")
+
+def generate_custom_tournament_structure(prompt: str, selected_model: str) -> List[Dict[str, Any]]:
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        raise RuntimeError("Missing OPENROUTER_API_KEY")
+
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+    
+    model_name = get_model_name(selected_model, prompt)
+    
+    system_prompt = """You are an AI Tournament Director.
+The user wants to create a custom sports tournament. Your job is to extract or generate the teams and output them in valid JSON format.
+
+RULES:
+1. Generate an array of team objects.
+2. Group size logic: Distribute the teams evenly into groups. 
+3. IMPORTANT CONSTRAINT: The tournament structure MUST allow a power of 2 teams (4, 8, 16, 32) to advance from the groups for the knockout stage.
+4. Output EXACTLY raw JSON. Do not include markdown code blocks like ```json ... ```. Just output the array.
+
+Schema for each team object:
+{
+  "id": integer (unique),
+  "tla": string (3 letter acronym),
+  "name": string,
+  "power_rating": float (0-100, estimate their strength based on real life or prompt),
+  "is_host": integer (0 or 1),
+  "market_value": integer (estimate in millions)
+}
+"""
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": prompt}
+    ]
+
+    try:
+        response = client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+            timeout=20.0
+        )
+        content = response.choices[0].message.content.strip()
+        # Clean up markdown code blocks if LLM still includes them
+        if content.startswith("```json"):
+            content = content[7:]
+        if content.startswith("```"):
+            content = content[3:]
+        if content.endswith("```"):
+            content = content[:-3]
+            
+        teams_data = json.loads(content.strip())
+        return teams_data
+    except Exception as e:
+        raise RuntimeError(f"Failed to generate custom tournament: {str(e)}")

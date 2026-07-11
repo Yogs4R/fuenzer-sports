@@ -66,6 +66,7 @@ export const id = {
       title: "Tanyakan Apapun. Simulasikan Semuanya.",
       subtitle: "Didukung oleh algoritma Monte Carlo canggih untuk prediksi olahraga terbaik.",
       placeholder: "Simulasikan pertandingan Grup A World Cup 2026...",
+      placeholderCustom: "Simulasikan turnamen kustom (misal, 16 tim esports)...",
       model: "Model",
       mode: "Mode",
       style: "Style"
@@ -144,6 +145,7 @@ export const id = {
       rightPanel: {
         groupStageComplete: "Babak Grup telah selesai! Gunakan mode 'From Scratch' untuk mengulang simulasi grup, atau beralih ke Knockout Bracket untuk menyimulasikan sisa turnamen.",
         runningSim: "Menjalankan Simulasi Monte Carlo...",
+        runningCustomSim: "Membuat Turnamen Kustom...",
         playSim: "Jalankan Simulasi",
         simBracket: "Menyimulasikan Bagan...",
         simKnockout: "Simulasikan Knockout",

@@ -66,6 +66,7 @@ export const en = {
       title: "Ask Anything. Simulate Everything.",
       subtitle: "Powered by advanced Monte Carlo algorithms for the ultimate sports predictions.",
       placeholder: "Simulate World Cup 2026 Group A matches...",
+      placeholderCustom: "Simulate a custom tournament (e.g., 16 Dota 2 teams)...",
       model: "Model",
       mode: "Mode",
       style: "Style"
@@ -144,6 +145,7 @@ export const en = {
       rightPanel: {
         groupStageComplete: "Group Stage is completed! Use 'From Scratch' mode to resimulate groups, or switch to the Knockout Bracket to simulate the rest of the tournament.",
         runningSim: "Running Monte Carlo Simulations...",
+        runningCustomSim: "Generating Custom Tournament...",
         playSim: "Play Simulation",
         simBracket: "Simulating Bracket...",
         simKnockout: "Simulate Knockout",

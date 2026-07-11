@@ -14,7 +14,7 @@ import { en } from '../../locales/en';
 import { id } from '../../locales/id';
 
 const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
-  const { simulationData, runSimulation, isLoading, liveStandings, selectedModel, selectedMode, isSimulatingKnockout, language } = useAppStore();
+  const { simulationData, runSimulation, isLoading, liveStandings, selectedCompetition, selectedModel, selectedMode, isSimulatingKnockout, language } = useAppStore();
   const t = language === 'id' ? id : en;
   const p = t.components.playground.rightPanel;
 
@@ -22,8 +22,17 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const filterOptions = ['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G', 'Group H', 'Group I', 'Group J', 'Group K', 'Group L', 'Best 3rd Place'];
-  const [selectedFilters, setSelectedFilters] = useState<string[]>(filterOptions);
+  const currentStandingsRaw = simulationData?.sample_standings || liveStandings || [];
+  
+  const filterOptions = selectedCompetition === 'World Cup' 
+    ? ['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G', 'Group H', 'Group I', 'Group J', 'Group K', 'Group L', 'Best 3rd Place']
+    : currentStandingsRaw.map(g => g.group_name);
+    
+  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  
+  React.useEffect(() => {
+    setSelectedFilters(filterOptions);
+  }, [selectedCompetition, currentStandingsRaw.length]);
   
   const [showMetrics, setShowMetrics] = useState(true);
   type MetricSort = 'default' | 'highest_1st' | 'lowest_1st' | 'highest_adv' | 'lowest_adv';
@@ -36,7 +45,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
     return 'text-red-400';
   };
 
-  const currentStandingsRaw = simulationData?.sample_standings || liveStandings || [];
+  const actualMode = selectedCompetition === 'Custom' ? 'From Scratch' : selectedMode;
   const currentMatchday = currentStandingsRaw[0]?.teams[0]?.matches_played || 0;
 
   // Search and Checkbox Filter Logic
@@ -48,7 +57,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
     })).filter(group => group.teams.length > 0);
 
   // Compute Best Third-Placed Teams
-  const thirdPlacedTeams = selectedFilters.includes('Best 3rd Place') ? currentStandingsRaw
+  const thirdPlacedTeams = (selectedCompetition === 'World Cup' && selectedFilters.includes('Best 3rd Place')) ? currentStandingsRaw
     .map(group => {
       const team = group.teams[2];
       if (team) {
@@ -150,12 +159,12 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
 
   const handleSimulate = () => {
     if (!isLoading) {
-      if (activeTab === 'standings' && selectedMode === 'Live Standings') {
+      if (activeTab === 'standings' && actualMode === 'Live Standings') {
         setToastMessage(p.groupStageComplete);
         setTimeout(() => setToastMessage(null), 5000);
         return;
       }
-      runSimulation('', selectedModel, selectedMode);
+      runSimulation('', selectedModel, actualMode);
     }
   };
 
@@ -168,7 +177,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             <div className="w-3 h-3 rounded-full bg-primary-cyan animate-bounce" style={{ animationDelay: '150ms' }} />
             <div className="w-3 h-3 rounded-full bg-primary-cyan animate-bounce" style={{ animationDelay: '300ms' }} />
           </div>
-          <p className="text-primary-cyan font-semibold animate-pulse">{p.runningSim}</p>
+          <p className="text-primary-cyan font-semibold animate-pulse">{selectedCompetition === 'Custom' ? p.runningCustomSim : p.runningSim}</p>
         </div>
       )}
 
@@ -385,7 +394,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
             </div>
 
             {/* Probability Metrics Overview */}
-            {simulationData && showMetrics && (
+            {simulationData && showMetrics && Object.keys(simulationData.probabilities).length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">{p.probOverview}</h3>
@@ -429,7 +438,13 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
                         <div className="absolute top-0 right-0 bg-white/10 px-2 py-1 text-[10px] text-gray-300 rounded-bl-lg font-bold uppercase tracking-wider backdrop-blur-sm z-10">{groupName}</div>
                         
                         <div className="flex items-center gap-3 mb-4">
-                          {crest && <img src={crest} alt={teamCode} className="w-8 h-8 object-contain drop-shadow-md" />}
+                          {selectedCompetition === 'Custom' ? (
+                             <div className="w-8 h-8 rounded-full bg-primary-cyan/20 text-primary-cyan border border-primary-cyan/30 flex items-center justify-center font-bold text-xs uppercase shadow-inner">
+                               {teamCode.slice(0, 3)}
+                             </div>
+                          ) : (
+                             crest && <img src={crest} alt={teamCode} className="w-8 h-8 object-contain drop-shadow-md" />
+                          )}
                           <h3 className="text-white font-black text-xl tracking-tight">{teamCode}</h3>
                         </div>
                         

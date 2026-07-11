@@ -27,7 +27,7 @@ const W_3RD_MAPPING: Record<string, string[]> = {
 
 // Note: W_R_MAPPING and R_R_MAPPING were removed because matches are now mapped to explicit slots.
 
-export const generateBracket = (standings: GroupStandings[]): MatchNode[] => {
+export const generateBracket = (standings: GroupStandings[], competition: string = 'World Cup'): MatchNode[] => {
   if (!standings || standings.length === 0) return [];
 
   // 1. Extract teams by position
@@ -52,6 +52,82 @@ export const generateBracket = (standings: GroupStandings[]): MatchNode[] => {
   const best8Third = thirdPlaces.slice(0, 8);
 
   const matches: MatchNode[] = [];
+  
+  if (competition === 'Custom') {
+    // Dynamic Bracket Generation for Custom Tournaments
+    const advancingTeams: TeamStats[] = [];
+    winners.forEach((team) => advancingTeams.push(team));
+    runnersUp.forEach((team) => advancingTeams.push(team));
+    
+    // Sort or just pair them up sequentially
+    // Total advancing teams should be a power of 2 (4, 8, 16, 32)
+    const numTeams = advancingTeams.length;
+    
+    // Find closest power of 2 that is <= numTeams
+    let power = 1;
+    while (power * 2 <= numTeams) power *= 2;
+    const finalCount = power;
+    
+    const selectedAdvancing = advancingTeams.slice(0, finalCount);
+    
+    const r1 = finalCount / 2;
+    let roundName = 'R32';
+    if (r1 === 8) roundName = 'R16';
+    if (r1 === 4) roundName = 'QF';
+    if (r1 === 2) roundName = 'SF';
+    if (r1 === 1) roundName = 'FINAL';
+    
+    const currentRoundSlots: Array<{ home: TeamStats | undefined, away: TeamStats | undefined }> = new Array(r1).fill({ home: undefined, away: undefined });
+    for (let i = 0; i < r1; i++) {
+       currentRoundSlots[i] = { home: selectedAdvancing[i*2], away: selectedAdvancing[i*2 + 1] };
+       matches.push({
+         id: `${roundName}-${i + 1}`,
+         round: roundName,
+         home: currentRoundSlots[i].home,
+         away: currentRoundSlots[i].away,
+         position: i + 1
+       });
+    }
+    
+    // Generate empty rounds
+    const generateEmptyRounds = (rName: string, count: number, startPos: number) => {
+      for (let i = 0; i < count; i++) {
+        matches.push({
+          id: `${rName}-${i + 1}`,
+          round: rName,
+          position: startPos + i
+        });
+      }
+    };
+    
+    if (r1 > 8) generateEmptyRounds('R16', 8, 1);
+    if (r1 > 4) generateEmptyRounds('QF', 4, 1);
+    if (r1 > 2) generateEmptyRounds('SF', 2, 1);
+    if (r1 > 1) {
+      generateEmptyRounds('FINAL', 1, 1);
+      generateEmptyRounds('3RD', 1, 1);
+    }
+    
+    const linkRounds = (prevRound: string, currRound: string, prevCount: number) => {
+      for (let i = 1; i <= prevCount; i++) {
+        const pMatch = matches.find(m => m.id === `${prevRound}-${i}`);
+        const currMatchId = `${currRound}-${Math.ceil(i / 2)}`;
+        if (pMatch) pMatch.nextMatchId = currMatchId;
+        
+        // Special case for Semi-Finals going to 3rd Place match
+        if (prevRound === 'SF') {
+          if (pMatch) pMatch.loserNextMatchId = `3RD-1`;
+        }
+      }
+    };
+    
+    if (r1 > 8) linkRounds('R32', 'R16', 16);
+    if (r1 > 4) linkRounds('R16', 'QF', 8);
+    if (r1 > 2) linkRounds('QF', 'SF', 4);
+    if (r1 > 1) linkRounds('SF', 'FINAL', 2);
+    
+    return matches;
+  }
 
   // 3. Greedy Assignment (Bipartite matching) for Winners vs Best 3rd
   const wGroupLetters = Object.keys(W_3RD_MAPPING); // A, B, D, E, G, I, K, L

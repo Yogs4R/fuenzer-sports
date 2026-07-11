@@ -25,6 +25,7 @@ const BracketView: React.FC = () => {
     setIsSimulatingKnockout,
     bracketMatches: matches,
     setBracketMatches: setMatches,
+    selectedCompetition,
     language
   } = useAppStore();
 
@@ -35,13 +36,14 @@ const BracketView: React.FC = () => {
   const [selectedMetricsRound, setSelectedMetricsRound] = React.useState<string | null>(null);
 
   useEffect(() => {
-    const dataToUse = selectedMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
+    const actualMode = selectedCompetition === 'Custom' ? 'From Scratch' : selectedMode;
+    const dataToUse = actualMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
     if (dataToUse && dataToUse.length > 0) {
       if (matches.length === 0 || matches[0]?.homeScore === undefined) {
-          setMatches(generateBracket(dataToUse));
+          setMatches(generateBracket(dataToUse, selectedCompetition));
       }
     }
-  }, [simulationData, liveStandings, selectedMode]);
+  }, [simulationData, liveStandings, selectedMode, selectedCompetition, matches.length]);
 
   const simulateMatch = (homePower: number, awayPower: number, homeTla: string, awayTla: string) => {
     const finalHome = homePower + getHostAdvantage(homeTla);
@@ -70,12 +72,13 @@ const BracketView: React.FC = () => {
     if (isSimulatingKnockout || matches.length === 0) return;
     setIsSimulatingKnockout(true);
 
-    const dataToUse = selectedMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
+    const actualMode = selectedCompetition === 'Custom' ? 'From Scratch' : selectedMode;
+    const dataToUse = actualMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
     
     let currentMatches = [...matches];
     // Re-simulate logic: wipe and reset if already played
     if (currentMatches[0]?.homeScore !== undefined) {
-       currentMatches = generateBracket(dataToUse || []);
+       currentMatches = generateBracket(dataToUse || [], selectedCompetition);
        setMatches(currentMatches);
        await new Promise(r => setTimeout(r, 100)); 
     }
@@ -160,7 +163,8 @@ const BracketView: React.FC = () => {
     }
   }, [furthestRound]);
 
-  const dataToUse = selectedMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
+  const actualMode = selectedCompetition === 'Custom' ? 'From Scratch' : selectedMode;
+  const dataToUse = actualMode === 'Live Standings' ? liveStandings : simulationData?.sample_standings;
   
   if (!dataToUse || matches.length === 0) {
     return (
@@ -266,8 +270,10 @@ const BracketView: React.FC = () => {
       {/* Bracket Container (Scrollable) */}
       <div className="flex-1 overflow-auto p-4 md:p-8 scrollbar-custom">
         <div className="flex gap-12 md:gap-16 min-w-max pb-16 pt-4">
-          {ROUNDS.map((round, rIndex) => {
-            const roundMatches = matches.filter(m => m.round === round);
+          {(() => {
+            const activeRounds = ROUNDS.filter(round => matches.some(m => m.round === round));
+            return activeRounds.map((round, rIndex) => {
+              const roundMatches = matches.filter(m => m.round === round);
             // If it's the FINAL round, also include the 3RD place match
             if (round === 'FINAL') {
               const thirdPlaceMatch = matches.find(m => m.round === '3RD');
@@ -275,7 +281,7 @@ const BracketView: React.FC = () => {
             }
 
             const matchSpacing = rIndex === 0 ? 'mt-0' : (rIndex === 1 ? 'mt-[46px]' : (rIndex === 2 ? 'mt-[138px]' : (rIndex === 3 ? 'mt-[322px]' : 'mt-[714px]')));
-            const matchGap = rIndex === 0 ? 'gap-4' : (rIndex === 1 ? 'gap-[108px]' : (rIndex === 2 ? 'gap-[292px]' : (rIndex === 3 ? 'gap-[660px]' : 'gap-[80px]')));
+            const matchGap = round === 'FINAL' ? 'gap-[80px]' : (rIndex === 0 ? 'gap-4' : (rIndex === 1 ? 'gap-[108px]' : (rIndex === 2 ? 'gap-[292px]' : 'gap-[660px]')));
 
             return (
               <div key={round} className="flex flex-col relative" style={{ minWidth: '220px' }}>
@@ -284,20 +290,19 @@ const BracketView: React.FC = () => {
                   {ROUND_NAMES[round]}
                 </div>
                 
-                {round === 'FINAL' && (
-                  <div className="absolute top-[620px] left-1/2 -translate-x-1/2 flex justify-center z-0">
-                    <div className="text-yellow-400 text-6xl drop-shadow-[0_0_15px_rgba(250,204,21,0.5)] opacity-80">🏆</div>
-                  </div>
-                )}
-                
                 {/* Matches Container */}
                 <div className={`flex flex-col ${matchGap} ${matchSpacing} relative`}>
                   {roundMatches.map((match, mIndex) => {
-                    const isSecondHalfStart = roundMatches.length > 1 && mIndex === roundMatches.length / 2 && round !== 'FINAL';
+                    const isSecondHalfStart = roundMatches.length > 1 && mIndex === Math.floor(roundMatches.length / 2) && round !== 'FINAL';
                     return (
                     <div key={match.id} className={`relative flex flex-col items-center ${isSecondHalfStart ? 'mt-[48px]' : ''}`}>
                       {match.round === '3RD' && (
                         <div className="text-yellow-500 font-bold text-xs uppercase mb-2 tracking-widest bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">{p.thirdPlace}</div>
+                      )}
+                      {match.round === 'FINAL' && (
+                        <div className="absolute -top-14 left-1/2 -translate-x-1/2 flex justify-center z-0">
+                          <div className="text-yellow-400 text-6xl drop-shadow-[0_0_15px_rgba(250,204,21,0.5)] opacity-90">🏆</div>
+                        </div>
                       )}
                       <motion.div 
                         layout
@@ -308,7 +313,11 @@ const BracketView: React.FC = () => {
                         {/* Home Team */}
                         <div className={`flex items-center justify-between p-2 text-sm border-b border-white/5 ${match.winnerId === match.home?.id ? 'bg-primary-cyan/10 font-bold text-white' : 'text-gray-300'}`}>
                           <div className="flex items-center gap-2">
-                            {match.home?.crest ? (
+                            {selectedCompetition === 'Custom' && match.home?.tla ? (
+                               <div className="w-5 h-5 rounded bg-primary-cyan/20 text-primary-cyan flex items-center justify-center font-bold text-[8px] shadow-inner shrink-0">
+                                 {match.home.tla.slice(0, 3)}
+                               </div>
+                            ) : match.home?.crest ? (
                               <img src={match.home.crest} alt="" className="w-5 h-5 object-contain" />
                             ) : (
                               <div className="w-5 h-5 bg-white/10 rounded-full" />
@@ -320,7 +329,11 @@ const BracketView: React.FC = () => {
                         {/* Away Team */}
                         <div className={`flex items-center justify-between p-2 text-sm ${match.winnerId === match.away?.id ? 'bg-primary-cyan/10 font-bold text-white' : 'text-gray-300'}`}>
                           <div className="flex items-center gap-2">
-                            {match.away?.crest ? (
+                            {selectedCompetition === 'Custom' && match.away?.tla ? (
+                               <div className="w-5 h-5 rounded bg-primary-cyan/20 text-primary-cyan flex items-center justify-center font-bold text-[8px] shadow-inner shrink-0">
+                                 {match.away.tla.slice(0, 3)}
+                               </div>
+                            ) : match.away?.crest ? (
                               <img src={match.away.crest} alt="" className="w-5 h-5 object-contain" />
                             ) : (
                               <div className="w-5 h-5 bg-white/10 rounded-full" />
@@ -332,18 +345,18 @@ const BracketView: React.FC = () => {
                       </motion.div>
                       
                       {/* Connection Lines to Next Round */}
-                      {match.nextMatchId && rIndex < ROUNDS.length - 1 && (
+                      {match.nextMatchId && rIndex < activeRounds.length - 1 && (
                         <div className="absolute left-full top-1/2 w-6 md:w-8 border-t-2 border-white/20 z-0"></div>
                       )}
                       
                       {/* Vertical Connection Line for Home/Away Pairs */}
-                      {match.nextMatchId && rIndex < ROUNDS.length - 1 && mIndex % 2 === 0 && (
+                      {match.nextMatchId && rIndex < activeRounds.length - 1 && mIndex % 2 === 0 && (
                         <div className={`absolute left-[calc(100%+24px)] md:left-[calc(100%+32px)] top-1/2 w-0.5 border-l-2 border-white/20 z-0
                           ${rIndex === 0 ? 'h-[92px]' : (rIndex === 1 ? 'h-[184px]' : (rIndex === 2 ? 'h-[368px]' : 'h-[784px]'))}
                         `}></div>
                       )}
                       {/* Horizontal line entering next match */}
-                      {match.nextMatchId && rIndex < ROUNDS.length - 1 && mIndex % 2 === 0 && (
+                      {match.nextMatchId && rIndex < activeRounds.length - 1 && mIndex % 2 === 0 && (
                         <div className={`absolute left-[calc(100%+24px)] md:left-[calc(100%+32px)] top-[calc(50%+46px)] 
                           ${rIndex === 1 ? 'top-[calc(50%+92px)]' : (rIndex === 2 ? 'top-[calc(50%+184px)]' : (rIndex === 3 ? 'top-[calc(50%+392px)]' : ''))}
                           w-6 md:w-8 border-t-2 border-white/20 z-0`}></div>
@@ -354,7 +367,8 @@ const BracketView: React.FC = () => {
                 </div>
               </div>
             );
-          })}
+          });
+          })()}
         </div>
       </div>
       {/* Disclaimer */}

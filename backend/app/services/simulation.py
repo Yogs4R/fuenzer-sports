@@ -4,12 +4,12 @@ from typing import List, Dict, Any
 from app.models.simulation import SimulationResponse, GroupStandings, TeamStats
 
 class MonteCarloEngine:
-    def __init__(self, teams_data: List[Dict[str, Any]], n_iterations: int = 10000):
+    def __init__(self, teams_data: List[Dict[str, Any]], n_iterations: int = 10000, teams_per_group: int = 4):
         self.teams_data = teams_data
         self.n_iterations = n_iterations
-        self.n_teams = 48
-        self.n_groups = 12
-        self.teams_per_group = 4
+        self.teams_per_group = teams_per_group
+        self.n_teams = len(teams_data)
+        self.n_groups = self.n_teams // self.teams_per_group if self.teams_per_group > 0 else 0
         
         # Parse data
         self.tlas = [t["tla"] for t in self.teams_data]
@@ -21,15 +21,12 @@ class MonteCarloEngine:
 
     def setup_matches(self):
         """Pre-calculate matchups for all 12 groups."""
-        # Teams are assumed to be strictly ordered by group: 0-3 = Group A, 4-7 = Group B, etc.
         self.matches = []
         for g in range(self.n_groups):
             base = g * self.teams_per_group
-            # 6 matches per group
-            self.matches.extend([
-                (base+0, base+1), (base+0, base+2), (base+0, base+3),
-                (base+1, base+2), (base+1, base+3), (base+2, base+3)
-            ])
+            for i in range(self.teams_per_group):
+                for j in range(i + 1, self.teams_per_group):
+                    self.matches.append((base + i, base + j))
         
         self.matches = np.array(self.matches) # Shape (72, 2)
         
@@ -111,50 +108,43 @@ class MonteCarloEngine:
         ranks = np.lexsort(sort_keys, axis=2) # Shape: (N, 12, 4) containing indices 0-3
         
         # Calculate probabilities
-        # Dictionary structure: tla -> {"1st": 0, "2nd": 0, "3rd": 0, "4th": 0, "qualify": 0}
-        prob_counters = {tla: {"1st": 0, "2nd": 0, "3rd": 0, "4th": 0, "qualify": 0} for tla in self.tlas}
+        pos_keys = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th"]
+        base_counters = {pos_keys[i]: 0 for i in range(min(self.teams_per_group, len(pos_keys)))}
+        base_counters["qualify"] = 0
+        prob_counters = {tla: base_counters.copy() for tla in self.tlas}
         
-        # Best 3rd place logic
-        # ranks[:, :, 2] gives the index (0-3) of the team that finished 3rd in each group
-        # We need their global index to look up points, gd, gf
-        # ranks[:, g, 2] + g*4 -> global index
+        is_world_cup = (self.n_teams == 48 and self.n_groups == 12 and self.teams_per_group == 4)
         
         for n in range(N):
             thirds_global_idx = []
             
             for g in range(self.n_groups):
-                # ranks[n, g] contains team local indices sorted 1st to 4th
-                first_local = ranks[n, g, 0]
-                second_local = ranks[n, g, 1]
-                third_local = ranks[n, g, 2]
-                fourth_local = ranks[n, g, 3]
+                for i in range(self.teams_per_group):
+                    local_idx = ranks[n, g, i]
+                    global_idx = g * self.teams_per_group + local_idx
+                    tla = self.tlas[global_idx]
+                    
+                    if i < len(pos_keys):
+                        prob_counters[tla][pos_keys[i]] += 1
+                    
+                    if i < 2:
+                        prob_counters[tla]["qualify"] += 1
+                    elif i == 2 and is_world_cup:
+                        thirds_global_idx.append(global_idx)
+                        
+            if is_world_cup and len(thirds_global_idx) == 12:
+                # Sort the 12 third-placed teams
+                thirds_pts = points[n, thirds_global_idx]
+                thirds_gd = gd[n, thirds_global_idx]
+                thirds_gf = gf[n, thirds_global_idx]
+                thirds_mv = mv[n, thirds_global_idx]
                 
-                # Update positional counters
-                prob_counters[self.tlas[g*4 + first_local]]["1st"] += 1
-                prob_counters[self.tlas[g*4 + second_local]]["2nd"] += 1
-                prob_counters[self.tlas[g*4 + third_local]]["3rd"] += 1
-                prob_counters[self.tlas[g*4 + fourth_local]]["4th"] += 1
+                t_sort_keys = (-thirds_mv, -thirds_gf, -thirds_gd, -thirds_pts)
+                t_ranks = np.lexsort(t_sort_keys)
                 
-                # Top 2 qualify automatically
-                prob_counters[self.tlas[g*4 + first_local]]["qualify"] += 1
-                prob_counters[self.tlas[g*4 + second_local]]["qualify"] += 1
-                
-                thirds_global_idx.append(g*4 + third_local)
-                
-            # Sort the 12 third-placed teams
-            thirds_pts = points[n, thirds_global_idx]
-            thirds_gd = gd[n, thirds_global_idx]
-            thirds_gf = gf[n, thirds_global_idx]
-            thirds_mv = mv[n, thirds_global_idx]
-            
-            # lexsort for thirds
-            t_sort_keys = (-thirds_mv, -thirds_gf, -thirds_gd, -thirds_pts)
-            t_ranks = np.lexsort(t_sort_keys)
-            
-            # Top 8 qualify
-            for i in range(8):
-                best_third_global_idx = thirds_global_idx[t_ranks[i]]
-                prob_counters[self.tlas[best_third_global_idx]]["qualify"] += 1
+                for i in range(8):
+                    best_third_global_idx = thirds_global_idx[t_ranks[i]]
+                    prob_counters[self.tlas[best_third_global_idx]]["qualify"] += 1
 
         # Convert to percentages
         probabilities = {}
@@ -163,8 +153,8 @@ class MonteCarloEngine:
             
         # Create 1 sample standing (from n=0)
         sample_standings = []
-        groups_names = ["Group A", "Group B", "Group C", "Group D", "Group E", "Group F", 
-                        "Group G", "Group H", "Group I", "Group J", "Group K", "Group L"]
+        import string
+        groups_names = [f"Group {string.ascii_uppercase[i % 26]}" for i in range(self.n_groups)]
         
         for g in range(self.n_groups):
             group_name = groups_names[g]
@@ -190,7 +180,7 @@ class MonteCarloEngine:
                     goals_for=t_gf,
                     goals_against=t_ga,
                     goal_difference=t_gd,
-                    matches_played=3,
+                    matches_played=self.teams_per_group - 1,
                     won=int(wins[0, global_team_idx]),
                     draw=int(draws_acc[0, global_team_idx]),
                     lost=int(losses[0, global_team_idx])

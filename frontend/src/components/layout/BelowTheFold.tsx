@@ -44,6 +44,7 @@ const BelowTheFold: React.FC = () => {
 
   const tabs = [
     { name: 'World Cup', soon: false },
+    { name: 'Custom', soon: false },
     { name: 'AFC', soon: true },
     { name: 'AFCON', soon: true },
     { name: 'UEFA', soon: true },

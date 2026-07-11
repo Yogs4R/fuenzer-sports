@@ -6,7 +6,7 @@ from slowapi.util import get_remote_address
 from app.models.simulation import SimulationRequest, SimulationResponse
 from app.integrations.mock_data import get_mock_wc_teams
 from app.services.simulation import MonteCarloEngine
-from app.integrations.llm import generate_narrative, route_prompt
+from app.integrations.llm import generate_narrative, route_prompt, generate_custom_tournament_structure
 
 logger = logging.getLogger(__name__)
 limiter = Limiter(key_func=get_remote_address)
@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.post("/simulate", response_model=SimulationResponse)
 @limiter.limit("10/minute")
-def run_simulation(request_obj: Request, request: SimulationRequest = None):
+def run_simulation(request: Request, payload: SimulationRequest = None):
     
     # Setup parameters
     iterations = 10000
@@ -26,47 +26,62 @@ def run_simulation(request_obj: Request, request: SimulationRequest = None):
     style = "Commentator Style"
     chat_history = []
     
-    if request:
-        iterations = request.iterations
-        custom_weights = request.custom_weights
-        prompt = request.prompt
-        model = request.model
-        competition = request.competition
-        mode = request.mode
-        style = request.style
-        chat_history = request.chat_history
+    if payload:
+        iterations = payload.iterations
+        custom_weights = payload.custom_weights
+        prompt = payload.prompt
+        model = payload.model
+        competition = payload.competition
+        mode = payload.mode
+        style = payload.style
+        chat_history = payload.chat_history
         
-    # Get base teams
-    teams_dict = get_mock_wc_teams()
-    teams = teams_dict.get("teams", [])
-    
-    # Apply custom weights if provided
-    # The weights might be keyed by TLA or Full Name, we will try to match both
-    if custom_weights:
-        for team in teams:
-            tla = team["tla"]
-            name = team["name"]
-            
-            boost = custom_weights.get(tla, 0.0) + custom_weights.get(name, 0.0)
-            if boost != 0:
-                team["power_rating"] += boost
+    if competition == "Custom" and prompt:
+        try:
+            teams = generate_custom_tournament_structure(prompt, model)
+            teams_per_group = 4 if len(teams) >= 4 else len(teams)
+            engine = MonteCarloEngine(teams_data=teams, n_iterations=iterations, teams_per_group=teams_per_group)
+        except Exception as e:
+            from fastapi import HTTPException
+            logger.error("Failed to generate custom tournament: %s", e)
+            raise HTTPException(status_code=500, detail="Failed to generate custom tournament. Please try a different prompt.")
+    elif payload and payload.custom_teams:
+        teams = payload.custom_teams
+        teams_per_group = 4 if len(teams) >= 4 else len(teams)
+        engine = MonteCarloEngine(teams_data=teams, n_iterations=iterations, teams_per_group=teams_per_group)
+    else:
+        # Get base teams
+        teams_dict = get_mock_wc_teams()
+        teams = teams_dict.get("teams", [])
+        
+        # Apply custom weights if provided
+        # The weights might be keyed by TLA or Full Name, we will try to match both
+        if custom_weights:
+            for team in teams:
+                tla = team["tla"]
+                name = team["name"]
                 
-    # Route the prompt if provided
-    if prompt:
-        route_result = route_prompt(prompt, model, chat_history, competition)
-        if route_result["route"] in ["GENERAL_SPORTS", "OUT_OF_CONTEXT"]:
-            return SimulationResponse(
-                iterations=0,
-                execution_time_ms=0.0,
-                probabilities={},
-                sample_standings=[],
-                title="Fuenzer AI Chat",
-                ai_narrative=route_result["response"],
-                is_general_chat=True
-            )
-                
-    # Initialize Engine
-    engine = MonteCarloEngine(teams_data=teams, n_iterations=iterations)
+                boost = custom_weights.get(tla, 0.0) + custom_weights.get(name, 0.0)
+                if boost != 0:
+                    team["power_rating"] += boost
+                    
+        # Route the prompt if provided
+        if prompt:
+            route_result = route_prompt(prompt, model, chat_history, competition)
+            if route_result["route"] in ["GENERAL_SPORTS", "OUT_OF_CONTEXT"]:
+                return SimulationResponse(
+                    iterations=0,
+                    execution_time_ms=0.0,
+                    probabilities={},
+                    sample_standings=[],
+                    title="Fuenzer AI Chat",
+                    ai_narrative=route_result["response"],
+                    is_general_chat=True
+                )
+                    
+        # Initialize Engine
+        engine = MonteCarloEngine(teams_data=teams, n_iterations=iterations)
+
     
     # Run simulation
     response = engine.run()
@@ -83,7 +98,7 @@ def run_simulation(request_obj: Request, request: SimulationRequest = None):
                 competition=competition,
                 mode=mode,
                 style=style,
-                generate_title=request.generate_title
+                generate_title=payload.generate_title if payload else False
             )
         except Exception as e:
             from fastapi import HTTPException
@@ -91,7 +106,7 @@ def run_simulation(request_obj: Request, request: SimulationRequest = None):
             raise HTTPException(status_code=500, detail="Simulation service temporarily unavailable. Please try again.")
             
     response.ai_narrative = ai_narrative
-    response.title = "World Cup Simulation"
+    response.title = "Custom Tournament Simulation" if competition == "Custom" else f"{competition} Simulation"
     
     if ai_narrative and ai_narrative.startswith("TITLE:"):
         lines = ai_narrative.split("\n", 1)

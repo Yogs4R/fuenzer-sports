@@ -138,6 +138,8 @@ interface AppState {
   
   // Live Data Actions
   fetchLiveStandings: () => Promise<void>;
+  
+  updateTeamName: (teamId: number, newName: string) => void;
 
 }
 
@@ -435,7 +437,22 @@ export const useAppStore = create<AppState>()(
       runSimulation: async (prompt: string, model: string, mode: string) => {
         const currentState = get();
         const cachedProbabilities = currentState.simulationData?.probabilities || {};
-        
+        let customTeams;
+        if (currentState.selectedCompetition === 'Custom' && currentState.simulationData) {
+          customTeams = currentState.simulationData.sample_standings.flatMap(group => group.teams.map(t => ({
+            ...t,
+            power_rating: t.power_rating || 60,
+            points: 0, goals_for: 0, goals_against: 0, goal_difference: 0, matches_played: 0, won: 0, draw: 0, lost: 0,
+            group: group.group_name
+          })));
+        } else if (mode === 'Live Standings' && currentState.liveStandings) {
+          customTeams = currentState.liveStandings.flatMap(group => group.teams.map(t => ({
+            ...t,
+            power_rating: t.power_rating || 60,
+            group: group.group_name
+          })));
+        }
+
         set((state) => ({ 
           isLoading: true, 
           error: null,
@@ -449,8 +466,9 @@ export const useAppStore = create<AppState>()(
           window.history.pushState({}, '', '/playground');
         }
 
-        const state = get();
         try {
+          const state = get();
+
           const payload = {
             iterations: 10000,
             prompt: prompt,
@@ -459,7 +477,8 @@ export const useAppStore = create<AppState>()(
             mode: mode,
             style: state.selectedStyle,
             chat_history: state.chatHistory.slice(-5),
-            generate_title: state.chatHistory.length === 1 // length is 1 because prompt is already appended
+            generate_title: state.chatHistory.length === 1, // length is 1 because prompt is already appended
+            custom_teams: customTeams
           };
           
           const response = await fetch(`${API_BASE_URL}/api/simulate`, {
@@ -474,7 +493,8 @@ export const useAppStore = create<AppState>()(
           
           const data: SimulationResponse = await response.json();
           
-          if (mode === 'Live Standings') {
+          const actualMode = state.selectedCompetition === 'Custom' ? 'From Scratch' : mode;
+          if (actualMode === 'Live Standings') {
             data.sample_standings = get().liveStandings || []; // Retain original group standings
             data.probabilities = cachedProbabilities; // Retain existing or empty probabilities
           }
@@ -496,7 +516,7 @@ export const useAppStore = create<AppState>()(
           // Progressive Matchday Animation
           const nextMock = data;
           
-          if (mode === 'From Scratch') {
+          if (actualMode === 'From Scratch') {
             for (let md = 1; md <= 3; md++) {
                 const intermediateMock = {
                    ...nextMock,
@@ -553,6 +573,28 @@ export const useAppStore = create<AppState>()(
                 await get().runSimulation(lastPrompt.content, state.selectedModel, state.selectedMode);
             }
         }
+      },
+      
+      updateTeamName: (teamId: number, newName: string) => {
+        set((state) => {
+            const updateGroupStandings = (standings: GroupStandings[]) => {
+                return standings.map(group => ({
+                    ...group,
+                    teams: group.teams.map(team => 
+                        team.id === teamId ? { ...team, name: newName } : team
+                    )
+                }));
+            };
+
+            return {
+                simulationData: state.simulationData ? {
+                    ...state.simulationData,
+                    sample_standings: updateGroupStandings(state.simulationData.sample_standings)
+                } : null,
+                liveStandings: state.liveStandings ? updateGroupStandings(state.liveStandings) : null
+            };
+        });
+        get().updateCurrentSession();
       }
     }),
     {

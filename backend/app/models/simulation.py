@@ -56,3 +56,4 @@ class SimulationRequest(BaseModel):
     style: str = "Commentator Style"
     chat_history: List[ChatMessage] = []
     generate_title: bool = False
+    custom_teams: List[Dict] = None
