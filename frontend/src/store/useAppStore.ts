@@ -430,6 +430,7 @@ export const useAppStore = create<AppState>()(
       },
       
       fetchLiveStandings: async () => {
+        if (get().isLiveLoading || get().hasFetchedLive) return;
         set({ isLiveLoading: true, hasFetchedLive: true });
         try {
           const response = await fetch(`${API_BASE_URL}/api/standings/live`);
