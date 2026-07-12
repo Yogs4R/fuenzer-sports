@@ -1,3 +1,14 @@
+---
+title: Fuenzer Sports Backend
+emoji: 🏆
+colorFrom: blue
+colorTo: cyan
+sdk: gradio
+sdk_version: 4.37.0
+app_file: app.py
+pinned: false
+---
+
 # ⚙️ Fuenzer Sports — Backend (FastAPI & AI Engine)
 
 The high-performance analytical engine for **Fuenzer Sports**. It runs vectorized Monte Carlo tournament simulations and orchestrates dual-provider LLM responses.
