@@ -6,6 +6,7 @@ colorTo: gray
 sdk: gradio
 app_file: run.py
 pinned: false
+sdk_version: 6.20.0
 ---
 
 # ⚙️ Fuenzer Sports — Backend (FastAPI & AI Engine)
