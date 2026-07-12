@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 FAST_MODEL = "accounts/fireworks/models/deepseek-v4-flash"
-PRO_MODEL = "accounts/yogs/deployments/xlxo3p36"
+PRO_MODEL = os.getenv("FIREWORKS_MODEL_PATH", "accounts/fireworks/models/gemma-4-e4b")
 VISION_FALLBACK_MODEL = "accounts/fireworks/models/minimax-m3"
 FIREWORKS_BASE_URL = "https://api.fireworks.ai/inference/v1"
 
@@ -56,7 +56,7 @@ def format_user_message(prompt: str, image_base64: str = None) -> Dict[str, Any]
 def execute_with_fallback(client_factory, model_name: str, messages: List[Dict], tools=None, tool_choice=None, timeout=15.0):
     fireworks_key = os.getenv("FIREWORKS_API_KEY", "")
     local_url = os.getenv("LOCAL_MODEL_BASE_URL", "")
-    fireworks_pro = os.getenv("FIREWORKS_PRO_MODEL", "accounts/yogs/deployments/xlxo3p36")
+    fireworks_pro = os.getenv("FIREWORKS_MODEL_PATH", "accounts/fireworks/models/gemma-4-e4b")
 
     # If it's FAST_MODEL, just run on Fireworks
     if model_name == FAST_MODEL:
