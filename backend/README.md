@@ -2,7 +2,7 @@
 title: Fuenzer Sports Backend
 emoji: 🏆
 colorFrom: blue
-colorTo: cyan
+colorTo: gray
 sdk: gradio
 sdk_version: 4.37.0
 app_file: app.py
