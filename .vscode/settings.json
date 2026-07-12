@@ -2,5 +2,13 @@
   "files.associations": {
     "_headers": "plaintext",
     "_redirects": "plaintext"
-  }
+  },
+  "jupyter.notebookFileRoot": "${workspaceFolder}",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingModuleSource": "none"
+  },
+  "[jupyter]": {
+    "editor.defaultFormatter": "ms-toolsai.jupyter"
+  },
+  "notebook.diagnostics.enabled": false
 }
