@@ -33,7 +33,7 @@ const StandingsTable: React.FC<StandingsTableProps> = ({ teams, qualifyCount = 2
 
   return (
     <div className="w-full overflow-x-auto scrollbar-hide rounded-xl border border-white/10 bg-[#080d1e]">
-      <div className="min-w-[500px]">
+      <div className="min-w-[600px] md:min-w-full">
         {/* Header */}
         <div className="grid grid-cols-12 gap-1 md:gap-2 p-3 text-[10px] md:text-sm font-semibold text-gray-400 border-b border-white/10 bg-white/5 uppercase">
           <div className="col-span-2 text-center">Pos</div>

@@ -373,8 +373,8 @@ const BracketView: React.FC = () => {
         </div>
       </div>
       {/* Disclaimer */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-none z-40 w-auto max-w-lg px-4">
-        <div className="bg-[#080d1e]/90 backdrop-blur-xs px-4 py-1.5 rounded-full border border-white/10 shadow-xl text-[10px] text-primary-cyan/80 text-center whitespace-normal leading-tight">
+      <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 pointer-events-none z-40 w-[95%] sm:w-auto max-w-lg px-2 sm:px-4">
+        <div className="bg-[#080d1e]/90 backdrop-blur-xs px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border border-white/10 shadow-xl text-[8px] sm:text-[10px] text-primary-cyan/80 text-center whitespace-normal leading-tight">
           {p.hypothetical}
         </div>
       </div>

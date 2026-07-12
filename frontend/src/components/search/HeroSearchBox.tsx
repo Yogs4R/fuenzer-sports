@@ -148,7 +148,27 @@ const HeroSearchBox: React.FC = () => {
         className="bg-bg-1 border border-white/10 rounded-3xl p-2 shadow-2xl relative mx-4 flex flex-col"
       >
 
-        <div className="relative">
+        <div className="relative flex flex-col">
+           <AnimatePresence>
+             {imageBase64 && (
+               <motion.div 
+                 initial={{ opacity: 0, height: 0 }}
+                 animate={{ opacity: 1, height: 'auto' }}
+                 exit={{ opacity: 0, height: 0 }}
+                 className="px-6 pt-4"
+               >
+                 <div className="relative inline-block border border-white/20 rounded-lg overflow-hidden bg-bg-0 shadow-lg">
+                   <img src={imageBase64} alt="Uploaded" className="h-16 w-16 object-cover" />
+                   <button 
+                     onClick={removeImage}
+                     className="absolute top-1 right-1 bg-black/60 p-0.5 rounded-full hover:bg-black text-white"
+                   >
+                     <X size={12} />
+                   </button>
+                 </div>
+               </motion.div>
+             )}
+           </AnimatePresence>
           <textarea
             value={displayQuery}
             onChange={(e) => {
@@ -200,24 +220,6 @@ const HeroSearchBox: React.FC = () => {
              )}
           </AnimatePresence>
            
-           <AnimatePresence>
-             {imageBase64 && (
-               <motion.div 
-                 initial={{ opacity: 0, scale: 0.8 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 exit={{ opacity: 0, scale: 0.8 }}
-                 className="absolute bottom-4 left-4 border border-white/20 rounded-lg overflow-hidden bg-bg-0 shadow-lg"
-               >
-                 <img src={imageBase64} alt="Uploaded" className="h-16 w-16 object-cover" />
-                 <button 
-                   onClick={removeImage}
-                   className="absolute top-1 right-1 bg-black/60 p-0.5 rounded-full hover:bg-black text-white"
-                 >
-                   <X size={12} />
-                 </button>
-               </motion.div>
-             )}
-           </AnimatePresence>
         </div>
         
         <div className="flex flex-wrap items-center justify-between p-2 relative gap-y-3" ref={dropdownRef}>

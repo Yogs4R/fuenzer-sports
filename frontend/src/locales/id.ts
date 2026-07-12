@@ -11,14 +11,9 @@ export const id = {
     empty: "Tidak ada notifikasi baru",
     updates: [
       {
-        date: "6 Juli 2026",
-        title: "Migrasi Vite & Tailwind CSS v4",
-        description: "Berhasil melakukan migrasi ke React 18, Vite 8, dan Tailwind CSS v4. Sistem visual Strict Dark Mode dikonfigurasi."
-      },
-      {
-        date: "5 Juli 2026",
-        title: "Desain Awal Monte Carlo Engine",
-        description: "Menerapkan simulasi dasar menggunakan backend Python dan FastAPI, dioptimalkan dengan NumPy."
+        date: "12 Juli 2026",
+        title: "Rilis Alpha v0.0.1",
+        description: "Rilis alpha awal dengan fitur simulasi Monte Carlo, klasemen langsung, bagan sistem gugur, dan obrolan AI interaktif."
       }
     ]
   },

@@ -11,14 +11,9 @@ export const en = {
     empty: "No new notifications",
     updates: [
       {
-        date: "July 6, 2026",
-        title: "Vite & Tailwind CSS v4 Migration",
-        description: "Successfully migrated to React 18, Vite 8, and Tailwind CSS v4. Configured strict dark mode visual system."
-      },
-      {
-        date: "July 5, 2026",
-        title: "Monte Carlo Engine Initial Design",
-        description: "Implemented basic simulations using Python and FastAPI backend, optimized using NumPy."
+        date: "July 12, 2026",
+        title: "Alpha Release v0.0.1",
+        description: "Initial alpha release featuring Monte Carlo simulations, live standings, knockout bracket, and interactive AI chat."
       }
     ]
   },

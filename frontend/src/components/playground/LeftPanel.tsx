@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import TypewriterText from './TypewriterText';
 import ProcessingState from './ProcessingState';
-import { Mic, ArrowUp, MoreVertical, X, Edit2, Trash2, ChevronDown, Sparkles, Copy, Check } from 'lucide-react';
+import { Mic, ArrowUp, MoreVertical, X, Edit2, Trash2, ChevronDown, Sparkles, Copy, Check, Image } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -37,7 +37,25 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
   const t = language === 'id' ? id : en;
   const p = t.components.playground.leftPanel;
   const [prompt, setPrompt] = useState('');
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImageBase64(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImageBase64(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
   const [isRecording, setIsRecording] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<'model' | 'style' | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -56,9 +74,10 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (prompt.trim() && !isLoading) {
-      runSimulation(prompt.trim(), selectedModel, selectedMode);
+    if ((prompt.trim() || imageBase64) && !isLoading) {
+      runSimulation(prompt.trim(), selectedModel, selectedMode, imageBase64 || undefined);
       setPrompt('');
+      removeImage();
     }
   };
 
@@ -294,6 +313,27 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
         {!needsClarification ? (
         <form onSubmit={handleSubmit} className="flex flex-col bg-[#050814] rounded-2xl border border-white/10 focus-within:border-primary-cyan/50 transition-colors p-2 px-3">
           
+          <AnimatePresence>
+            {imageBase64 && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="pb-2"
+              >
+                <div className="relative inline-block border border-white/20 rounded-lg overflow-hidden bg-bg-0 shadow-lg">
+                  <img src={imageBase64} alt="Uploaded" className="h-16 w-16 object-cover" />
+                  <button 
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute top-1 right-1 bg-black/60 p-0.5 rounded-full hover:bg-black text-white"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <div className="flex items-start w-full">
             <textarea
               value={prompt}
@@ -308,6 +348,21 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
 
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
             <div className="flex items-center gap-2">
+              <input 
+                type="file" 
+                accept="image/*" 
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                className="hidden" 
+              />
+              <button 
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className={`p-1.5 rounded-full transition-colors shrink-0 ${imageBase64 ? 'text-primary-cyan bg-primary-cyan/10' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                title="Upload Image"
+              >
+                <Image size={16} />
+              </button>
               <button 
                 type="button"
                 onClick={toggleRecording}
@@ -367,7 +422,7 @@ const LeftPanel: React.FC<LeftPanelProps> = ({ onCloseMobile }) => {
 
             <button
               type="submit"
-              disabled={!prompt.trim() || isLoading}
+              disabled={(!prompt.trim() && !imageBase64) || isLoading}
               className="p-1.5 bg-primary-cyan text-[#050814] rounded-lg shrink-0 disabled:opacity-50 disabled:bg-white/10 disabled:text-gray-500 hover:bg-cyan-400 transition-colors"
             >
               <ArrowUp size={16} strokeWidth={2.5} />

@@ -125,36 +125,41 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
   const handleCopyImage = async () => {
     const target = getShareTarget();
     if (!target) return;
-    try {
-      setIsSharing(true);
-      const dataUrl = await generateShareImage(target);
-      const blob = await (await fetch(dataUrl)).blob();
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
-      triggerCopySuccess('image');
-      setIsShareOpen(false);
-    } catch (err) {
-      console.error('Failed to copy image', err);
-    } finally {
-      setIsSharing(false);
-    }
+    setIsSharing(true);
+    // Add small delay to let UI update "disabled" state and render properly
+    setTimeout(async () => {
+      try {
+        const dataUrl = await generateShareImage(target);
+        const blob = await (await fetch(dataUrl)).blob();
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        triggerCopySuccess('image');
+        setIsShareOpen(false);
+      } catch (err) {
+        console.error('Failed to copy image', err);
+      } finally {
+        setIsSharing(false);
+      }
+    }, 50);
   };
 
   const handleDownloadImage = async () => {
     const target = getShareTarget();
     if (!target) return;
-    try {
-      setIsSharing(true);
-      const dataUrl = await generateShareImage(target);
-      const link = document.createElement('a');
-      link.download = `fuenzer-simulation-${Date.now()}.png`;
-      link.href = dataUrl;
-      link.click();
-      setIsShareOpen(false);
-    } catch (err) {
-      console.error('Failed to download image', err);
-    } finally {
-      setIsSharing(false);
-    }
+    setIsSharing(true);
+    setTimeout(async () => {
+      try {
+        const dataUrl = await generateShareImage(target);
+        const link = document.createElement('a');
+        link.download = `fuenzer-simulation-${Date.now()}.png`;
+        link.href = dataUrl;
+        link.click();
+        setIsShareOpen(false);
+      } catch (err) {
+        console.error('Failed to download image', err);
+      } finally {
+        setIsSharing(false);
+      }
+    }, 50);
   };
 
   const handleShareText = async () => {
@@ -172,7 +177,22 @@ const RightPanel: React.FC<RightPanelProps> = ({ onToggleMenu }) => {
            text += '\n';
          });
       } else {
-         text += `Knockout Bracket Highlights:\nCheck the full simulation at sports.fuenzer.web.id!`;
+         text += `Knockout Bracket Highlights:\n`;
+         // Get bracket matches from store since they are simulated there
+         const storeMatches = useAppStore.getState().bracketMatches;
+         const finalMatch = storeMatches.find(m => m.round === 'FINAL');
+         if (finalMatch && finalMatch.home && finalMatch.away) {
+           if (finalMatch.homeScore !== undefined) {
+             const winner = finalMatch.homeScore > (finalMatch.awayScore ?? 0) ? finalMatch.home.name : finalMatch.away.name;
+             text += `🏆 Champion: ${winner}\n`;
+             text += `Final: ${finalMatch.home.name} ${finalMatch.homeScore} - ${finalMatch.awayScore} ${finalMatch.away.name}\n`;
+           } else {
+             text += `Final Matchup: ${finalMatch.home.name} vs ${finalMatch.away.name}\n`;
+           }
+         } else {
+           text += `Simulate the bracket to see the final matchup!\n`;
+         }
+         text += `\nCheck the full simulation at sports.fuenzer.web.id!`;
       }
       text += `\nSimulated by Monte Carlo AI.\n🌐 sports.fuenzer.web.id`;
 

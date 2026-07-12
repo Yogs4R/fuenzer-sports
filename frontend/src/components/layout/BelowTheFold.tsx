@@ -5,6 +5,11 @@ import { en } from '../../locales/en';
 import { Search, Zap, BarChart3, ChevronRight, ChevronDown } from 'lucide-react';
 import { motion } from 'framer-motion';
 import FlagImage from '../playground/FlagImage';
+import amdLogo from '../../assets/images/amd.webp';
+import fireworksLogo from '../../assets/images/fireworks-ai.webp';
+import footballDataLogo from '../../assets/images/football-data.webp';
+import googleGemmaLogo from '../../assets/images/google-gemma.webp';
+import lablabLogo from '../../assets/images/lablab-ai.webp';
 
 // You can replace this YouTube Video ID with your actual demo video ID once uploaded
 const DEMO_YOUTUBE_ID = 'dQw4w9WgXcQ'; 
@@ -40,11 +45,11 @@ const BelowTheFold: React.FC = () => {
   const groups = liveStandings || [];
 
   const brands = [
-    { name: 'Football-Data', logo: '/src/assets/images/football-data.webp' },
-    { name: 'AMD', logo: '/src/assets/images/amd.webp' },
-    { name: 'lablab.ai', logo: '/src/assets/images/lablab-ai.webp' },
-    { name: 'Google Gemma', logo: '/src/assets/images/google-gemma.webp' },
-    { name: 'Fireworks AI', logo: '/src/assets/images/fireworks-ai.webp' },
+    { name: 'Football-Data', logo: footballDataLogo },
+    { name: 'AMD', logo: amdLogo },
+    { name: 'lablab.ai', logo: lablabLogo },
+    { name: 'Google Gemma', logo: googleGemmaLogo },
+    { name: 'Fireworks AI', logo: fireworksLogo },
   ];
 
   const tabs = [
@@ -389,13 +394,13 @@ const BelowTheFold: React.FC = () => {
             {/* Tech stack logo images at the top */}
             <div className="flex items-center gap-4 sm:gap-6 mb-6 relative z-10 bg-bg-0/40 px-4 sm:px-5 py-2 sm:py-3 rounded-2xl border border-white/5 w-full sm:w-fit justify-center sm:justify-start">
               <div className="w-20 sm:w-28 h-6 sm:h-8 flex items-center justify-center">
-                <img src="/src/assets/images/amd.webp" alt="AMD" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
+                <img src={amdLogo} alt="AMD" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
               </div>
               <div className="w-20 sm:w-28 h-6 sm:h-8 flex items-center justify-center">
-                <img src="/src/assets/images/google-gemma.webp" alt="Google Gemma" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
+                <img src={googleGemmaLogo} alt="Google Gemma" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
               </div>
               <div className="w-20 sm:w-28 h-6 sm:h-8 flex items-center justify-center">
-                <img src="/src/assets/images/fireworks-ai.webp" alt="Fireworks AI" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
+                <img src={fireworksLogo} alt="Fireworks AI" className="max-h-full max-w-full object-contain brightness-0 invert opacity-70 hover:opacity-100 transition-opacity" />
               </div>
             </div>
 
