@@ -2,15 +2,27 @@ import os
 import json
 from openai import OpenAI
 from typing import List, Dict, Any
+import logging
 
-def get_model_name(selected_model: str, prompt: str) -> str:
-    fast_model = "google/gemini-2.5-flash-lite"
-    pro_model = "openai/gpt-oss-120b"
+logger = logging.getLogger(__name__)
+
+# Constants
+FAST_MODEL = "accounts/fireworks/models/deepseek-v4-flash"
+PRO_MODEL = "google/gemma-4-31b-it"
+VISION_FALLBACK_MODEL = "accounts/fireworks/models/minimax-m3"
+FIREWORKS_BASE_URL = "https://api.fireworks.ai/inference/v1"
+
+def get_client(base_url: str, api_key: str) -> OpenAI:
+    return OpenAI(base_url=base_url, api_key=api_key)
+
+def get_model_name(selected_model: str, prompt: str, has_image: bool) -> str:
+    if has_image:
+        return PRO_MODEL
     
     if selected_model == "Fast":
-        return fast_model
+        return FAST_MODEL
     elif selected_model == "Pro":
-        return pro_model
+        return PRO_MODEL
     else: # Auto
         # Basic heuristic for complexity
         complex_keywords = [
@@ -19,20 +31,62 @@ def get_model_name(selected_model: str, prompt: str) -> str:
         ]
         prompt_lower = prompt.lower()
         if len(prompt.split()) > 15 or any(k in prompt_lower for k in complex_keywords):
-            return pro_model
-        return fast_model
+            return PRO_MODEL
+        return FAST_MODEL
 
-def orchestrate_agent(prompt: str, teams: List[Dict[str, Any]], selected_model: str, chat_history: List[Any], competition: str) -> dict:
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        return {"action": "simulate", "modifiers": []}
+def format_user_message(prompt: str, image_base64: str = None) -> Dict[str, Any]:
+    if image_base64:
+        # Check if the image contains the data URI scheme. If not, add a generic jpeg one.
+        # Ensure it works for most LLMs supporting standard vision format
+        img_url = image_base64 if image_base64.startswith("data:image") else f"data:image/jpeg;base64,{image_base64}"
+        return {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": prompt},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": img_url
+                    }
+                }
+            ]
+        }
+    return {"role": "user", "content": prompt}
 
-    client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=api_key,
-    )
-    
-    model_name = get_model_name(selected_model, prompt)
+def execute_with_fallback(client_factory, model_name: str, messages: List[Dict], tools=None, tool_choice=None, timeout=15.0):
+    fireworks_key = os.getenv("FIREWORKS_API_KEY", "")
+    local_url = os.getenv("LOCAL_MODEL_BASE_URL", "http://localhost:8000/v1")
+
+    # If it's FAST_MODEL, just run on Fireworks
+    if model_name == FAST_MODEL:
+        client = client_factory(FIREWORKS_BASE_URL, fireworks_key)
+        kwargs = {"model": FAST_MODEL, "messages": messages, "timeout": timeout}
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = tool_choice
+        return client.chat.completions.create(**kwargs)
+
+    # It's PRO_MODEL. Try local first.
+    client = client_factory(local_url, "dummy-local-key")
+    try:
+        kwargs = {"model": PRO_MODEL, "messages": messages, "timeout": timeout}
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = tool_choice
+        return client.chat.completions.create(**kwargs)
+    except Exception as local_e:
+        logger.warning(f"Local model {PRO_MODEL} failed ({local_e}). Falling back to Fireworks {VISION_FALLBACK_MODEL}.")
+        # Fallback to Fireworks Vision Model
+        fb_client = client_factory(FIREWORKS_BASE_URL, fireworks_key)
+        kwargs = {"model": VISION_FALLBACK_MODEL, "messages": messages, "timeout": timeout}
+        if tools:
+            kwargs["tools"] = tools
+            kwargs["tool_choice"] = tool_choice
+        return fb_client.chat.completions.create(**kwargs)
+
+def orchestrate_agent(prompt: str, teams: List[Dict[str, Any]], selected_model: str, chat_history: List[Any], competition: str, image_base64: str = None) -> dict:
+    has_image = bool(image_base64)
+    model_name = get_model_name(selected_model, prompt, has_image)
     
     tools = [
         {
@@ -124,7 +178,7 @@ def orchestrate_agent(prompt: str, teams: List[Dict[str, Any]], selected_model: 
     teams_context = [{"tla": t["tla"], "name": t["name"]} for t in teams] if teams else "No teams currently loaded."
     
     system_prompt = f"""You are the master AI orchestrator for the {competition}.
-Your task is to analyze the user's prompt and call the appropriate tool.
+Your task is to analyze the user's prompt (and any attached image) and call the appropriate tool.
 
 CONTEXT (Current Teams in Tournament):
 {teams_context}
@@ -142,15 +196,17 @@ RULES:
     for msg in chat_history[-3:]:
         role = "user" if msg.role == "user" else "assistant"
         messages.append({"role": role, "content": msg.content})
-    messages.append({"role": "user", "content": prompt})
+        
+    messages.append(format_user_message(prompt, image_base64))
     
     try:
-        response = client.chat.completions.create(
-            model=model_name,
+        response = execute_with_fallback(
+            client_factory=get_client,
+            model_name=model_name,
             messages=messages,
             tools=tools,
             tool_choice="required",
-            timeout=15.0
+            timeout=20.0
         )
         
         tool_call = response.choices[0].message.tool_calls[0]
@@ -167,7 +223,7 @@ RULES:
             return {"action": "simulate", "modifiers": args.get("modifiers", [])}
             
     except Exception as e:
-        print("Orchestrator error:", e)
+        logger.error("Orchestrator error: %s", e)
         return {"action": "simulate", "modifiers": []}
 
 def generate_narrative(
@@ -178,18 +234,12 @@ def generate_narrative(
     competition: str,
     mode: str,
     style: str,
-    generate_title: bool = False
+    generate_title: bool = False,
+    image_base64: str = None
 ) -> str:
-    api_key = os.getenv("OPENROUTER_API_KEY")
-    if not api_key:
-        return "AI integration is not configured. (Missing OPENROUTER_API_KEY)"
-
-    client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=api_key,
-    )
     
-    model_name = get_model_name(selected_model, prompt)
+    has_image = bool(image_base64)
+    model_name = get_model_name(selected_model, prompt, has_image)
     
     sim_context = json.dumps(simulation_results, default=str)
     if len(sim_context) > 10000:
@@ -230,14 +280,16 @@ Rules:
         role = "user" if msg.role == "user" else "assistant"
         messages.append({"role": role, "content": msg.content})
         
-    messages.append({"role": "user", "content": prompt})
+    messages.append(format_user_message(prompt, image_base64))
 
     try:
-        response = client.chat.completions.create(
-            model=model_name,
+        response = execute_with_fallback(
+            client_factory=get_client,
+            model_name=model_name,
             messages=messages,
-            timeout=15.0
+            timeout=25.0
         )
         return response.choices[0].message.content
     except Exception as e:
-        raise RuntimeError(f"LLM API Error: {str(e)}")
+        logger.error("Narrative LLM API Error: %s", e)
+        return "I encountered an error generating the narrative. Please try again."

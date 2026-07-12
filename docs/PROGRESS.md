@@ -19,8 +19,8 @@ This document outlines the step-by-step execution plan for the development phase
 | [x] | **4. Polish** | **9.6 Knockout Bracket & Greedy Algorithm** | • Implement `BracketView` for Round of 32 visualization.<br>• Use **Greedy Assignment Algorithm** for 8 Best 3rd-Place matching (optimizing O(1) matching vs hardcoding 495 Annex C permutations).<br>• Auto-generate Title via LLM. |
 | [x] | **5. Post-MVP Enhancements** | **10. Auth & Firestore** | • Setup Firebase Auth (Google Sign-In).<br>• Sync `localStorage` history to Firestore for cloud backup. |
 | [x] | **5. Post-MVP Enhancements** | **11. SEO & Security Check** | • Implement SEO tags in `public` folder.<br>• Perform frontend and API security checks. |
-| [ ] | **6. Launch** | **12. CI/CD & Deployment** | • Setup Dockerfile and docker-compose.<br>• Setup GitHub Actions for CI.<br>• Deploy frontend to Cloudflare Pages.<br>• Deploy backend to AMD Cloud. |
-| [ ] | **6. Launch** | **13. Final Review & Demo** | • Record Video Demo / GIF of the platform.<br>• Update `README.md` if setup steps changed.<br>• Final repository check for Hackathon submission. |
+| [x] | **6. Launch** | **12. CI/CD & Deployment** | • Setup Dockerfile and docker-compose.<br>• Setup GitHub Actions for CI.<br>• Deploy frontend to Cloudflare Pages.<br>• Deploy backend to AMD Cloud. |
+| [x] | **6. Launch** | **13. Final Review & Demo** | • Record Video Demo / GIF of the platform.<br>• Update `README.md` if setup steps changed.<br>• Final repository check for Hackathon submission. |
 
 *Note: Mark the `Status` column with `[x]` as each step is completed.*
 

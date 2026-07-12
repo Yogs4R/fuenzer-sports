@@ -60,3 +60,4 @@ class SimulationRequest(BaseModel):
     generate_title: bool = False
     custom_teams: List[Dict] = None
     resolved_clarification: Dict[str, str] = None
+    image_base64: str = None

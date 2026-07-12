@@ -137,8 +137,8 @@ interface AppState {
   updateCurrentSession: () => void;
   loadSession: (id: string) => void;
   deleteSession: (id: string) => void;
-  runSimulation: (prompt: string, model: string, mode: string) => Promise<void>;
-  resolveClarification: (teamTla: string) => Promise<void>;
+  runSimulation: (prompt: string, model: string, mode: string, imageBase64?: string) => Promise<void>;
+  resolveClarification: (teamTla: string, imageBase64?: string) => Promise<void>;
   reRunSimulation: () => Promise<void>;
   clearSimulationData: () => void;
   setChatStreamingComplete: (index: number) => void;
@@ -445,7 +445,7 @@ export const useAppStore = create<AppState>()(
       },
 
       
-      runSimulation: async (prompt: string, model: string, mode: string) => {
+      runSimulation: async (prompt: string, model: string, mode: string, imageBase64?: string) => {
         const currentState = get();
         let customTeams;
         if (currentState.selectedCompetition === 'Custom' && currentState.simulationData) {
@@ -488,7 +488,8 @@ export const useAppStore = create<AppState>()(
             style: state.selectedStyle,
             chat_history: state.chatHistory.slice(-5),
             generate_title: state.chatHistory.length === 1, // length is 1 because prompt is already appended
-            custom_teams: customTeams
+            custom_teams: customTeams,
+            image_base64: imageBase64
           };
           
           const response = await fetch(`${API_BASE_URL}/api/simulate`, {
@@ -585,7 +586,7 @@ export const useAppStore = create<AppState>()(
         }
       },
       
-      resolveClarification: async (teamTla: string) => {
+      resolveClarification: async (teamTla: string, imageBase64?: string) => {
         const state = get();
         if (!state.pendingPrompt || !state.clarificationTarget) return;
 
@@ -628,7 +629,8 @@ export const useAppStore = create<AppState>()(
             chat_history: state.chatHistory.slice(-5),
             generate_title: state.chatHistory.length === 1,
             custom_teams: customTeams,
-            resolved_clarification: { target, team: teamTla }
+            resolved_clarification: { target, team: teamTla },
+            image_base64: imageBase64
           };
           
           const response = await fetch(`${API_BASE_URL}/api/simulate`, {

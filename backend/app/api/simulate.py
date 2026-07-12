@@ -25,6 +25,7 @@ def run_simulation(request: Request, payload: SimulationRequest = None):
     mode = "Live Standings"
     style = "Commentator Style"
     chat_history = []
+    image_base64 = None
     
     if payload:
         iterations = payload.iterations
@@ -35,6 +36,7 @@ def run_simulation(request: Request, payload: SimulationRequest = None):
         mode = payload.mode
         style = payload.style
         chat_history = payload.chat_history
+        image_base64 = payload.image_base64
         
     teams = []
     teams_per_group = 4
@@ -64,7 +66,7 @@ def run_simulation(request: Request, payload: SimulationRequest = None):
             team_val = payload.resolved_clarification.get("team")
             effective_prompt += f"\n[System Note: The user confirmed that '{target}' plays for the team '{team_val}'.]"
             
-        orchestrator_result = orchestrate_agent(effective_prompt, teams, model, chat_history, competition)
+        orchestrator_result = orchestrate_agent(effective_prompt, teams, model, chat_history, competition, image_base64)
         action = orchestrator_result.get("action")
         
         if action == "chat":
@@ -127,7 +129,8 @@ def run_simulation(request: Request, payload: SimulationRequest = None):
                 competition=competition,
                 mode=mode,
                 style=style,
-                generate_title=payload.generate_title if payload else False
+                generate_title=payload.generate_title if payload else False,
+                image_base64=image_base64
             )
         except Exception as e:
             from fastapi import HTTPException

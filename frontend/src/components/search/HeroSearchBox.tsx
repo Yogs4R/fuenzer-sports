@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowUp, Sparkles, ChevronDown, Mic, Loader2 } from 'lucide-react';
+import { ArrowUp, Sparkles, ChevronDown, Mic, Loader2, Image, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import QuickActionChips from './QuickActionChips';
 import { useAppStore } from '../../store/useAppStore';
@@ -31,8 +31,10 @@ const HeroSearchBox: React.FC = () => {
   const t = language === 'id' ? id : en;
   const [query, setQuery] = useState('');
   const [tempQuery, setTempQuery] = useState('');
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
   
   const [activeDropdown, setActiveDropdown] = useState<DropdownType>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isRecording, setIsRecording] = useState(false);
   
@@ -95,12 +97,35 @@ const HeroSearchBox: React.FC = () => {
   };
 
   const displayQuery = tempQuery || query;
-  const isSubmitActive = displayQuery.trim().length >= 4;
+  const isSubmitActive = displayQuery.trim().length >= 4 || !!imageBase64;
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setImageBase64(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeImage = () => {
+    setImageBase64(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleSimulate = () => {
     if (isSubmitActive && !isLoading) {
       startNewSession();
-      runSimulation(displayQuery, selectedModel, selectedMode);
+      runSimulation(displayQuery, selectedModel, selectedMode, imageBase64 || undefined);
+      setImageBase64(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -174,12 +199,46 @@ const HeroSearchBox: React.FC = () => {
                 </motion.div>
              )}
           </AnimatePresence>
+           
+           <AnimatePresence>
+             {imageBase64 && (
+               <motion.div 
+                 initial={{ opacity: 0, scale: 0.8 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 exit={{ opacity: 0, scale: 0.8 }}
+                 className="absolute bottom-4 left-4 border border-white/20 rounded-lg overflow-hidden bg-bg-0 shadow-lg"
+               >
+                 <img src={imageBase64} alt="Uploaded" className="h-16 w-16 object-cover" />
+                 <button 
+                   onClick={removeImage}
+                   className="absolute top-1 right-1 bg-black/60 p-0.5 rounded-full hover:bg-black text-white"
+                 >
+                   <X size={12} />
+                 </button>
+               </motion.div>
+             )}
+           </AnimatePresence>
         </div>
         
         <div className="flex flex-wrap items-center justify-between p-2 relative gap-y-3" ref={dropdownRef}>
           {/* Left: Action & Selectors */}
           <div className="flex flex-wrap items-center gap-2">
             
+            <input 
+              type="file" 
+              accept="image/*" 
+              ref={fileInputRef}
+              onChange={handleImageUpload}
+              className="hidden" 
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              aria-label="Upload Image"
+              className={`flex items-center justify-center w-9 h-9 rounded-full transition-all border ${imageBase64 ? 'bg-primary-cyan/10 border-primary-cyan/30 text-primary-cyan' : 'bg-bg-0 border-white/5 hover:border-white/20 text-gray-400 hover:text-white'}`}
+            >
+              <Image size={16} />
+            </button>
+
             {/* Model Dropdown */}
             <div className="relative">
               <button 
