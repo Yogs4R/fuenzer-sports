@@ -12,6 +12,12 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ""
 };
 
+if (!import.meta.env.VITE_FIREBASE_API_KEY) {
+  console.warn(
+    "Firebase API Key is missing. Please ensure VITE_FIREBASE_API_KEY is set in your Cloudflare Pages Environment Variables (with the VITE_ prefix) and that you have triggered a new deployment after saving."
+  );
+}
+
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 export const db = getFirestore(app);
