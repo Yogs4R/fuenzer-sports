@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 # Constants
 FAST_MODEL = "accounts/fireworks/models/deepseek-v4-flash"
-PRO_MODEL = "google/gemma-4-31b-it"
+PRO_MODEL = "google/gemma-4-12b-it"
 VISION_FALLBACK_MODEL = "accounts/fireworks/models/minimax-m3"
 FIREWORKS_BASE_URL = "https://api.fireworks.ai/inference/v1"
 
@@ -56,6 +56,7 @@ def format_user_message(prompt: str, image_base64: str = None) -> Dict[str, Any]
 def execute_with_fallback(client_factory, model_name: str, messages: List[Dict], tools=None, tool_choice=None, timeout=15.0):
     fireworks_key = os.getenv("FIREWORKS_API_KEY", "")
     local_url = os.getenv("LOCAL_MODEL_BASE_URL", "http://localhost:8000/v1")
+    fireworks_pro = os.getenv("FIREWORKS_PRO_MODEL", "accounts/fireworks/models/gemma-4-e4b")
 
     # If it's FAST_MODEL, just run on Fireworks
     if model_name == FAST_MODEL:
@@ -66,23 +67,52 @@ def execute_with_fallback(client_factory, model_name: str, messages: List[Dict],
             kwargs["tool_choice"] = tool_choice
         return client.chat.completions.create(**kwargs)
 
-    # It's PRO_MODEL. Try local first.
-    client = client_factory(local_url, "dummy-local-key")
-    try:
-        kwargs = {"model": PRO_MODEL, "messages": messages, "timeout": timeout}
-        if tools:
-            kwargs["tools"] = tools
-            kwargs["tool_choice"] = tool_choice
-        return client.chat.completions.create(**kwargs)
-    except Exception as local_e:
-        logger.warning(f"Local model {PRO_MODEL} failed ({local_e}). Falling back to Fireworks {VISION_FALLBACK_MODEL}.")
-        # Fallback to Fireworks Vision Model
+    # It's PRO_MODEL. Try local first if URL is set.
+    if local_url and local_url.strip():
+        client = client_factory(local_url, "dummy-local-key")
+        try:
+            kwargs = {"model": PRO_MODEL, "messages": messages, "timeout": timeout}
+            if tools:
+                kwargs["tools"] = tools
+                kwargs["tool_choice"] = tool_choice
+            return client.chat.completions.create(**kwargs)
+        except Exception as local_e:
+            logger.warning(f"Local model {PRO_MODEL} failed ({local_e}). Trying Fireworks Pro model {fireworks_pro}.")
+            
+            # Local failed -> Try Fireworks Pro (Gemma 4 E4B)
+            fb_client = client_factory(FIREWORKS_BASE_URL, fireworks_key)
+            try:
+                kwargs = {"model": fireworks_pro, "messages": messages, "timeout": timeout}
+                if tools:
+                    kwargs["tools"] = tools
+                    kwargs["tool_choice"] = tool_choice
+                return fb_client.chat.completions.create(**kwargs)
+            except Exception as fw_pro_e:
+                logger.warning(f"Fireworks Pro model {fireworks_pro} failed ({fw_pro_e}). Falling back to Fireworks {VISION_FALLBACK_MODEL}.")
+                # Fireworks Pro failed -> Fall back to Minimax M3
+                kwargs = {"model": VISION_FALLBACK_MODEL, "messages": messages, "timeout": timeout}
+                if tools:
+                    kwargs["tools"] = tools
+                    kwargs["tool_choice"] = tool_choice
+                return fb_client.chat.completions.create(**kwargs)
+    else:
+        # Bypass local -> Go directly to Fireworks Pro (Gemma 4 E4B)
+        logger.info(f"Local model URL is empty. Routing directly to Fireworks Pro model {fireworks_pro}.")
         fb_client = client_factory(FIREWORKS_BASE_URL, fireworks_key)
-        kwargs = {"model": VISION_FALLBACK_MODEL, "messages": messages, "timeout": timeout}
-        if tools:
-            kwargs["tools"] = tools
-            kwargs["tool_choice"] = tool_choice
-        return fb_client.chat.completions.create(**kwargs)
+        try:
+            kwargs = {"model": fireworks_pro, "messages": messages, "timeout": timeout}
+            if tools:
+                kwargs["tools"] = tools
+                kwargs["tool_choice"] = tool_choice
+            return fb_client.chat.completions.create(**kwargs)
+        except Exception as fw_pro_e:
+            logger.warning(f"Fireworks Pro model {fireworks_pro} failed ({fw_pro_e}). Falling back to Fireworks {VISION_FALLBACK_MODEL}.")
+            # Fireworks Pro failed -> Fall back to Minimax M3
+            kwargs = {"model": VISION_FALLBACK_MODEL, "messages": messages, "timeout": timeout}
+            if tools:
+                kwargs["tools"] = tools
+                kwargs["tool_choice"] = tool_choice
+            return fb_client.chat.completions.create(**kwargs)
 
 def orchestrate_agent(prompt: str, teams: List[Dict[str, Any]], selected_model: str, chat_history: List[Any], competition: str, image_base64: str = None) -> dict:
     has_image = bool(image_base64)

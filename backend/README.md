@@ -15,8 +15,9 @@ The high-performance analytical engine for **Fuenzer Sports**. It runs vectorize
 To achieve high performance while staying cost-effective and compliant with AMD GPU guidelines:
 
 - **Fast Endpoints:** Routed to `deepseek-v4-flash` via Fireworks serverless API for immediate, simple prompts.
-- **Pro & Vision Endpoints:** Routed to a local **Google Gemma 4** model deployed on **AMD Instinct MI300X** GPUs via `vLLM` with ROCm support.
-- **Vision & Reliability Fallback:** If the local AMD notebook server goes down, the backend dynamically falls back to the `minimax-m3` multimodal vision model on Fireworks.
+- **Pro & Vision Endpoints (Production):** Routed to a dedicated **Google Gemma 4 E4B** deployment hosted on Fireworks AI.
+- **Local AMD Integration:** A local deployment pipeline for **Gemma 4 (12B)** on **AMD Instinct MI300X** GPUs via `Ollama/vLLM` (ROCm 7.2) is fully pre-configured in our Jupyter Lab workspace (`deploy-gemma-amd.ipynb`), ready to scale on-premises once VM network restrictions are resolved.
+- **Vision & Reliability Fallback:** The backend dynamically routes to the `minimax-m3` model on Fireworks if the primary provider is unreachable.
 
 ## 💻 Local Setup & Development
 
