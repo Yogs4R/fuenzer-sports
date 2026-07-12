@@ -44,3 +44,6 @@ firestore.rules
 _bmad/
 _bmad-output/
 .agent/
+
+# Docs
+docs/PITCH_AND_VIDEO.md
