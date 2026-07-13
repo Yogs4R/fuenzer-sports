@@ -65,7 +65,7 @@ Fuenzer Sports combines a **natural-language interface** with a high-performance
 |---|---|---|
 | **Prompt-Driven AI Simulation** | Ask natural language questions to simulate outcomes, get tactical match breakdowns, and update tournament paths. | Simplifies complex data requests into a zero-friction, search-like user experience. |
 | **Autonomous AI Agent (Level 7+)** | Upgraded backend orchestrator using native OpenAI-compatible tool calling schema. The AI decides when to run a simulation, ask for clarification, or start a general chat. | Elevates the system from a rule-based script to an intelligent agentic orchestration layer. |
-| **Human-in-the-Loop (HITL)** | When you ask a what-if query about an unknown entity (e.g., *"What if Asep gets a red card?"*), the AI pauses and prompts the user with an interactive dropdown in the chat stream to assign the entity. | Gracefully handles AI knowledge gaps without hallucinating data, building high user trust. |
+| **Human-in-the-Loop (HITL)** | When you ask a what-if query about an unknown entity (e.g., *"What if Nico Paz gets a red card?"*), the AI pauses and prompts the user with an interactive dropdown in the chat stream to assign the entity. | Gracefully handles AI knowledge gaps without hallucinating data, building high user trust. |
 | **Custom Tournament Mode** | Go beyond the World Cup! Generate completely custom tournaments (e.g., esports leagues) directly from text prompts. | Expands platform market fit to custom esports events, school competitions, and fantasy drafts. |
 | **Animated Standings UI** | Beautifully fluid standings tables built with React and Framer Motion that automatically reorder with layout animations. | Delivers a premium, satisfying visual presentation of live data updates. |
 | **Share & Export Workspace** | Fully operational screenshot export tool that captures long vertical standings tables or horizontal knockout brackets in their entirety. | Solves browser viewport constraints and CORS image limitations for instant, high-quality sharing. |
@@ -95,8 +95,8 @@ To run thousands of simulations and handle complex language models with low late
 * **Software Layer:** Accelerated via the **AMD ROCm™ open software platform**, enabling high-throughput parallelized matrix logic that handles 10,000+ iterations in under 5ms.
 
 ### 🧠 Serverless & Local AI Stack
-* **Fireworks AI (Function Calling):** The autonomous orchestration layer runs serverless API calls pointing to high-performance models (such as **MiniMax M3** or **Llama-3.1-70B**), allowing native function-calling latency under 1 second.
-* **AMD Cloud Local Models:** The architecture is designed to easily swap OpenRouter to a local model deployment (e.g. **Google Gemma 4** or **Gemma 2 9B-Instruct**) running on AMD Instinct **MI300X** hardware via **vLLM / Ollama** thanks to strict adherence to standard OpenAI tool calling specs.
+* **Fireworks AI (Function Calling):** The autonomous orchestration layer runs serverless API calls pointing to high-performance models (such as **MiniMax M3** or **Deepseek V4 Flash**), allowing native function-calling latency under 1 second.
+* **AMD Cloud Local Models:** The architecture is designed to easily swap OpenRouter to a local model deployment (e.g. **Google Gemma 4 12B IT** or **Gemma 4 E4B**) running on AMD Instinct **MI300X** hardware via **vLLM / Ollama** and Fireworks AI, thanks to strict adherence to standard OpenAI tool calling specs.
 
 ---
 
