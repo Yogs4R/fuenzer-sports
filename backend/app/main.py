@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def read_root():
     return {"message": "Fuenzer Sports API is running"}
 
