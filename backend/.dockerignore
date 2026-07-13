@@ -1,0 +1,24 @@
+# Python virtual environment
+venv/
+.venv/
+env/
+
+# Python cache / compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local env files
+.env
+
+# Testing / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+nosetests.xml
+workspace.xml
+
+# Editor / OS files
+.vscode/
+.idea/
+.DS_Store
