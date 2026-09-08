@@ -1,0 +1,5 @@
+# Vulnerabilities already patched via dependencies upgrade in Dockerfile & requirements.txt
+# (setuptools >= 78.1.1, msgpack >= 1.2.1)
+# Ignores residual bundled artifacts in base python image ensurepip/dist-packages
+CVE-2025-47273
+GHSA-6v7p-g79w-8964
