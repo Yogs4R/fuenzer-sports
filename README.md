@@ -13,7 +13,7 @@
 ---
 
 ## 📌 Table of Contents
-1. [Overview & AMD Track 3 Context](#1-overview--amd-track-3-context)
+1. [Overview & Value Proposition](#1-overview--value-proposition)
 2. [The Problem & Our Solution](#2-the-problem--our-solution)
 3. [Key Features](#3-key-features)
 4. [Algorithms & Mathematical Models](#4-algorithms--mathematical-models)
@@ -27,19 +27,19 @@
 
 ---
 
-## 1. Overview & AMD Track 3 Context
+## 1. Overview & Value Proposition
 
 **Fuenzer Sports** is a next-generation, interactive AI-driven sports analytics simulation platform. By bridging the gap between an instant search interface and a complex sports management simulation, it delivers a **Zero-Friction** approach to predicting tournament outcomes. 
 
 Users can ask any natural language question (e.g., *"What are Indonesia's chances of reaching the knockout stage?"*) and our engine instantly runs thousands of mathematical Monte Carlo simulations, presenting the results through animated UI standings and an intelligent AI commentary.
 
-### 🦄 Track 3: Unicorn (Open Innovation) Alignment
-This project is built specifically for **Track 3 (Unicorn Track)** of the AMD Developer Hackathon. It is designed as a highly scalable "Startup Pitch", focusing on open innovation, lack of constraints, and strong product-market fit.
+### 🦄 Open Innovation & Core Strengths
+Designed as a highly scalable sports analytics and tournament simulation platform, focusing on open innovation, zero-friction user experience, and strong product-market fit.
 
-**Judging Criteria Fulfillment:**
+**Key Value Pillars:**
 - **Creativity & Originality:** Shifts sports prediction from static legacy dashboards into a dynamic, "Search-to-Workspace" AI chat paradigm. It is a completely novel behavior in sports analytics.
 - **Completeness:** Provides a fully functional MVP from natural language parsing to mathematically backed Monte Carlo executions, real-time Firebase syncing, and highly polished animated frontend rendering.
-- **Use of AMD Platforms:** The compute-heavy Monte Carlo engine (executing 10,000+ simulation permutations per prompt) relies on **AMD GPUs** for highly parallelized execution via NumPy, paired with LLM processing via the **Fireworks AI API**.
+- **Compute-Driven Accuracy:** The compute-heavy Monte Carlo engine (executing 10,000+ simulation permutations per prompt) leverages **AMD GPU / vectorized NumPy parallel execution**, paired with LLM processing via open models and fast serverless fallbacks (**Fireworks AI API / Gemma**).
 - **Product/Market Potential:** Targets a massive dual audience: professional sports analysts seeking rapid scenario modeling, and hardcore sports fans/bettors seeking instant, data-backed tournament predictions.
 
 ---
@@ -230,7 +230,7 @@ fuenzer-sports/
 │   ├── tests/                # Pytest suites
 │   ├── Dockerfile            # Optimized linux/amd64 backend image
 │   └── requirements.txt      
-├── docs/                     # Documentation & Hackathon Guidelines
+├── docs/                     # Documentation & Guides
 ├── frontend/                 # React Vite Application
 │   ├── public/               # Static assets, robots.txt, llms.txt
 │   ├── src/
@@ -243,7 +243,7 @@ fuenzer-sports/
 │   ├── Dockerfile            # Multi-stage build Nginx image for frontend
 │   └── package.json          
 ├── .env.example              # Example environment variables
-├── docker-compose.yml        # Root orchestration for Jury local run
+├── docker-compose.yml        # Root orchestration for local run
 └── README.md                 # Project documentation
 ```
 
@@ -251,7 +251,7 @@ fuenzer-sports/
 
 ## 10. Getting Started (Setup)
 
-### Option A: For Judges (One-Click Docker Compose)
+### Option A: Quickstart (One-Click Docker Compose)
 The easiest way to run the entire application (Frontend + Backend) is via Docker Compose.
 1. Clone the repository.
 2. (Optional) Copy `.env.example` to `.env` in the root and fill in your Fireworks API key. If omitted, the system gracefully falls back to local simulation data.
