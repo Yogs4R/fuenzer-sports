@@ -24,7 +24,9 @@ RUN pip install --no-cache-dir --upgrade pip \
     && pip install --no-cache-dir --upgrade -r requirements.txt \
     && rm -rf /usr/local/lib/python3.10/ensurepip \
     && find /usr /home /root -name "*setuptools-70*" -exec rm -rf {} + 2>/dev/null || true \
-    && find /usr /home /root -name "*msgpack-1.1*" -exec rm -rf {} + 2>/dev/null || true
+    && find /usr /home /root -name "*msgpack-1.1*" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr /home /root -name "*urllib3-2.7*" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr /home /root -name "*urllib3*2.7*" -exec rm -rf {} + 2>/dev/null || true
 
 # Copy project and set ownership
 COPY --chown=user:user . $HOME/app
