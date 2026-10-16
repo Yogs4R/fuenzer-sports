@@ -20,7 +20,7 @@ WORKDIR $HOME/app
 # Install python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir --upgrade "setuptools>=78.1.1" wheel jaraco.context "msgpack>=1.2.1" \
+    && pip install --no-cache-dir --upgrade "setuptools>=78.1.1" wheel jaraco.context "msgpack>=1.2.1" "urllib3>=2.8.0" \
     && pip install --no-cache-dir --upgrade -r requirements.txt \
     && rm -rf /usr/local/lib/python3.10/ensurepip \
     && find /usr /home /root -name "*setuptools-70*" -exec rm -rf {} + 2>/dev/null || true \
