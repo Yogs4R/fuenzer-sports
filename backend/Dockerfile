@@ -20,13 +20,18 @@ WORKDIR $HOME/app
 # Install python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir --upgrade "setuptools>=78.1.1" wheel jaraco.context "msgpack>=1.2.1" "urllib3>=2.8.0" \
+    && pip install --no-cache-dir --upgrade "setuptools>=78.1.1" "wheel>=0.46.2" "jaraco.context>=6.1.0" "msgpack>=1.2.1" "urllib3>=2.8.0" "Pillow>=13.0.0" \
     && pip install --no-cache-dir --upgrade -r requirements.txt \
     && rm -rf /usr/local/lib/python3.10/ensurepip \
     && find /usr /home /root -name "*setuptools-70*" -exec rm -rf {} + 2>/dev/null || true \
     && find /usr /home /root -name "*msgpack-1.1*" -exec rm -rf {} + 2>/dev/null || true \
     && find /usr /home /root -name "*urllib3-2.7*" -exec rm -rf {} + 2>/dev/null || true \
-    && find /usr /home /root -name "*urllib3*2.7*" -exec rm -rf {} + 2>/dev/null || true
+    && find /usr /home /root -name "*urllib3*2.7*" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr /home /root -name "*pillow*12*" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr /home /root -name "*jaraco*context*5*" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr /home /root -name "*jaraco.context-5*" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr /home /root -name "*wheel-0.45*" -exec rm -rf {} + 2>/dev/null || true \
+    && find /usr /home /root -name "*wheel*0.45*" -exec rm -rf {} + 2>/dev/null || true
 
 # Copy project and set ownership
 COPY --chown=user:user . $HOME/app
